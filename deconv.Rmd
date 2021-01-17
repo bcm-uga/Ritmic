@@ -1,0 +1,118 @@
+---
+title: "Pipeline deconv"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Methylation
+
+##Loading Data
+```{r }
+D_40p = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_40p_met.rds")
+D_80p = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_80p_met.rds")
+```
+
+
+##Choosing the number of cell types K 
+
+```{r choice_k}
+medepir::plot_k(D_40p)
+medepir::plot_k(D_80p)
+
+```
+
+##Feature selection 
+
+```{r FS, echo = F}
+D_FS_40p = medepir::feature_selection(D_40p)
+saveRDS(D_FS_40p, "~/projects/pipeline_deconv_analysis/data/D_FS/D_FS_40p_met.rds")
+D_FS_80p = medepir::feature_selection(D_80p)
+saveRDS(D_FS_80p, "~/projects/pipeline_deconv_analysis/data/D_FS/D_FS_80p_met.rds")
+
+dim(D_FS_40p)
+dim(D_FS_80p)
+```
+
+##Deconvolution
+
+```{r deconv, echo = F}
+results_edec = medepir::Edec(D_FS_40p, nbcell = 4, infloci = rownames(D_FS_40p))
+saveRDS(results_edec, "~/projects/pipeline_deconv_analysis/results/deconv/EDec_40p.rds")
+
+results_edec = medepir::Edec(D_FS_80p, nbcell = 4, infloci = rownames(D_FS_80p))
+saveRDS(results_edec, "~/projects/pipeline_deconv_analysis/results/deconv/EDec_80p.rds")
+```
+
+#RNAseq
+
+##Loading Data
+```{r }
+D_40p_s = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_40p_rna_s.rds")
+D_40p_c = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_40p_rna_c.rds")
+
+D_80p_s = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_80p_rna_s.rds")
+D_80p_c = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_80p_rna_c.rds")
+```
+
+##Fonction deconv
+
+```{r function, echo = F}
+source("http://sablab.net/scripts/LibICA.r")
+library("NMF")
+
+deconv_RNA = function(D_rna, k = 5){
+  
+  ### FEATURE SELECTION PART : 
+  ### Taking most important genes of stable components - no deletion of duplicate ones
+  
+  D = D_rna
+  IC = runICA(D, ncomp=10, ncores=2, ntry=50)
+  idc = apply(IC$stab, 2, mean) > 0.8
+  Genes = getGenesICA(IC,alpha=0.2)
+  genes = unlist(lapply(Genes[idc],function(x){c(x$pos$genes, x$neg$genes)}))
+  D <- D[genes, ]
+  
+  ### DECONVOLUTION PART : 
+  ### NMF, with snmf/r method
+  
+  res <- NMF::nmf(x = D, rank = k, method = "snmf/r", seed = 1)
+  A   <- apply(
+    X      = res@fit@H
+    , MARGIN = 2
+    , FUN    = function( x ) {
+      x / sum( x )
+    }
+  )
+  return(list(A = A, T = res@fit@W))
+}
+```
+
+##Choosing the number of cell types K 
+
+```{r }
+medepir::plot_k(D_40p_s)
+medepir::plot_k(D_40p_c)
+
+medepir::plot_k(D_80p_s)
+medepir::plot_k(D_80p_c)
+```
+
+##Deconvolution
+
+```{r , echo = F}
+res = deconv_RNA(D_40p_s, k = 4)
+saveRDS(res, "~/projects/pipeline_deconv_analysis/results/deconv/wNMF_40p_s.rds")
+
+res = deconv_RNA(D_40p_c, k = 4)
+saveRDS(res, "~/projects/pipeline_deconv_analysis/results/deconv/wNMF_40p_c.rds")
+
+res = deconv_RNA(D_80p_s, k = 4)
+saveRDS(res, "~/projects/pipeline_deconv_analysis/results/deconv/wNMF_80p_s.rds")
+
+res = deconv_RNA(D_80p_c, k = 4)
+saveRDS(res, "~/projects/pipeline_deconv_analysis/results/deconv/wNMF_80p_c.rds")
+```
+

@@ -1,0 +1,551 @@
+---
+title: "deconv_analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library("ComplexHeatmap")
+```
+
+Fonction heatmap
+```{r, echo = F}
+plot_heatmap_hclust = function (data, main = NULL, xlab = NULL, ylab = NULL) {
+  sum(apply(is.na(data), 1, any))
+  data = data[!apply(is.na(data), 1, any), ]
+
+  # clustering base on correlation for tissues
+  tmp_d = data
+  tmp_d = t(tmp_d) - apply(tmp_d, 2, mean)
+  tmp_d = t(tmp_d)
+  tmp_d = cor(tmp_d, method="pe")
+  t = dist(1 - tmp_d)
+  t[which(is.na(t))] = 0
+  hc_col = hclust(t, method="complete")
+
+  Colv = as.dendrogram(hc_col)
+  dendrogram="col"      
+
+  # clustering base on eucl. dist. for genes
+  d = dist(data)
+  hc_row = hclust(d, method="complete")
+  Rowv = as.dendrogram(hc_row)
+  dendrogram="both"      
+
+  # col
+  colors=c("blue", "gray", "red")
+  cols = grDevices::colorRampPalette(colors)(1000)
+
+  gplots::heatmap.2(data, Rowv=Rowv, Colv=Colv, dendrogram="col", trace="none", col=cols, breaks = seq(0, 1, length.out = 1001), 
+                        mar=c(10,5), useRaster=TRUE, main = main,
+           xlab = xlab,
+           ylab = ylab)
+}
+
+```
+
+Fonction MAE
+
+```{r, echo = F}
+
+#' Mean absolute error (MAE) between two matrices.
+#' @export
+MAE <- function(M1, M2) {
+  mean(abs(M1 - M2))
+}
+
+#' Root mean squared error (RMSE) between two matrices.
+#' @export
+RMSE <- function(M1, M2) {
+  sqrt(mean((M1 - M2)^2))
+}
+
+################################################################################
+
+
+#' Compare the A matrices
+#'
+#' This function compute errors between the two A matrices,
+#'   after guessing the permutation.
+#'
+#' @param A_reel The control A matrix.
+#' @param A_estim The calculated A matrix.
+#'   Permutation is guessed from the minimum MAE.
+#'
+#' @export
+compare_A_matrix <- function(A_reel, A_estim) {
+
+  N <- ncol(A_reel)
+  K <- nrow(A_reel)
+  stopifnot(K > 1)
+
+  stopifnot(ncol(A_estim) == N)
+  stopifnot(nrow(A_estim) < ncol(A_estim))
+  stopifnot(nrow(A_estim) <= 10)
+  stopifnot(!anyNA(A_estim))
+
+  # if not supplying enough types (make sure that {nrow(A_estim) >= K})
+  if (nrow(A_estim) < K) A_estim <- rbind(A_estim, matrix(0, K - nrow(A_estim), N))
+
+  comb <- unlist(
+    combinat::combn(nrow(A_estim), K, fun = combinat::permn, simplify = FALSE),
+    recursive = FALSE
+  )
+  comb_MAE <- sapply(comb, function(perm) {
+    MAE(A_reel, A_estim[perm, , drop = FALSE])
+  })
+
+  perm <- comb[[which.min(comb_MAE)]]
+  A_estim_perm <- A_estim[perm, , drop = FALSE]
+
+  list(
+    perm = perm,
+    MAE  = MAE(A_reel, A_estim_perm),
+    RMSE = RMSE(A_reel, A_estim_perm)
+  )
+}
+
+```
+
+#Data
+
+##Loading D matrices and previous results
+
+3 matrices D:  D meth, D rna s et D rna c
+
+```{r, echo = F}
+#D_40p_met = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_40p_met.rds")
+D_80p_met = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_80p_met.rds")
+# D_40p_s = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_40p_rna_s.rds")
+# D_40p_c = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_40p_rna_c.rds")
+# D_80p_s = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_80p_rna_s.rds")
+# D_80p_c = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_80p_rna_c.rds")
+# D_80p_s_b = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_80p_rna_s_b.rds")
+# D_80p_c_b = readRDS("~/projects/pipeline_deconv_analysis/data/D_f/D_80p_rna_c_b.rds")
+
+D_80p_c_t = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_c_t.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_rna.rds"))
+D_80p_n = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_n.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_rna.rds"))
+
+```
+
+On a les résultats de la déconvolution de la méthylation par EDec.
+
+```{r, echo = F}
+#res_40p_met = readRDS( "~/projects/pipeline_deconv_analysis/results/deconv/EDec_40p.rds")
+res_80p_met = readRDS( "~/projects/pipeline_deconv_analysis/results/deconv/EDec_80p.rds")
+#colnames(res_40p_met$A) = 1:40
+colnames(res_80p_met$A) = 1:80
+
+# res_40p_rna_s = readRDS( "~/projects/pipeline_deconv_analysis/results/deconv/wNMF_40p_s.rds")
+# res_40p_rna_c = readRDS( "~/projects/pipeline_deconv_analysis/results/deconv/wNMF_40p_c.rds")
+# res_80p_rna_s = readRDS( "~/projects/pipeline_deconv_analysis/results/deconv/wNMF_80p_s.rds")
+# res_80p_rna_c = readRDS( "~/projects/pipeline_deconv_analysis/results/deconv/wNMF_80p_c.rds")
+# 
+# colnames(res_40p_rna_s$A) = 1:40
+# colnames(res_40p_rna_c$A) = 1:40
+# colnames(res_80p_rna_s$A) = 1:80
+#colnames(res_80p_rna_c$A) = 1:80
+```
+
+##Run EDec step 2
+
+On utilise EDec step 2 pour inférer la matrice T RNA à partir de A meth
+
+```{r, echo = F }
+# genes_expression = D_40p_s
+# prop_cell_type = t(res_40p_met$A)
+# res_edec = EDec::run_edec_stage_2(genes_expression, prop_cell_type)
+# T_EDec_40p_s = res_edec$means
+# colnames(T_EDec_40p_s) = 1:4
+# saveRDS(T_EDec_40p_s, "~/projects/pipeline_deconv_analysis/results/deconv/EDec2_40p_s.rds" )
+
+# genes_expression = D_40p_c
+# prop_cell_type = t(res_40p_met$A)
+# res_edec = EDec::run_edec_stage_2(genes_expression, prop_cell_type)
+# T_EDec_40p_c = res_edec$means
+# colnames(T_EDec_40p_c) = 1:4
+# saveRDS(T_EDec_40p_c, "~/projects/pipeline_deconv_analysis/results/deconv/EDec2_40p_c.rds" )
+# 
+# genes_expression = D_80p_s
+# prop_cell_type = t(res_80p_met$A)
+# res_edec = EDec::run_edec_stage_2(genes_expression, prop_cell_type)
+# T_EDec_80p_s = res_edec$means
+# colnames(T_EDec_80p_s) = 1:4
+# saveRDS(T_EDec_80p_s, "~/projects/pipeline_deconv_analysis/results/deconv/EDec2_80p_s.rds" )
+# 
+# genes_expression = D_80p_c
+# prop_cell_type = t(res_80p_met$A)
+# res_edec = EDec::run_edec_stage_2(genes_expression, prop_cell_type)
+# T_EDec_80p_c = res_edec$means
+# colnames(T_EDec_80p_c) = 1:4
+# saveRDS(T_EDec_80p_c, "~/projects/pipeline_deconv_analysis/results/deconv/EDec2_80p_c.rds" )
+# 
+# genes_expression = D_80p_s_b
+# prop_cell_type = t(res_80p_met$A)
+# res_edec = EDec::run_edec_stage_2(genes_expression, prop_cell_type)
+# T_EDec_80p_s_b = res_edec$means
+# colnames(T_EDec_80p_s_b) = 1:4
+# saveRDS(T_EDec_80p_s_b, "~/projects/pipeline_deconv_analysis/results/deconv/EDec2_80p_s_b.rds" )
+# 
+# genes_expression = D_80p_c_b
+# prop_cell_type = t(res_80p_met$A)
+# res_edec = EDec::run_edec_stage_2(genes_expression, prop_cell_type)
+# T_EDec_80p_c_b = res_edec$means
+# colnames(T_EDec_80p_c_b) = 1:4
+# saveRDS(T_EDec_80p_c_b, "~/projects/pipeline_deconv_analysis/results/deconv/EDec2_80p_c_b.rds" )
+
+genes_expression = D_80p_n
+prop_cell_type = t(res_80p_met$A)
+res_edec = EDec::run_edec_stage_2(genes_expression, prop_cell_type)
+T_EDec_80p_n = res_edec$means
+colnames(T_EDec_80p_n) = 1:4
+saveRDS(T_EDec_80p_n, "~/projects/pipeline_deconv_analysis/results/deconv/EDec2_80p_n.rds" )
+
+genes_expression = D_80p_c_t
+prop_cell_type = t(res_80p_met$A)
+res_edec = EDec::run_edec_stage_2(genes_expression, prop_cell_type)
+T_EDec_80p_c_t = res_edec$means
+colnames(T_EDec_80p_c_t) = 1:4
+saveRDS(T_EDec_80p_c_t, "~/projects/pipeline_deconv_analysis/results/deconv/EDec2_80p_c_t.rds" )
+```
+
+#Comparison
+
+##A comparison 
+
+###Distribution par patient et MAE
+```{r }
+#A_10ctrl = readRDS("~/projects/pipeline_deconv_analysis/data/A/A_10ctrl.rds")
+A_20ctrl = readRDS("~/projects/pipeline_deconv_analysis/data/A/A_20ctrl.rds")
+#A_30p = readRDS("~/projects/pipeline_deconv_analysis/data/A/A_30.rds")
+A_60p = readRDS("~/projects/pipeline_deconv_analysis/data/A/A_60.rds")
+
+colors <- c("#FF6386", "#D0FF96", "#96B1FF", "#FFC196")
+
+# barplot(res_40p_met$A[, 31:40], names.arg=1:10, col=colors, main = "10 contrôles EDec")
+# barplot(A_10ctrl, names.arg=1:10, col=colors, main = "10 vrais contrôles")
+# compare_A_matrix(A_10ctrl, res_40p_met$A[, 31:40])
+
+barplot(res_80p_met$A[, 61:80], names.arg=1:20, col=colors, main = "20 contrôles EDec")
+barplot(A_20ctrl, names.arg=1:20, col=colors, main = "20 vrais contrôles")
+compare_A_matrix(A_20ctrl, res_80p_met$A[, 61:80])
+
+# barplot(res_40p_met$A[, 1:30], names.arg=1:30, col=colors, main = "30 tumeurs EDec")
+# barplot(A_30p, names.arg=1:30, col=colors, main = "30 vraies tumeurs")
+# compare_A_matrix(A_30p, res_40p_met$A[, 1:30])
+
+barplot(res_80p_met$A[, 1:60], names.arg=1:60, col=colors, main = "60 tumeurs EDec")
+barplot(A_60p, names.arg=1:60, col=colors, main = "60 vraies tumeurs")
+compare_A_matrix(A_60p, res_80p_met$A[, 1:60])
+```
+
+###Comparaison par type cellulaire
+```{r }
+summary(t(A_60p))
+summary(t(res_80p_met$A[, 1:60]))
+
+df= data.frame(prop = c(A_60p),
+               type = rep(c("normal", "fibro", "immune", "tumor")))
+
+ggplot(df, aes(x = prop, color=type, fill=type)) + 
+ geom_histogram(aes(y=..density..), alpha=0.5, bins = 50, position="identity")+
+ geom_density(alpha=.2) +
+  labs(title = "Distribution de A ref") + theme_minimal()
+
+df= data.frame(prop = c(res_80p_met$A[, 1:60]),
+               type = rep(c("normal", "fibro", "tumor", "immune")))
+
+ggplot(df, aes(x = prop, color=type, fill=type)) + 
+ geom_histogram(aes(y=..density..), alpha=0.5, bins = 50, position="identity")+
+ geom_density(alpha=.2) +
+  labs(title = "Distribution de A calculé") + theme_minimal()
+
+
+df= data.frame(prop = c(A_60p, res_80p_met$A[, 1:60]),
+               type = c(rep(c("normal", "fibro", "immune", "tumor"), times = 60), rep(c("normal", "fibro", "tumor", "immune"), times = 60)),
+               A = rep(c("Reference", "Computed"), each = 240))
+
+ggplot(df[df$type == "normal", ], aes(x = prop, color=A, fill=A)) + 
+ geom_histogram(aes(y=..density..), alpha=0.5, bins = 30, position="identity")+
+ geom_density(alpha=.2) +
+  labs(title = "Type epi") + theme_minimal()
+
+ggplot(df[df$type == "fibro", ], aes(x = prop, color=A, fill=A)) + 
+ geom_histogram(aes(y=..density..), alpha=0.5, bins = 30, position="identity")+
+ geom_density(alpha=.2) +
+  labs(title = "Type fibro") + theme_minimal()
+
+ggplot(df[df$type == "immune", ], aes(x = prop, color=A, fill=A)) + 
+ geom_histogram(aes(y=..density..), alpha=0.5, bins = 30, position="identity")+
+ geom_density(alpha=.2) +
+  labs(title = "Type immune") + theme_minimal()
+
+ggplot(df[df$type == "tumor", ], aes(x = prop, color=A, fill=A)) + 
+ geom_histogram(aes(y=..density..), alpha=0.5, bins = 30, position="identity")+
+ geom_density(alpha=.2) +
+  labs(title = "Type tumor") + theme_minimal()
+```
+
+###Erreur entre les 2 matrices
+Erreur = (A ref - A deconv) 
+
+```{r }
+err_A = (A_60p -  res_80p_met$A[c(1, 2, 4, 3), 1:60])
+summary(t(err_A))
+
+df = data.frame(prop = c(err_A),
+               type = rep(c("normal", "fibro", "immune", "tumor")))
+
+ggplot(df, aes(x = prop, color=type, fill=type)) + 
+ geom_histogram(aes(y=..density..), alpha=0.5, bins = 50, position="identity")+
+ geom_density(alpha=.2) +
+  labs(title = "(A ref - A deconv) / A ref") + theme_minimal()
+```
+
+##T comparison 
+
+###Comparaison par type cellulaire des T RNAseq
+```{r }
+T_rnaseq = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_rna.rds")
+
+summary(T_rnaseq)
+summary(T_EDec_80p_n[, c(1, 2, 4)])
+summary(T_EDec_80p_c_t[, c(1, 2, 4)])
+
+df= data.frame(expr = c(T_rnaseq, T_EDec_80p_n[, c(1, 2, 4)]),
+               type = c(rep(c("normal", "fibro", "immune"), each = nrow(T_rnaseq)), rep(c("normal", "fibro", "immune"), nrow(T_EDec_80p_n))),
+               T = rep(c("Reference", "Computed"), each = 64698))
+
+ggplot(df[df$type == "normal", ], aes(x = expr, color= T, fill=T)) + 
+    geom_histogram(aes(y=..density..), alpha=0.5, bins = 50, position="identity")+
+    geom_density(alpha=.2) +
+    labs(title = "Type epi") + theme_minimal() + xlim(0, 50) + ylim(0, 0.15)
+
+ggplot(df[df$type == "fibro", ], aes(x = expr, color= T, fill=T)) + 
+    geom_histogram(aes(y=..density..), alpha=0.5, bins = 50, position="identity")+
+    geom_density(alpha=.2) +
+    labs(title = "Type fibro") + theme_minimal() + xlim(0, 50) + ylim(0, 0.16)
+
+ggplot(df[df$type == "immune", ], aes(x = expr, color= T, fill=T)) + 
+    geom_histogram(aes(y=..density..), alpha=0.5, bins = 50, position="identity")+
+    geom_density(alpha=.2) +
+    labs(title = "Type immune") + theme_minimal() + xlim(0, 50) + ylim(0, 0.15)
+```
+
+###Comparaison avec les signatures des types cellulaires
+Fonctions heatmap
+```{r, echo = F}
+
+#' zScoring
+#'
+#'This function compute the z score for each gene of an expression matrix.
+#'
+#' @param data, a matrix with for each sample and each gene the log2 normalized count
+#'
+#' @return This function return a matrix of the same dimensions than `data` but with the z score.
+#' @export
+#'
+#' @examples norm_data = zScoring(data)
+zScoring = function(data){
+  z_data = t(apply(data, 1, function(x) (x - mean(x)) / sd(x)))
+  return(z_data)
+}
+
+
+#' Heatmap_lvl
+#'
+#' This function builds an heatmap representation of the different signatures expression for one level of architecture.
+#'
+#' @param data the matrix of gene expression (normalized by z-score).
+#' @param signatures the nested list of markers for each compartment and level.
+#'
+#' @return
+#' @export
+#'
+#' @example heatmap_lvl(data, pdac_signatures, lvl = 1)
+heatmap_lvl <- function(data, signatures, lvl = 1){
+  if (!requireNamespace("ComplexHeatmap", quietly = TRUE))
+    stop("Please install package {ComplexHeatmap} (https://jokergoo.github.io/ComplexHeatmap-reference/book/c).")
+  suppressPackageStartupMessages(library(ComplexHeatmap))
+
+  if(!is.data.frame(signatures[[lvl]])){
+    df_sign = data.frame()
+    for(i in 1:length(signatures[[lvl]])){
+      sign = cbind(signatures[[lvl]][[i]], compartment = rep(names(signatures[[lvl]])[i]))
+      df_sign = rbind(df_sign, sign)
+    }
+  } else {
+    df_sign = cbind(signatures[[lvl]], compartment = signatures[[lvl]][2])
+  }
+
+  df_sign = df_sign[df_sign[, 1] %in% rownames(data), ]
+
+  Heatmap(data[df_sign[, 1], ], name = "Z-Score",
+            row_split = df_sign[, 2],
+            row_title_gp = gpar(fontsize = 6),
+            left_annotation = rowAnnotation(Compartiment = df_sign[, 4]),
+            row_names_gp = gpar(fontsize = 2)
+    )
+}
+
+
+
+#' heatmap_compartiment
+#'
+#'
+#'
+#' @param data the matrix of gene expression (normalized by z-score).
+#' @param signatures the nested list of markers for each compartment and level.
+#' @param lvl the level of architecture that corresponds to the compartment.
+#' @param compartment the compartment you want to plot.
+#'
+#' @return
+#' @export
+#'
+#' @example heatmap_compartiment(data, pdac_signatures, lvl = 2, compartment = "immune")
+heatmap_compartiment <- function(data, signatures, lvl = 1, compartment){
+  if (!requireNamespace("ComplexHeatmap", quietly = TRUE))
+    stop("Please install package {ComplexHeatmap} (https://jokergoo.github.io/ComplexHeatmap-reference/book/c).")
+  suppressPackageStartupMessages(library(ComplexHeatmap))
+
+  df_comp = signatures[[lvl]][[compartment]]
+  df_comp = df_comp[df_comp[, 1] %in% rownames(data), ]
+
+  Heatmap(data[df_comp[, 1], ], name = "Z-Score",
+          row_split = df_comp[, 2],
+          row_title_gp = gpar(fontsize = 6),
+          left_annotation = rowAnnotation(Population = df_comp[, 2]),
+          row_names_gp = gpar(fontsize = 2)
+  )
+}
+
+
+```
+
+Marqueurs pancréas de Yasmina
+```{r, results="verbatim"}
+T_nontum = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_rna.rds")
+
+signatures_pancreas <- readRDS("~/projects/DistSignatures/data/pdac_signatures2.rds")
+sign_perso = as.matrix(signatures_pancreas$Level1[signatures_pancreas$Level1$Compartment == "Immune", ])
+sign_perso = rbind(sign_perso, as.matrix(signatures_pancreas$Level2$Epithelium))
+sign_perso = rbind(sign_perso, as.matrix(signatures_pancreas$Level3$Tumor[signatures_pancreas$Level3$Tumor$Population == "Classic", ]))
+sign_perso = rbind(sign_perso, as.matrix(signatures_pancreas$Level2$Stroma[signatures_pancreas$Level2$Stroma$Population == "Fibroblasts", ]))
+
+
+sign_perso = data.frame(Gene = sign_perso[, 1],
+                        Compartment = sign_perso[, 2], 
+                        Source = sign_perso[, 3], stringsAsFactors = F)
+
+signatures_pancreas$perso = sign_perso
+
+
+# heatmap_lvl(zScoring(T_EDec_40p_s), signatures_pancreas, lvl = 1)
+# heatmap_lvl(zScoring(T_EDec_40p_s), signatures_pancreas, lvl = 2)
+# 
+# heatmap_lvl(zScoring(T_EDec_40p_c), signatures_pancreas, lvl = 1)
+# heatmap_lvl(zScoring(T_EDec_40p_c), signatures_pancreas, lvl = 2)
+# 
+# heatmap_lvl(zScoring(T_EDec_80p_s), signatures_pancreas, lvl = 1)
+# heatmap_lvl(zScoring(T_EDec_80p_s), signatures_pancreas, lvl = 2)
+# 
+# heatmap_lvl(zScoring(T_EDec_80p_c), signatures_pancreas, lvl = 1)
+# heatmap_lvl(zScoring(T_EDec_80p_c), signatures_pancreas, lvl = 2)
+
+
+data = zScoring(T_EDec_80p_n)
+df_sign = signatures_pancreas$perso[signatures_pancreas$perso[, 1] %in% rownames(data), ]
+df_sign$Compartment = factor(df_sign$Compartment, levels = c("Immune", "Fibroblasts", "Endocrine", "Acinar", "Ductal", "Classic"))
+
+Heatmap(data[df_sign[, 1], ], name = "Z-Score", column_title = "Simu n",
+        row_split = df_sign[, 2],
+        row_title_gp = gpar(fontsize = 6),
+        left_annotation = rowAnnotation(Compartiment = df_sign[, 2]),
+        row_names_gp = gpar(fontsize = 2), cluster_rows = F, cluster_columns = F)
+
+data = zScoring(T_EDec_80p_c_t)
+Heatmap(data[df_sign[, 1], ], name = "Z-Score", column_title = "Simu c t",
+        row_split = df_sign[, 2],
+        row_title_gp = gpar(fontsize = 6),
+        left_annotation = rowAnnotation(Compartiment = df_sign[, 2]),
+        row_names_gp = gpar(fontsize = 2), cluster_rows = F, cluster_columns = F)
+
+# data = zScoring(T_EDec_80p_c)
+# Heatmap(data[df_sign[, 1], ], name = "Z-Score", column_title = "Simu 1 c",
+#         row_split = df_sign[, 2],
+#         row_title_gp = gpar(fontsize = 6),
+#         left_annotation = rowAnnotation(Compartiment = df_sign[, 2]),
+#         row_names_gp = gpar(fontsize = 2), cluster_rows = F, cluster_columns = F)
+
+# data = zScoring(T_EDec_80p_s_b)
+# Heatmap(data[df_sign[, 1], ], name = "Z-Score", column_title = "Simu 2 s",
+#         row_split = df_sign[, 2],
+#         row_title_gp = gpar(fontsize = 6),
+#         left_annotation = rowAnnotation(Compartiment = df_sign[, 2]),
+#         row_names_gp = gpar(fontsize = 2), cluster_rows = F, cluster_columns = F)
+# 
+# data = zScoring(T_EDec_80p_c_b)
+# Heatmap(data[df_sign[, 1], ], name = "Z-Score", column_title = "Simu 2 c",
+#         row_split = df_sign[, 2],
+#         row_title_gp = gpar(fontsize = 6),
+#         left_annotation = rowAnnotation(Compartiment = df_sign[, 2]),
+#         row_names_gp = gpar(fontsize = 2), cluster_rows = F, cluster_columns = F)
+
+```
+
+
+##D cancer 
+
+On va faire des tests sur le type cancer. 
+
+T_cancer = T de référence. 
+
+D_cancer = D déconvolué - A*T des autres types déconvolués / A cancer (= D cancer calculée).
+
+D_test = D ref - A*T des autres types ref / A cancer ref (= D cancer ref)
+
+```{r }
+T_cancer_s = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_s.rds")$T
+T_cancer_c = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_c.rds")$T
+D_cancer_s = readRDS("~/projects/pipeline_deconv_analysis/results/D_cancer/D_cancer_80p_s.rds")[, 1:60]
+D_cancer_c = readRDS("~/projects/pipeline_deconv_analysis/results/D_cancer/D_cancer_80p_c.rds")[, 1:60]
+D_test_s = readRDS("~/projects/pipeline_deconv_analysis/results/D_cancer/D_test_s.rds")
+D_test_c = readRDS("~/projects/pipeline_deconv_analysis/results/D_cancer/D_test_c.rds")
+
+summary(c(T_cancer_s))
+summary(c(T_cancer_c))
+summary(c(D_cancer_s))
+summary(c(D_cancer_c))
+summary(c(D_test_s))
+summary(c(D_test_c))
+
+df= data.frame(expr = c(T_cancer_s, D_cancer_s, D_test_s),
+               type = rep(c("Reference T", "Computed D cancer", "Reference D cancer"), each = 1293960))
+
+ggplot(df, aes(x = expr, color= type, fill=type)) + 
+    geom_histogram(aes(y=..density..), alpha=0.5, bins = 50, position="identity")+
+    geom_density(alpha=.2) +
+    labs(title = "") + theme_minimal() + xlim(-10, 200)
+
+
+err_D_cancer = (T_cancer_s -  D_cancer_s)
+summary(c(err_D_cancer))
+df = data.frame(prop = c(err_D_cancer))
+ggplot(df, aes(x = prop)) + 
+ geom_histogram(aes(y=..density..), alpha=0.5, bins = 50, position="identity")+
+ geom_density(alpha=.2) +
+  labs(title = "Ref T -  Computed D cancer") + theme_minimal()
+
+
+err_D_cancer = (T_cancer_s -  D_test_s)
+summary(c(err_D_cancer))
+df = data.frame(prop = c(err_D_cancer))
+ggplot(df, aes(x = prop)) + 
+ geom_histogram(aes(y=..density..), alpha=0.5, bins = 50, position="identity")+
+ geom_density(alpha=.2) +
+  labs(title = "Ref T -  Ref D cancer") + theme_minimal()
+
+```
+
+```
