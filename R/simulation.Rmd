@@ -167,20 +167,20 @@ corr_prop_n = function(T_cancer, G, A, z = 2){
 ##Simu A
 
 ```{r, results="verbatim", eval = F}
-A_30 = simu_A(30)
+# A_30 = simu_A(30)
 A_60 = simu_A(60)
 
-A_10ctrl = simu_A(10, c(4.5, 4.5, 1))
+# A_10ctrl = simu_A(10, c(4.5, 4.5, 1))
 A_20ctrl = simu_A(20, c(4.5, 4.5, 1))
 
-rownames(A_30) = c("normal", "fibro", "immune", "tumor")
+# rownames(A_30) = c("normal", "fibro", "immune", "tumor")
 rownames(A_60) = c("normal", "fibro", "immune", "tumor")
 rownames(A_10ctrl) = c("normal", "fibro", "immune")
-rownames(A_20ctrl) = c("normal", "fibro", "immune")
+# rownames(A_20ctrl) = c("normal", "fibro", "immune")
 
-saveRDS(A_30, "~/projects/pipeline_deconv_analysis/data/A/A_30.rds")
+# saveRDS(A_30, "~/projects/pipeline_deconv_analysis/data/A/A_30.rds")
 saveRDS(A_60, "~/projects/pipeline_deconv_analysis/data/A/A_60.rds")
-saveRDS(A_10ctrl, "~/projects/pipeline_deconv_analysis/data/A/A_10ctrl.rds")
+# saveRDS(A_10ctrl, "~/projects/pipeline_deconv_analysis/data/A/A_10ctrl.rds")
 saveRDS(A_20ctrl, "~/projects/pipeline_deconv_analysis/data/A/A_20ctrl.rds")
 ```
 
@@ -211,7 +211,7 @@ saveRDS(T_rna, "~/projects/pipeline_deconv_analysis/data/T/T_rna.rds")
 # saveRDS(T_30, "data/T/T_30_tum_rna.rds")
 # saveRDS(T_60, "data/T/T_60_tum_rna.rds")
 
-T_30 = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_30_tum_rna.rds")
+# T_30 = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_30_tum_rna.rds")
 T_60 = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna.rds")
 
 
@@ -220,14 +220,14 @@ T_60 = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna.rds")
 ##Simulating correlation proportion/tumors
 
 ```{r, results="verbatim"}
-T_30_s = corr_prop_s(T_30, G = 20, A_30, x = mean(c(T_30)))
-T_30_c = corr_prop_c(T_30, G = 20, A_30, y = sd(c(T_30))/2)
+# T_30_s = corr_prop_s(T_30, G = 20, A_30, x = mean(c(T_30)))
+# T_30_c = corr_prop_c(T_30, G = 20, A_30, y = sd(c(T_30))/2)
 
 T_60_s = corr_prop_s(T_60, G = 20, A_60, x = mean(c(T_30)))
 T_60_c = corr_prop_c(T_60, G = 20, A_60, y = sd(c(T_30))/2)
 
-saveRDS(T_30_s, "~/projects/pipeline_deconv_analysis/data/T/T_30_tum_rna_s.rds")
-saveRDS(T_30_c, "~/projects/pipeline_deconv_analysis/data/T/T_30_tum_rna_c.rds")
+# saveRDS(T_30_s, "~/projects/pipeline_deconv_analysis/data/T/T_30_tum_rna_s.rds")
+# saveRDS(T_30_c, "~/projects/pipeline_deconv_analysis/data/T/T_30_tum_rna_c.rds")
 
 saveRDS(T_60_s, "~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_s.rds")
 saveRDS(T_60_c, "~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_c.rds")
@@ -256,20 +256,20 @@ D_brut1 = T_challenge1 %*% A_challenge1
 ####Tumors
 
 ```{r, results="verbatim"}
-D_30 = T_met %*% A_30
+# D_30 = T_met %*% A_30
 D_60 = T_met %*% A_60
 
-saveRDS(D_30, "~/projects/pipeline_deconv_analysis/data/D/D_30_tum_met.rds")
+# saveRDS(D_30, "~/projects/pipeline_deconv_analysis/data/D/D_30_tum_met.rds")
 saveRDS(D_60, "~/projects/pipeline_deconv_analysis/data/D/D_60_tum_met.rds")
 ```
 
 ####Controls
 
 ```{r, results="verbatim"}
-D_10 = T_met[, 1:3] %*% A_10ctrl
+# D_10 = T_met[, 1:3] %*% A_10ctrl
 D_20 = T_met[, 1:3] %*% A_20ctrl
 
-saveRDS(D_10, "~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_met.rds")
+# saveRDS(D_10, "~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_met.rds")
 saveRDS(D_20, "~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_met.rds")
 ```
 
@@ -278,20 +278,20 @@ saveRDS(D_20, "~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_met.rds")
 ####Tumors
 
 ```{r, results="verbatim"}
-D_30_s = c()
-D_30_c = c()
-for(p in 1:30){
-  tumor = T_30_s$T[, p]
-  D_p = cbind(T_rna, tumor) %*% A_30[, p]
-  D_30_s = cbind(D_30_s, D_p)
-  
-  tumor = T_30_c$T[, p]
-  D_p = cbind(T_rna, tumor) %*% A_30[, p]
-  D_30_c = cbind(D_30_c, D_p)
-}
-
-saveRDS(D_30_s, "~/projects/pipeline_deconv_analysis/data/D/D_30_tum_rna_s.rds")
-saveRDS(D_30_c, "~/projects/pipeline_deconv_analysis/data/D/D_30_tum_rna_c.rds")
+# D_30_s = c()
+# D_30_c = c()
+# for(p in 1:30){
+#   tumor = T_30_s$T[, p]
+#   D_p = cbind(T_rna, tumor) %*% A_30[, p]
+#   D_30_s = cbind(D_30_s, D_p)
+#   
+#   tumor = T_30_c$T[, p]
+#   D_p = cbind(T_rna, tumor) %*% A_30[, p]
+#   D_30_c = cbind(D_30_c, D_p)
+# }
+# 
+# saveRDS(D_30_s, "~/projects/pipeline_deconv_analysis/data/D/D_30_tum_rna_s.rds")
+# saveRDS(D_30_c, "~/projects/pipeline_deconv_analysis/data/D/D_30_tum_rna_c.rds")
 
 D_60_s = c()
 D_60_c = c()
@@ -347,10 +347,10 @@ saveRDS(D_60_c_t, "~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_c_t.r
 ####Controls
 
 ```{r, results="verbatim"}
-D_10 = T_rna[, 1:3] %*% A_10ctrl
+# D_10 = T_rna[, 1:3] %*% A_10ctrl
 D_20 = T_rna[, 1:3] %*% A_20ctrl
 
-saveRDS(D_10, "~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_rna.rds")
+# saveRDS(D_10, "~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_rna.rds")
 saveRDS(D_20, "~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_rna.rds")
 ```
 
@@ -366,22 +366,22 @@ add_bruit = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
   return(datam)
 }
 
-D_40p_met = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_30_tum_met.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_met.rds"))      
-
-saveRDS(add_bruit(D_40p_met), "~/projects/pipeline_deconv_analysis/data/D_f/D_40p_met.rds")
+# D_40p_met = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_30_tum_met.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_met.rds"))      
+# 
+# saveRDS(add_bruit(D_40p_met), "~/projects/pipeline_deconv_analysis/data/D_f/D_40p_met.rds")
 
 D_80p_met = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_60_tum_met.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_met.rds"))
 
 saveRDS(add_bruit(D_80p_met), "~/projects/pipeline_deconv_analysis/data/D_f/D_80p_met.rds")
 
 
-D_40p_rna = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_30_tum_rna_s.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_rna.rds"))
-
-saveRDS(add_bruit(D_40p_rna, val_max = max(D_40p_rna)), "~/projects/pipeline_deconv_analysis/data/D_f/D_40p_rna_s.rds")
-
-D_40p_rna = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_30_tum_rna_c.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_rna.rds"))
-
-saveRDS(add_bruit(D_40p_rna, val_max = max(D_40p_rna)), "~/projects/pipeline_deconv_analysis/data/D_f/D_40p_rna_c.rds")
+# D_40p_rna = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_30_tum_rna_s.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_rna.rds"))
+# 
+# saveRDS(add_bruit(D_40p_rna, val_max = max(D_40p_rna)), "~/projects/pipeline_deconv_analysis/data/D_f/D_40p_rna_s.rds")
+# 
+# D_40p_rna = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_30_tum_rna_c.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_rna.rds"))
+# 
+# saveRDS(add_bruit(D_40p_rna, val_max = max(D_40p_rna)), "~/projects/pipeline_deconv_analysis/data/D_f/D_40p_rna_c.rds")
 
 D_80p_rna = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_s.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_rna.rds"))
 saveRDS(add_bruit(D_80p_rna, val_max = max(D_80p_rna)), "~/projects/pipeline_deconv_analysis/data/D_f/D_80p_rna_s.rds")
