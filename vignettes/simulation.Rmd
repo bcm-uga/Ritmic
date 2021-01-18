@@ -1,0 +1,401 @@
+---
+title: "Simulation"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(stringr)
+library(ggplot2)
+library("matrixStats")
+library('mixtools')
+
+```
+
+
+#Data 
+
+##Loading raw RNAseq and DNAmeth of cell components
+
+```{r, results="verbatim"}
+load("~/projects/data_challenge/Data_challenge_V2/simu/data/Data_DC_methylome.RData")
+data_methyl = Data_DC_methylome[[1]]
+
+load("~/projects/data_challenge/Data_challenge_V2/simu/data/Data_DC_transcriptome_allgenes_notlog.RData")
+data_trsc = data_trscp2[, -which(colnames(data_trscp2) == "TUM_CLASSIC.PDAC044T")]
+
+lignee_methyl = colnames(data_methyl)
+lignee_trsc = colnames(data_trsc)
+
+tumor_met = data_methyl[, str_detect(lignee_methyl, "CLASSIC")]
+dim(tumor_met)
+immuno_met = data_methyl[, str_detect(lignee_methyl, "IMMUNE")]
+dim(immuno_met)
+normal_met = data_methyl[, str_detect(lignee_methyl, "NORMAL")]
+dim(normal_met)
+fibro_met = data_methyl[, str_detect(lignee_methyl, "FIBRO")]
+dim(fibro_met)
+
+tumor_rna = data_trsc[, str_detect(lignee_trsc, "CLASSIC")]
+dim(tumor_rna)
+immuno_rna = data_trsc[, str_detect(lignee_trsc, "IMMUNE")]
+dim(immuno_rna)
+normal_rna = data_trsc[, str_detect(lignee_trsc, "NORMAL")]
+dim(normal_rna)
+fibro_rna = data_trsc[, str_detect(lignee_trsc, "FIBRO")]
+dim(fibro_rna)
+```
+
+##Loading TCGA PAAD
+
+```{r, results="verbatim", eval = F}
+tcga_met = readRDS("~/projects/pipeline_deconv_analysis/data/PAAD_data_met.rds")
+exp_grp_met = readRDS("~/projects/pipeline_deconv_analysis/data/PAAD_exp_grp_met.rds")
+table(exp_grp_met$tissue_status )
+dim(tcga_met)
+
+tcga_rna = readRDS("~/projects/pipeline_deconv_analysis/data/PAAD_data_rna.rds")
+tcga_rna_norm = readRDS("~/projects/pipeline_deconv_analysis/data/PAAD_data_norm_rna.rds")
+exp_grp_rna = readRDS("~/projects/pipeline_deconv_analysis/data/PAAD_exp_grp_rna.rds")
+table(exp_grp_rna$tissue_status )
+dim(tcga_rna)
+```
+
+#Functions
+
+##Simu A
+
+Take n the number of patients and alpha, the vector of cell type proportions of size k
+
+```{r, results="verbatim"}
+simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
+  tmp_mix_Lvar = t(gtools::rdirichlet(n = n, alpha = alpha))
+}
+```
+
+##Variability on cancer type
+
+```{r, results="verbatim"}
+simu_T_cancer = function(tumor_RNAseq, n){
+  n_simu = n - ncol(tumor_RNAseq)
+  T_res = matrix(NA, ncol = n, nrow = nrow(tumor_RNAseq))
+  T_res[, 1:ncol(tumor_RNAseq)] = tumor_RNAseq
+  rownames(T_res) = rownames(tumor_RNAseq)
+  t = 0
+  
+  for(g in rownames(tumor_RNAseq)){
+    dist_g = tumor_RNAseq[g, ]
+    #Genes that don't work (à corriger un jour)
+    if(sum(dist_g == 0) < 0.5*length(dist_g) & !g%in%c("CELF3", "ZCCHC24", "DNAH17", "MMP10", "UPK2", "PCAT1", "DPH6-AS1", "PRAF2", "CNTF", "LINC00940", "SNHG7", "LY6G6C", "C2CD4A", "HIST3H2BB", "HIST1H2AI", "TMEM201", "OPTC", "PALM3", "ZPBP2", "MROH2A", "TMEM255B", "AIFM3", "BEGAIN", "DDN", "SERTAD2", "ZFAS1", "KCNJ4", "CXorf58", "PF4", "TMED6", "SMG1", "C18orf25", "FLI1", "HABP2", "CDKAL1", "YARS2", "KHK", "SPOCD1", "IPO8", "GCH1", "AOC3", "IDO1", "SH3BGRL", "VGF", "ZBP1", "FABP3", "CDC20", "SCN4A", "C2CD5", "PDGFRL", "MGAT4A", "UPB1", "ASCL1", "AKAP4", "RHAG", "IGSF1", "SLCO1A2", "LHFPL4", "PGLYRP3",  "PANX2", "KIF6", "CA1", "FNDC1", "TBX4", "KCNC2", "ASPG", "SOAT2", "CYP7B1", "CLCNKB", "ZYG11A", "SNORD121A", "PSG4", "CDH19", "BMP6", "CD300LB", "SOGA3", "SPEG", "TGM1", "VRK1",  "KRT23")){
+      #Computing the bimodal distribution
+      dists_sep <- normalmixEM(dist_g, maxrestarts=10000, k= 2)
+      probs <- dists_sep$lambda
+      m <- dists_sep$mu      
+      s <- dists_sep$sigma
+      N <- 1e5
+      grp <- sample(length(probs), N, replace=TRUE, prob=probs)
+      x <- rnorm(N, m[grp], s[grp])
+      x[x<0] = 0
+    } else {
+      x = dist_g
+      t = t+1
+    }
+        
+    T_res[g, (ncol(tumor_RNAseq)+1):n] = sample(x, n_simu, replace=TRUE)
+  }
+   return(T_res)
+}
+
+```
+
+##Correlation cancer proportion
+
+```{r, results="verbatim"}
+#On pioche g gènes au hasard pour fibro et immune, puis pour chaque patient on ajoute x*proportion(immune) ou fibro à l'expression
+corr_prop_s = function(T_cancer, G, A, x = 100){
+  genes = sample(nrow(T_cancer), G, replace = F)
+  g_immune = genes[1:(G/2)]
+  g_fibro =  genes[(G/2 +1):G]
+  T_f = T_cancer
+  for(n in 1:ncol(T_cancer)){
+    immune = A[3, n]
+    fibro = A[2, n]
+    T_f[g_immune, n] =  T_f[g_immune, n]+ x*immune
+    T_f[g_fibro, n] =  T_f[g_fibro, n]+ x*fibro
+  }
+  return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
+}
+
+#On pioche g gènes au hasard pour fibro et immune, si la proportion du type est supérieure au seuil, on multiplie l'expression par y
+corr_prop_c = function(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
+  genes = sample(nrow(T_cancer), G, replace = F)
+  g_immune = genes[1:(G/2)]
+  g_fibro =  genes[(G/2 +1):G]
+  T_f = T_cancer
+  for(n in 1:ncol(T_cancer)){
+    immune = A[3, n]
+    fibro = A[2, n]
+    if(immune > thres_i){
+      T_f[g_immune, n] =  T_f[g_immune, n] * y
+    }
+    if(fibro > thres_f){
+      T_f[g_fibro, n] =  T_f[g_fibro, n] * y
+    }
+  }
+  return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
+}
+
+#On pioche g gènes au hasard pour fibro et immune, puis pour chaque patient on fait expression*(1 + z*proportion(immune ou fibro))
+corr_prop_n = function(T_cancer, G, A, z = 2){
+  genes = sample(nrow(T_cancer), G, replace = F)
+  g_immune = genes[1:(G/2)]
+  g_fibro =  genes[(G/2 +1):G]
+  T_f = T_cancer
+  for(n in 1:ncol(T_cancer)){
+    immune = A[3, n]
+    fibro = A[2, n]
+    T_f[g_immune, n] =  T_f[g_immune, n]*(1 + z*immune)
+    T_f[g_fibro, n] =  T_f[g_fibro, n]*(1 + z*fibro)
+  }
+  return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
+}
+
+```
+
+#Simu 
+
+##Simu A
+
+```{r, results="verbatim", eval = F}
+# A_30 = simu_A(30)
+A_60 = simu_A(60)
+
+# A_10ctrl = simu_A(10, c(4.5, 4.5, 1))
+A_20ctrl = simu_A(20, c(4.5, 4.5, 1))
+
+# rownames(A_30) = c("normal", "fibro", "immune", "tumor")
+rownames(A_60) = c("normal", "fibro", "immune", "tumor")
+rownames(A_10ctrl) = c("normal", "fibro", "immune")
+# rownames(A_20ctrl) = c("normal", "fibro", "immune")
+
+# saveRDS(A_30, "~/projects/pipeline_deconv_analysis/data/A/A_30.rds")
+saveRDS(A_60, "~/projects/pipeline_deconv_analysis/data/A/A_60.rds")
+# saveRDS(A_10ctrl, "~/projects/pipeline_deconv_analysis/data/A/A_10ctrl.rds")
+saveRDS(A_20ctrl, "~/projects/pipeline_deconv_analysis/data/A/A_20ctrl.rds")
+```
+
+##Simulating raw T matrix
+
+###Methylation
+```{r, results="verbatim"}
+T_met = cbind(rowMedians(normal_met), rowMedians(fibro_met), rowMedians(immuno_met), rowMedians(tumor_met))
+colnames(T_met) = c("Normal", "Fibro", "Immune", "Tumor")
+rownames(T_met) = rownames(tumor_met)
+saveRDS(T_met, "~/projects/pipeline_deconv_analysis/data/T/T_met.rds")
+```
+
+###Transcriptome
+```{r, results="verbatim"}
+T_rna = cbind(rowMedians(normal_rna), rowMedians(fibro_rna), rowMedians(immuno_rna))
+colnames(T_rna) =  c("Normal", "Fibro", "Immune")
+rownames(T_rna) = rownames(normal_rna)
+saveRDS(T_rna, "~/projects/pipeline_deconv_analysis/data/T/T_rna.rds")
+```
+
+##Simulating tumor RNA T matrix
+
+```{r, results="verbatim"}
+# T_30 = simu_T_cancer(tumor_rna, 30)
+# T_60 = simu_T_cancer(tumor_rna, 60)
+# 
+# saveRDS(T_30, "data/T/T_30_tum_rna.rds")
+# saveRDS(T_60, "data/T/T_60_tum_rna.rds")
+
+# T_30 = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_30_tum_rna.rds")
+T_60 = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna.rds")
+
+
+```
+
+##Simulating correlation proportion/tumors
+
+```{r, results="verbatim"}
+# T_30_s = corr_prop_s(T_30, G = 20, A_30, x = mean(c(T_30)))
+# T_30_c = corr_prop_c(T_30, G = 20, A_30, y = sd(c(T_30))/2)
+
+T_60_s = corr_prop_s(T_60, G = 20, A_60, x = mean(c(T_30)))
+T_60_c = corr_prop_c(T_60, G = 20, A_60, y = sd(c(T_30))/2)
+
+# saveRDS(T_30_s, "~/projects/pipeline_deconv_analysis/data/T/T_30_tum_rna_s.rds")
+# saveRDS(T_30_c, "~/projects/pipeline_deconv_analysis/data/T/T_30_tum_rna_c.rds")
+
+saveRDS(T_60_s, "~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_s.rds")
+saveRDS(T_60_c, "~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_c.rds")
+
+T_60_s_b = corr_prop_s(T_60, G = 50, A_60, x = mean(c(T_30))*10)
+T_60_c_b = corr_prop_c(T_60, G = 50, A_60, y = sd(c(T_30)))
+saveRDS(T_60_s_b, "~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_s_b.rds")
+saveRDS(T_60_c_b, "~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_c_b.rds")
+
+#Sd moyen entre les échantillons
+val = mean(apply(T_60, 1, sd))
+val
+
+T_60_n = corr_prop_n(T_60, G = 100, A_60, z = val)
+T_60_c_t = corr_prop_c(T_60, G = 100, A_60, y = val)
+saveRDS(T_60_n, "~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_n.rds")
+saveRDS(T_60_c_t, "~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_c_t.rds")
+
+```
+
+##Simulating D matrices
+D_brut1 = T_challenge1 %*% A_challenge1
+
+###Methylation
+
+####Tumors
+
+```{r, results="verbatim"}
+# D_30 = T_met %*% A_30
+D_60 = T_met %*% A_60
+
+# saveRDS(D_30, "~/projects/pipeline_deconv_analysis/data/D/D_30_tum_met.rds")
+saveRDS(D_60, "~/projects/pipeline_deconv_analysis/data/D/D_60_tum_met.rds")
+```
+
+####Controls
+
+```{r, results="verbatim"}
+# D_10 = T_met[, 1:3] %*% A_10ctrl
+D_20 = T_met[, 1:3] %*% A_20ctrl
+
+# saveRDS(D_10, "~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_met.rds")
+saveRDS(D_20, "~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_met.rds")
+```
+
+###Transcriptome
+
+####Tumors
+
+```{r, results="verbatim"}
+# D_30_s = c()
+# D_30_c = c()
+# for(p in 1:30){
+#   tumor = T_30_s$T[, p]
+#   D_p = cbind(T_rna, tumor) %*% A_30[, p]
+#   D_30_s = cbind(D_30_s, D_p)
+#   
+#   tumor = T_30_c$T[, p]
+#   D_p = cbind(T_rna, tumor) %*% A_30[, p]
+#   D_30_c = cbind(D_30_c, D_p)
+# }
+# 
+# saveRDS(D_30_s, "~/projects/pipeline_deconv_analysis/data/D/D_30_tum_rna_s.rds")
+# saveRDS(D_30_c, "~/projects/pipeline_deconv_analysis/data/D/D_30_tum_rna_c.rds")
+
+D_60_s = c()
+D_60_c = c()
+for(p in 1:60){
+  tumor = T_60_s$T[, p]
+  D_p = cbind(T_rna, tumor) %*% A_60[, p]
+  D_60_s = cbind(D_60_s, D_p)
+  
+  tumor = T_60_c$T[, p]
+  D_p = cbind(T_rna, tumor) %*% A_60[, p]
+  D_60_c = cbind(D_60_c, D_p)
+}
+
+saveRDS(D_60_s, "~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_s.rds")
+saveRDS(D_60_c, "~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_c.rds")
+
+
+D_60_s_b = c()
+D_60_c_b = c()
+for(p in 1:60){
+  tumor = T_60_s_b$T[, p]
+  D_p = cbind(T_rna, tumor) %*% A_60[, p]
+  D_60_s_b = cbind(D_60_s_b, D_p)
+  
+  tumor = T_60_c_b$T[, p]
+  D_p = cbind(T_rna, tumor) %*% A_60[, p]
+  D_60_c_b = cbind(D_60_c_b, D_p)
+}
+
+saveRDS(D_60_s_b, "~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_s_b.rds")
+saveRDS(D_60_c_b, "~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_c_b.rds")
+
+T_rna = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_rna.rds")
+
+D_60_n = c()
+D_60_c_t = c()
+for(p in 1:60){
+  tumor = T_60_n$T[, p]
+  D_p = cbind(T_rna, tumor) %*% A_60[, p]
+  D_60_n = cbind(D_60_n, D_p)
+  
+  tumor = T_60_c_t$T[, p]
+  D_p = cbind(T_rna, tumor) %*% A_60[, p]
+  D_60_c_t = cbind(D_60_c_t, D_p)
+}
+
+saveRDS(D_60_n, "~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_n.rds")
+saveRDS(D_60_c_t, "~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_c_t.rds")
+
+
+```
+
+####Controls
+
+```{r, results="verbatim"}
+# D_10 = T_rna[, 1:3] %*% A_10ctrl
+D_20 = T_rna[, 1:3] %*% A_20ctrl
+
+# saveRDS(D_10, "~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_rna.rds")
+saveRDS(D_20, "~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_rna.rds")
+```
+
+##Final D matrices 
+
+```{r, results="verbatim"}
+
+add_bruit = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
+  noise = matrix(rnorm(prod(dim(data)), mean = mean, sd = sd), nrow = nrow(data))
+  datam = data + noise
+  datam[datam < val_min] = data[datam < val_min]
+  datam[datam > val_max] = data[datam > val_max]
+  return(datam)
+}
+
+# D_40p_met = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_30_tum_met.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_met.rds"))      
+# 
+# saveRDS(add_bruit(D_40p_met), "~/projects/pipeline_deconv_analysis/data/D_f/D_40p_met.rds")
+
+D_80p_met = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_60_tum_met.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_met.rds"))
+
+saveRDS(add_bruit(D_80p_met), "~/projects/pipeline_deconv_analysis/data/D_f/D_80p_met.rds")
+
+
+# D_40p_rna = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_30_tum_rna_s.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_rna.rds"))
+# 
+# saveRDS(add_bruit(D_40p_rna, val_max = max(D_40p_rna)), "~/projects/pipeline_deconv_analysis/data/D_f/D_40p_rna_s.rds")
+# 
+# D_40p_rna = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_30_tum_rna_c.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_10_ctrl_rna.rds"))
+# 
+# saveRDS(add_bruit(D_40p_rna, val_max = max(D_40p_rna)), "~/projects/pipeline_deconv_analysis/data/D_f/D_40p_rna_c.rds")
+
+D_80p_rna = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_s.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_rna.rds"))
+saveRDS(add_bruit(D_80p_rna, val_max = max(D_80p_rna)), "~/projects/pipeline_deconv_analysis/data/D_f/D_80p_rna_s.rds")
+
+
+D_80p_rna = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_c.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_rna.rds"))
+saveRDS(add_bruit(D_80p_rna, val_max = max(D_80p_rna)), "~/projects/pipeline_deconv_analysis/data/D_f/D_80p_rna_c.rds")
+
+
+D_80p_rna = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_s_b.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_rna.rds"))
+saveRDS(add_bruit(D_80p_rna, val_max = max(D_80p_rna)), "~/projects/pipeline_deconv_analysis/data/D_f/D_80p_rna_s_b.rds")
+
+
+D_80p_rna = cbind(readRDS("~/projects/pipeline_deconv_analysis/data/D/D_60_tum_rna_c_b.rds"), readRDS("~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_rna.rds"))
+saveRDS(add_bruit(D_80p_rna, val_max = max(D_80p_rna)), "~/projects/pipeline_deconv_analysis/data/D_f/D_80p_rna_c_b.rds")
+
+```
