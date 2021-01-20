@@ -18,10 +18,10 @@ library('mixtools')
 ##Loading raw RNAseq and DNAmeth of cell components
 
 ```{r, results="verbatim"}
-load("~/projects/data_challenge/Data_challenge_V2/simu/data/Data_DC_methylome.RData")
+load("~/projects/dataPenda/Data_DC_methylome.RData")
 data_methyl = Data_DC_methylome[[1]]
 
-load("~/projects/data_challenge/Data_challenge_V2/simu/data/Data_DC_transcriptome_allgenes_notlog.RData")
+load("~/projects/dataPenda/Data_DC_transcriptome_allgenes_notlog.RData")
 data_trsc = data_trscp2[, -which(colnames(data_trscp2) == "TUM_CLASSIC.PDAC044T")]
 
 lignee_methyl = colnames(data_methyl)
@@ -64,10 +64,18 @@ dim(tcga_rna)
 #Functions
 
 ##Simu A
-
-Take n the number of patients and alpha, the vector of cell type proportions of size k
-
 ```{r, results="verbatim"}
+#' Simu A
+
+#'Take n the number of patients and alpha, the vector of cell type proportions of size k
+#'
+#' @param n 
+#' @param alpha cell type proportions of size k
+#'
+#' @return proportions of different cell types
+#' @export
+#'
+#' @examples
 simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
   tmp_mix_Lvar = t(gtools::rdirichlet(n = n, alpha = alpha))
 }
@@ -76,6 +84,15 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
 ##Variability on cancer type
 
 ```{r, results="verbatim"}
+#' Title
+#'
+#' @param tumor_RNAseq 
+#' @param n 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 simu_T_cancer = function(tumor_RNAseq, n){
   n_simu = n - ncol(tumor_RNAseq)
   T_res = matrix(NA, ncol = n, nrow = nrow(tumor_RNAseq))
@@ -127,6 +144,19 @@ corr_prop_s = function(T_cancer, G, A, x = 100){
 }
 
 #On pioche g gènes au hasard pour fibro et immune, si la proportion du type est supérieure au seuil, on multiplie l'expression par y
+#' Title
+#'
+#' @param T_cancer 
+#' @param G 
+#' @param A 
+#' @param y 
+#' @param thres_i 
+#' @param thres_f 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 corr_prop_c = function(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
   genes = sample(nrow(T_cancer), G, replace = F)
   g_immune = genes[1:(G/2)]
@@ -146,6 +176,17 @@ corr_prop_c = function(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
 }
 
 #On pioche g gènes au hasard pour fibro et immune, puis pour chaque patient on fait expression*(1 + z*proportion(immune ou fibro))
+#' Title
+#'
+#' @param T_cancer 
+#' @param G 
+#' @param A 
+#' @param z 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 corr_prop_n = function(T_cancer, G, A, z = 2){
   genes = sample(nrow(T_cancer), G, replace = F)
   g_immune = genes[1:(G/2)]
@@ -358,6 +399,18 @@ saveRDS(D_20, "~/projects/pipeline_deconv_analysis/data/D/D_20_ctrl_rna.rds")
 
 ```{r, results="verbatim"}
 
+#' Title
+#'
+#' @param data 
+#' @param mean 
+#' @param sd 
+#' @param val_min 
+#' @param val_max 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 add_bruit = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
   noise = matrix(rnorm(prod(dim(data)), mean = mean, sd = sd), nrow = nrow(data))
   datam = data + noise
