@@ -18,10 +18,10 @@ library('mixtools')
 ##Loading raw RNAseq and DNAmeth of cell components
 
 ```{r, results="verbatim"}
-load("~/projects/dataPenda/Data_DC_methylome.RData")
+load("~/Datas/projects/dataPenda/Data_DC_methylome.RData")
 data_methyl = Data_DC_methylome[[1]]
 
-load("~/projects/dataPenda/Data_DC_transcriptome_allgenes_notlog.RData")
+load("~/Datas/projects/dataPenda/Data_DC_transcriptome_allgenes_notlog.RData")
 data_trsc = data_trscp2[, -which(colnames(data_trscp2) == "TUM_CLASSIC.PDAC044T")]
 
 lignee_methyl = colnames(data_methyl)
@@ -65,17 +65,16 @@ dim(tcga_rna)
 
 ##Simu A
 ```{r, results="verbatim"}
-#' Simu A
-
-#'Take n the number of patients and alpha, the vector of cell type proportions of size k
+#' Simulate cell type distributions in tumours
+#' Creates a new matrix with : n the number of patients and alpha the vector of cell type proportions of size k
 #'
 #' @param n 
-#' @param alpha cell type proportions of size k
+#' @param alpha cell type proportions of size k in a concatenated vector
 #'
-#' @return proportions of different cell types
-#' @export
+#' @return proportions of different cell types in matrix 
+#' @export 
 #'
-#' @examples
+#' @examples simu_A(20,c(1.5, 4.5, 3))
 simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
   tmp_mix_Lvar = t(gtools::rdirichlet(n = n, alpha = alpha))
 }
@@ -84,7 +83,7 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
 ##Variability on cancer type
 
 ```{r, results="verbatim"}
-#' Title
+#' Simu T cancer
 #'
 #' @param tumor_RNAseq 
 #' @param n 
@@ -94,13 +93,19 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
 #'
 #' @examples
 simu_T_cancer = function(tumor_RNAseq, n){
+  # n_simu return the number of new simulations 
   n_simu = n - ncol(tumor_RNAseq)
+  # T_res : empty matrix with the @n parameter columns and the rows from tumor_RNAseq
   T_res = matrix(NA, ncol = n, nrow = nrow(tumor_RNAseq))
+  # Fill the boxes with those from @tumor_RNAseq
   T_res[, 1:ncol(tumor_RNAseq)] = tumor_RNAseq
+  # Store the rownames from tumor_RNAseq in the new matrix 
   rownames(T_res) = rownames(tumor_RNAseq)
+  # QUESTION : debugging supposed
   t = 0
   
   for(g in rownames(tumor_RNAseq)){
+    # Check the distance between genes 
     dist_g = tumor_RNAseq[g, ]
     #Genes that don't work (à corriger un jour)
     if(sum(dist_g == 0) < 0.5*length(dist_g) & !g%in%c("CELF3", "ZCCHC24", "DNAH17", "MMP10", "UPK2", "PCAT1", "DPH6-AS1", "PRAF2", "CNTF", "LINC00940", "SNHG7", "LY6G6C", "C2CD4A", "HIST3H2BB", "HIST1H2AI", "TMEM201", "OPTC", "PALM3", "ZPBP2", "MROH2A", "TMEM255B", "AIFM3", "BEGAIN", "DDN", "SERTAD2", "ZFAS1", "KCNJ4", "CXorf58", "PF4", "TMED6", "SMG1", "C18orf25", "FLI1", "HABP2", "CDKAL1", "YARS2", "KHK", "SPOCD1", "IPO8", "GCH1", "AOC3", "IDO1", "SH3BGRL", "VGF", "ZBP1", "FABP3", "CDC20", "SCN4A", "C2CD5", "PDGFRL", "MGAT4A", "UPB1", "ASCL1", "AKAP4", "RHAG", "IGSF1", "SLCO1A2", "LHFPL4", "PGLYRP3",  "PANX2", "KIF6", "CA1", "FNDC1", "TBX4", "KCNC2", "ASPG", "SOAT2", "CYP7B1", "CLCNKB", "ZYG11A", "SNORD121A", "PSG4", "CDH19", "BMP6", "CD300LB", "SOGA3", "SPEG", "TGM1", "VRK1",  "KRT23")){
@@ -129,6 +134,17 @@ simu_T_cancer = function(tumor_RNAseq, n){
 
 ```{r, results="verbatim"}
 #On pioche g gènes au hasard pour fibro et immune, puis pour chaque patient on ajoute x*proportion(immune) ou fibro à l'expression
+#' Title
+#'
+#' @param T_cancer 
+#' @param G 
+#' @param A 
+#' @param x 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 corr_prop_s = function(T_cancer, G, A, x = 100){
   genes = sample(nrow(T_cancer), G, replace = F)
   g_immune = genes[1:(G/2)]
