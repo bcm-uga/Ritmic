@@ -83,7 +83,7 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
 ##Variability on cancer type
 
 ```{r, results="verbatim"}
-#' Create a matrix with random gene expression distribution in n cell types with genes from RNA_seq dataset 
+#' Create a matrix with random gene expression distribution in n tumoral cell lines with genes from RNA_seq dataset 
 #'
 #' @param tumor_RNAseq RNAseq dataset to simulate a random T matrix
 #' @param n Supposed cell types number 
