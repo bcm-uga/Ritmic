@@ -65,7 +65,7 @@ dim(tcga_rna)
 
 ##Simu A
 ```{r, results="verbatim"}
-#' Simulate cell type distributions in tumours
+#' Simulate cell line distributions in tumors
 #' Creates a new matrix with @n patients and @alpha the vector of cell type proportions of size k
 #'
 #' @param n 
@@ -83,7 +83,9 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
 ##Variability on cancer type
 
 ```{r, results="verbatim"}
-#' Create a matrix with random gene expression distribution in n tumoral cell lines with genes from RNA_seq dataset 
+#' Simulate a tumoral environment 
+#' @Description
+#' Generate a matrix with random gene expression distribution in n tumoral cell lines with genes from RNA_seq dataset 
 #'
 #' @param tumor_RNAseq RNAseq dataset to simulate a random T matrix
 #' @param n Supposed cell types number 
@@ -121,7 +123,7 @@ simu_T_cancer = function(tumor_RNAseq, n){
       N <- 1e5
       # Random sample : on all probs obtained, each gene are sampled many times to be randomly affected 
       grp <- sample(length(probs), N, replace=TRUE, prob=probs)
-      # Random generation for the normal distribution with mean=m       and sd = s for the gene in for loop  
+      # Random generation for the normal distribution with mean=m and sd = s for the gene in for loop  
       x <- rnorm(N, m[grp], s[grp])
       # All negative values from the normal distribution of gene expression equals to 0 
       x[x<0] = 0
@@ -145,7 +147,7 @@ simu_T_cancer = function(tumor_RNAseq, n){
 #' Title
 #'
 #' @param T_cancer 
-#' @param G 
+#' @param G Gene number(integer type) to be sampled 
 #' @param A 
 #' @param x 
 #'

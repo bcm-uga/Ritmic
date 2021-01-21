@@ -2,21 +2,21 @@
 % Please edit documentation in R/simulation.R
 \name{simu_A}
 \alias{simu_A}
-\title{Title simu_A}
+\title{Simulate cell line distributions in tumors}
 \usage{
 simu_A(n, alpha = c(1.5, 4.5, 1, 3))
 }
 \arguments{
-\item{n}{number of patients}
+\item{n}{patients number}
 
-\item{alpha}{proportions of different cell types}
+\item{alpha}{cell type proportions of size k in a concatenated vector}
 }
 \value{
-the matrix of proportions
+Proportion of different cell lines in a matrix
 }
 \description{
-Title simu_A
+Creates a new matrix with @n : the patient number and @alpha : the vector of cell lines proportion of size k
 }
 \examples{
-simu_A(n = 30, alpha = c(1.5, 4.5, 1, 3))
+simu_A(20,c(1.5, 4.5, 3))
 }
