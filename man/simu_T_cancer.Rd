@@ -12,7 +12,7 @@ simu_T_cancer(tumor_RNAseq, n)
 \item{n}{Supposed cell types number}
 }
 \value{
-A matrix : Gene expression distribution per cell type
+The matrix A: Gene expressions distributions per cell line
 }
 \description{
 Generate a matrix with random gene expression distributions in n tumor cell lines with genes imported from RNA_seq dataset

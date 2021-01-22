@@ -1,11 +1,13 @@
-#' Simulate cell line distributions in tumors
+#' Simulate cell line proportion distributions in tumors
 #' 
 #' @description 
-#' Creates a new matrix with @n : the patient number and @alpha : the vector of cell lines proportion of size k
+#' Creates a new matrix A with @n : the patient number and @alpha : the vector of cell lines proportion of size k
 #'
 #' @param n patients number
 #' @param alpha cell type proportions of size k in a concatenated vector
-#'
+#' 
+#' @seealso gtools::rdirichlet
+#' 
 #' @return Proportion of different cell lines in a matrix 
 #' @export 
 #'
@@ -15,13 +17,15 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
 }
 
 #' Simulate a tumor micro-environment 
-#' @description 
-#' Generate a matrix with random gene expression distributions in n tumor cell lines with genes imported from RNA_seq dataset 
+#' @description Generate a matrix with random gene expression distributions in n tumor cell lines with genes imported from RNA_seq dataset 
 #'
 #' @param tumor_RNAseq RNAseq dataset to simulate a random T matrix
 #' @param n Supposed cell types number 
+#' 
+#' @importFrom stats rnorm
+#' @importFrom mixtools normalmixEM
 #'
-#' @return A matrix : Gene expression distribution per cell type  
+#' @return The matrix A: Gene expressions distributions per cell line  
 #' @export
 #'
 #' @examples
@@ -59,7 +63,6 @@ simu_T_cancer = function(tumor_RNAseq, n){
       # All negative values from the normal distribution of gene expression equals to 0 
       x[x<0] = 0
     } else {
-      # Checking the wrong genes 
       x = dist_g
       t = t+1
     }
@@ -69,4 +72,127 @@ simu_T_cancer = function(tumor_RNAseq, n){
   return(T_res)
 }
 
+#' Simple deregulations in tumors micro-environment 
+#' @description 
+#' Generation of deregulations with a simple model in the matrix T generated from @RiTMIC::simu_T_cancer() with cell lines proportions from the matrix A @RiTMIC::simu_A() \cr\cr
+#' Step 1: G genes are drawn\cr \cr 
+#' Step 2: Over-expression induced to these genes : \cr \cr
+#' newGeneExpression = geneExpression + x * cellTypeProportion
+#' @param T_cancer RNAseq data
+#' @param G Gene number(integer type) to be sampled 
+#' @param A Matrix A : distribution of cell lines per tumor @RiTMIC::simu_A()
+#' @param x Coefficient, by default it's settled to 100
+#' 
+#' @return A list with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
+#' @export
+#'
+#' @examples
+corr_prop_s = function(T_cancer, G, A, x = 100){
+  # Sampling of the gene names from T_cancer 
+  genes = sample(nrow(T_cancer), G, replace = F)
+  # First half part of selected genes represents the immune cell lines
+  g_immune = genes[1:(G/2)]
+  # The other half represents the tumor cell lines
+  g_fibro =  genes[(G/2 +1):G]
+  T_f = T_cancer
+  for(n in 1:ncol(T_cancer)){
+    # Capturing immune and fibro cells proportions in the n tumor from matrix @parameter A 
+    immune = A[3, n]
+    fibro = A[2, n]
+    # Deregulation of random genes for fibro cell types and immune cell types : Adding the coefficient x multiply by the cell type proportion to induce over-expression 
+    T_f[g_immune, n] =  T_f[g_immune, n]+ x*immune
+    T_f[g_fibro, n] =  T_f[g_fibro, n]+ x*fibro
+  }
+  return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
+}
 
+#' Complex deregulations in tumors micro-environment 
+#' @description 
+#' Generation of deregulations with a complex model in the matrix T generated from @RiTMIC::simu_T_cancer() with cell lines proportions from the matrix A @RiTMIC::simu_A() \cr \cr
+#' Step 1: G genes are drawn\cr \cr 
+#' Step 2: Checking : proportions of cell type immune or fibro is respectively greater than @tres_i and @tres_f ? \cr \cr
+#' Step 3: For the cell lines (fibro, immune) having a proportion greater than threshold: \cr \cr
+#' newGeneExpression = geneExpression * y
+#' 
+#' @param T_cancer The matrix T, for more documentation @RiTMIC::simu_T_cancer()
+#' @param G Gene numbers to be drawn
+#' @param A The matrix A, for more documentation @RiTMIC::simu_A()
+#' @param y Overexpression coefficient to multiply the gene expression, by default y = 2
+#' @param thres_i Threshold to induce overexpression in immune cells, by default thres_i = 0.1
+#' @param thres_f Threshold to induce overexpression in fibro cells, by default thres_f = 0.45
+#'
+#' @return A list with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
+#' @export
+#'
+#' @examples
+corr_prop_c = function(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
+  genes = sample(nrow(T_cancer), G, replace = F)
+  g_immune = genes[1:(G/2)]
+  g_fibro =  genes[(G/2 +1):G]
+  T_f = T_cancer
+  for(n in 1:ncol(T_cancer)){
+    immune = A[3, n]
+    fibro = A[2, n]
+    if(immune > thres_i){
+      T_f[g_immune, n] =  T_f[g_immune, n] * y
+    }
+    if(fibro > thres_f){
+      T_f[g_fibro, n] =  T_f[g_fibro, n] * y
+    }
+  }
+  return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
+}
+
+#On pioche g gènes au hasard pour fibro et immune, puis pour chaque patient on fait expression*(1 + z*proportion(immune ou fibro))
+#' New deregulations in tumors micro-environment 
+#' @description 
+#' Generation of deregulations from a new model in the matrix T generated from @RiTMIC::simu_T_cancer() with cell lines proportions from the matrix A @RiTMIC::simu_A() \cr \cr
+#' Step 1: G genes are drawn\cr \cr 
+#' Step 2: For the cell lines, over-expressions to every G genes is induced by: \cr \cr
+#' newGeneExpression = geneExpression + [(1 + z)* cellTypeProportion)]
+#'
+#' @param T_cancer 
+#' @param G 
+#' @param A 
+#' @param z 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+corr_prop_n = function(T_cancer, G, A, z = 2){
+  genes = sample(nrow(T_cancer), G, replace = F)
+  g_immune = genes[1:(G/2)]
+  g_fibro =  genes[(G/2 +1):G]
+  T_f = T_cancer
+  for(n in 1:ncol(T_cancer)){
+    immune = A[3, n]
+    fibro = A[2, n]
+    T_f[g_immune, n] =  T_f[g_immune, n]*(1 + z*immune)
+    T_f[g_fibro, n] =  T_f[g_fibro, n]*(1 + z*fibro)
+  }
+  return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
+}
+
+#' Add noise to the simulations of tumor micro-environments
+#' @description By adding noise, the simulation will have a better reflection of the biological simulation
+#' @param data matrix_T with or without deregulations 
+#' @param mean 
+#' @param sd 
+#' @param val_min 
+#' @param val_max 
+#' 
+#' @seealso RiTMIC::simu_T_cancer() 
+#' @seealso RiTMIC::corr_prop functions...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+add_noise = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
+  noise = matrix(rnorm(prod(dim(data)), mean = mean, sd = sd), nrow = nrow(data))
+  datam = data + noise
+  datam[datam < val_min] = data[datam < val_min]
+  datam[datam > val_max] = data[datam > val_max]
+  return(datam)
+}

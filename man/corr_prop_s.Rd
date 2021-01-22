@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulation.R
 \name{corr_prop_s}
 \alias{corr_prop_s}
-\title{Generator of simple deregulations in tumors micro-environment}
+\title{Simple deregulations in tumors micro-environment}
 \usage{
 corr_prop_s(T_cancer, G, A, x = 100)
 }
@@ -19,7 +19,8 @@ corr_prop_s(T_cancer, G, A, x = 100)
 A list with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 }
 \description{
-Generation of deregulations in the matrix T generated from @RiTMIC::simu_T_cancer() with cell lines proportions from the matrix A @RiTMIC::simu_A() \cr
-Step 1: G genes are drawn\cr 
-Step 2: Over-expression induced to these genes by adding the coefficient x multiply by the cell type proportion of fibro or immune cell lines
+Generation of deregulations with a simple model in the matrix T generated from @RiTMIC::simu_T_cancer() with cell lines proportions from the matrix A @RiTMIC::simu_A() \cr\cr
+Step 1: G genes are drawn\cr \cr 
+Step 2: Over-expression induced to these genes : \cr \cr
+newGeneExpression = geneExpression + x * cellTypeProportion
 }

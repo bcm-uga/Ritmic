@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulation.R
 \name{corr_prop_n}
 \alias{corr_prop_n}
-\title{Generator of new deregulations in tumors micro-environment}
+\title{New deregulations in tumors micro-environment}
 \usage{
 corr_prop_n(T_cancer, G, A, z = 2)
 }
@@ -19,8 +19,8 @@ corr_prop_n(T_cancer, G, A, z = 2)
 
 }
 \description{
-Generation of deregulations in the matrix T generated from @RiTMIC::simu_T_cancer() with cell lines proportions from the matrix A @RiTMIC::simu_A() \cr \cr
+Generation of deregulations from a new model in the matrix T generated from @RiTMIC::simu_T_cancer() with cell lines proportions from the matrix A @RiTMIC::simu_A() \cr \cr
 Step 1: G genes are drawn\cr \cr 
-Step 2: For the cell lines, over-expressions to every G genes is induced by: \cr
+Step 2: For the cell lines, over-expressions to every G genes is induced by: \cr \cr
 newGeneExpression = geneExpression + [(1 + z)* cellTypeProportion)]
 }

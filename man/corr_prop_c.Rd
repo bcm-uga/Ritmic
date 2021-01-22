@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulation.R
 \name{corr_prop_c}
 \alias{corr_prop_c}
-\title{Generator of complex deregulations in tumors micro-environment}
+\title{Complex deregulations in tumors micro-environment}
 \usage{
 corr_prop_c(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45)
 }
@@ -23,7 +23,7 @@ corr_prop_c(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45)
 A list with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 }
 \description{
-Generation of deregulations in the matrix T generated from @RiTMIC::simu_T_cancer() with cell lines proportions from the matrix A @RiTMIC::simu_A() \cr \cr
+Generation of deregulations with a complex model in the matrix T generated from @RiTMIC::simu_T_cancer() with cell lines proportions from the matrix A @RiTMIC::simu_A() \cr \cr
 Step 1: G genes are drawn\cr \cr 
 Step 2: Checking : proportions of cell type immune or fibro is respectively greater than @tres_i and @tres_f ? \cr \cr
 Step 3: For the cell lines (fibro, immune) having a proportion greater than threshold: \cr \cr

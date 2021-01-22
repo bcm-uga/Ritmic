@@ -20,3 +20,6 @@ Creates a new matrix A with @n : the patient number and @alpha : the vector of c
 \examples{
 simu_A(20,c(1.5, 4.5, 3))
 }
+\seealso{
+gtools::rdirichlet
+}
