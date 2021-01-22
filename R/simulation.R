@@ -14,9 +14,9 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
   tmp_mix_Lvar = t(gtools::rdirichlet(n = n, alpha = alpha))
 }
 
-#' Simulate a tumoral environment 
-#' @Description
-#' Generate a matrix with random gene expression distribution in n tumoral cell lines with genes from RNA_seq dataset 
+#' Simulate a tumor micro-environment 
+#' @description 
+#' Generate a matrix with random gene expression distributions in n tumor cell lines with genes imported from RNA_seq dataset 
 #'
 #' @param tumor_RNAseq RNAseq dataset to simulate a random T matrix
 #' @param n Supposed cell types number 

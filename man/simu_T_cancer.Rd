@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulation.R
 \name{simu_T_cancer}
 \alias{simu_T_cancer}
-\title{Simulate a tumoral environment}
+\title{Simulate a tumor micro-environment}
 \usage{
 simu_T_cancer(tumor_RNAseq, n)
 }
@@ -15,5 +15,5 @@ simu_T_cancer(tumor_RNAseq, n)
 A matrix : Gene expression distribution per cell type
 }
 \description{
-Simulate a tumoral environment
+Generate a matrix with random gene expression distributions in n tumor cell lines with genes imported from RNA_seq dataset
 }

@@ -1,4 +1,4 @@
-Package: RiTHMIC
+Package: RiTMIC
 Type: Package
 Title: A R package for RegulatIon of Tumor MIcroenvironment Composition
 Version: 0.1.0
@@ -11,7 +11,9 @@ Maintainer: Magali Richard <magali.richard@univ-grenoble-alpes.fr>
 Description: Pipeline for deregulation, the rithmic package provides some tools to analyse genetic deregulation of tumor micro environment.
 Depends: R(>= 2.10.0)
 Imports:
-  gtools
+  gtools,
+  mixtools,
+  matrixStats
 License: CeCILL
 Encoding: UTF-8
 LazyData: true
