@@ -2,12 +2,12 @@
 % Please edit documentation in R/simulation.R
 \name{add_noise}
 \alias{add_noise}
-\title{Add noise to the simulations of tumor micro-environments}
+\title{Add noise to the analysis or simulations of the tumor micro-environments gene expressions}
 \usage{
 add_noise(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1)
 }
 \arguments{
-\item{data}{matrix_T with or without deregulations}
+\item{data}{matrix_D with or without deregulations obtained from the combinations of matrix_T * matrix_A}
 
 \item{mean}{}
 
@@ -21,10 +21,11 @@ add_noise(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1)
 
 }
 \description{
-By adding noise, the simulation will have a better reflection of the biological simulation
+Applications of adding noise : \cr Simulations : Better reflection of the biological observations \cr
+Biological observation : improve the generalization error to avoid over-learning
 }
 \seealso{
-RiTMIC::simu_T_cancer()
+RiTMIC::simu_T_cancer
 
 RiTMIC::corr_prop functions...
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulation.R
 \name{simu_A}
 \alias{simu_A}
-\title{Simulate cell line proportion distributions in tumors}
+\title{Simulate cell lines proportion distribution in tumors}
 \usage{
 simu_A(n, alpha = c(1.5, 4.5, 1, 3))
 }
@@ -15,11 +15,14 @@ simu_A(n, alpha = c(1.5, 4.5, 1, 3))
 Proportion of different cell lines in a matrix
 }
 \description{
-Creates a new matrix A with @n : the patient number and @alpha : the vector of cell lines proportion of size k
+\code{simu_A} generates the \strong{matrix A} : \cr Proportion of cell lines distribution per tumor \cr \cr  Dimensions: n x alpha
+}
+\details{
+Cell lines distributions are obtained with \code{\link[gtools]{rdirichlet}} method
 }
 \examples{
 simu_A(20,c(1.5, 4.5, 3))
 }
 \seealso{
-gtools::rdirichlet
+\code{\link[gtools]{rdirichlet}}
 }

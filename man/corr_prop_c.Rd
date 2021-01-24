@@ -7,25 +7,25 @@
 corr_prop_c(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45)
 }
 \arguments{
-\item{T_cancer}{The matrix T, for more documentation @RiTMIC::simu_T_cancer()}
+\item{T_cancer}{The matrix T, for more documentation : \code{simu_T_cancer}}
 
-\item{G}{Gene numbers to be drawn}
+\item{G}{Number of random Genes to be drawn}
 
-\item{A}{The matrix A, for more documentation @RiTMIC::simu_A()}
+\item{A}{The matrix A, for more documentation \code{simu_A}}
 
-\item{y}{Overexpression coefficient to multiply the gene expression, by default y = 2}
+\item{y}{Overexpression coefficient to multiply the gene expression, {default} = 2}
 
-\item{thres_i}{Threshold to induce overexpression in immune cells, by default thres_i = 0.1}
+\item{thres_i}{Threshold to induce overexpression in immune cells, {default} = 0.1}
 
-\item{thres_f}{Threshold to induce overexpression in fibro cells, by default thres_f = 0.45}
+\item{thres_f}{Threshold to induce overexpression in fibro cells, {default} = 0.45}
 }
 \value{
-A list with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
+List with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 }
 \description{
-Generation of deregulations with a complex model in the matrix T generated from @RiTMIC::simu_T_cancer() with cell lines proportions from the matrix A @RiTMIC::simu_A() \cr \cr
+Deregulations with a complex model in the matrix T generated from \code{simu_T_cancer} with cell lines proportions from the return of \code{simu_A} method \cr \cr
 Step 1: G genes are drawn\cr \cr 
-Step 2: Checking : proportions of cell type immune or fibro is respectively greater than @tres_i and @tres_f ? \cr \cr
+Step 2: Checking : proportions of cell type immune or fibro is respectively greater than \strong{tres_i} and \strong{tres_f} ? \cr \cr
 Step 3: For the cell lines (fibro, immune) having a proportion greater than threshold: \cr \cr
 newGeneExpression = geneExpression * y
 }
