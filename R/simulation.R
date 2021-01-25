@@ -174,18 +174,18 @@ corr_prop_n = function(T_cancer, G, A, z = 2){
 }
 
 #' Add noise to the analysis or simulations of the tumor micro-environments gene expressions
-#' @description Applications of adding noise : \cr Simulations : Better reflection of the biological observations \cr
+#' @description Applications of \code{add_noise} \cr \cr Simulations : Better reflection of the biological observations \cr
 #' Biological observation : improve the generalization error to avoid over-learning  
 #' @param data matrix_D with or without deregulations obtained from the combinations of matrix_T * matrix_A
-#' @param mean 
-#' @param sd 
-#' @param val_min 
-#' @param val_max 
+#' @param mean Mean of the data 
+#' @param sd Standard deviation of the data 
+#' @param val_min Minimum value
+#' @param val_max Maximum value
 #' 
 #' @seealso RiTMIC::simu_T_cancer 
 #' @seealso RiTMIC::corr_prop functions...
 #'
-#' @return
+#' @return New matrix D with dimensions : tumors_number x gene_name
 #' @export
 #'
 #' @examples

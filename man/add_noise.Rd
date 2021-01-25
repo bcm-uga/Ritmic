@@ -9,19 +9,19 @@ add_noise(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1)
 \arguments{
 \item{data}{matrix_D with or without deregulations obtained from the combinations of matrix_T * matrix_A}
 
-\item{mean}{}
+\item{mean}{Mean of the data}
 
-\item{sd}{}
+\item{sd}{Standard deviation of the data}
 
-\item{val_min}{}
+\item{val_min}{Minimum value}
 
-\item{val_max}{}
+\item{val_max}{Maximum value}
 }
 \value{
-
+New matrix D with dimensions : tumors_number x gene_name
 }
 \description{
-Applications of adding noise : \cr Simulations : Better reflection of the biological observations \cr
+Applications of \code{add_noise} \cr \cr Simulations : Better reflection of the biological observations \cr
 Biological observation : improve the generalization error to avoid over-learning
 }
 \seealso{
