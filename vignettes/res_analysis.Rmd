@@ -29,28 +29,20 @@ T_60tum_c = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_c.r
 T_60tum_s = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_s.rds")
 A_60p = readRDS("~/projects/pipeline_deconv_analysis/data/A/A_60.rds")
 
+#Les gènes modifiés dans le simus
 genes_c = c(rownames(T_60tum_c$T)[T_60tum_c$g_immune], rownames(T_60tum_c$T)[T_60tum_c$g_fibro])
-
 genes_s = c(rownames(T_60tum_s$T)[T_60tum_s$g_immune], rownames(T_60tum_s$T)[T_60tum_s$g_fibro])
 
 penda_res_c = readRDS("~/projects/pipeline_deconv_analysis/results/penda/test_simu1c.rds")
 penda_res_s = readRDS("~/projects/pipeline_deconv_analysis/results/penda/test_simu1s.rds")
-penda_ssdereg = readRDS("~/projects/pipeline_deconv_analysis/results/penda/test_sansdereg.rds")
-penda_res_60s_ctrlres = readRDS("~/projects/pipeline_deconv_analysis/results/penda/test_penda_s_ctrlres.rds")
-penda_res_60c_ctrlres = readRDS("~/projects/pipeline_deconv_analysis/results/penda/test_penda_c_ctrlres.rds")
 
+##Fonction 1 : pré-traitement: prend les résultats de Penda, puis : concatène les matrices pour avoir 1 seule, enlève les gènes où tous les patients ont la même dérégulation, enlève les gènes qui ont moins de x patients dans chaque état de dérégulation
 
-
+#Normalisation resultats Penda
 penda_cond_s = abs(penda_res_s$up_genes - penda_res_s$down_genes)
 penda_cond_c = abs(penda_res_c$up_genes - penda_res_c$down_genes)
-penda_cond_na = abs(penda_ssdereg$up_genes - penda_ssdereg$down_genes)
 
-penda_cond_s_ctrlres = abs(penda_res_60s_ctrlres$up_genes - penda_res_60s_ctrlres$down_genes)
-penda_cond_c_ctrlres = abs(penda_res_60c_ctrlres$up_genes - penda_res_60c_ctrlres$down_genes)
-
-table(penda_cond_s == penda_cond_na)
-table(penda_cond_c == penda_cond_na)
-
+#Retrait des gènes où tous les patients ont la même dérégulation
 g_egaux = which(apply(penda_cond_s, 1, function(g) {
   length(table(g)) == 1
 }))
@@ -61,22 +53,7 @@ g_egaux = which(apply(penda_cond_c, 1, function(g) {
 }))
 penda_cond_c = penda_cond_c[-g_egaux, ]
 
-g_egaux = which(apply(penda_cond_na, 1, function(g) {
-  length(table(g)) == 1
-}))
-penda_cond_na = penda_cond_na[-g_egaux, ]
-
-g_egaux = which(apply(penda_cond_s_ctrlres, 1, function(g) {
-  length(table(g)) == 1
-}))
-penda_cond_s_ctrlres = penda_cond_s_ctrlres[-g_egaux, ]
-
-g_egaux = which(apply(penda_cond_c_ctrlres, 1, function(g) {
-  length(table(g)) == 1
-}))
-penda_cond_c_ctrlres = penda_cond_c_ctrlres[-g_egaux, ]
-
-
+#Retrait des gènesqui ont moins de x patients dans chaque état de dérégulation (ici x = 5)
 g_sup = which(apply(penda_cond_s, 1, function(g) {
   table(g)[1] > 5 & table(g)[2] > 5
 }))
@@ -86,34 +63,18 @@ g_sup = which(apply(penda_cond_c, 1, function(g) {
   table(g)[1] > 5 & table(g)[2] > 5
 }))
 penda_cond_c = penda_cond_c[g_sup, ]
+##Fin fonction 1
 
-g_sup = which(apply(penda_cond_na, 1, function(g) {
-  table(g)[1] > 5 & table(g)[2] > 5
-}))
-penda_cond_na = penda_cond_na[g_sup, ]
-
-g_sup = which(apply(penda_cond_s_ctrlres, 1, function(g) {
-  table(g)[1] > 5 & table(g)[2] > 5
-}))
-penda_cond_s_ctrlres = penda_cond_s_ctrlres[g_sup, ]
-
-g_sup = which(apply(penda_cond_c_ctrlres, 1, function(g) {
-  table(g)[1] > 5 & table(g)[2] > 5
-}))
-penda_cond_c_ctrlres = penda_cond_c_ctrlres[g_sup, ]
 
 dim(penda_cond_s)
 dim(penda_cond_c)
-dim(penda_cond_na)
 
 table(genes_s %in% rownames(penda_cond_s))
 table(genes_c %in% rownames(penda_cond_c ))
 
+#On isole les gènes dérégulés dans les simus qu'on a encore dans les résultats Penda
 genes_s_f = genes_s[(genes_s %in% rownames(penda_cond_s))]
 genes_c_f = genes_c[(genes_c %in% rownames(penda_cond_c ))]
-
-genes_s_fb = genes_s[(genes_s %in% rownames(penda_cond_s_ctrlres))]
-genes_c_fb = genes_c[(genes_c %in% rownames(penda_cond_c_ctrlres))]
 ```
 
 
@@ -134,6 +95,8 @@ On passe chaque gène de Penda un par un. Pour chaque type cellulaire, on calcul
 
 
 ```{r simu_s, echo = FALSE }
+##Fonction 2 : pour chaque gène et chaque type cellulaire, on fait 2 groupes selon la dérégulation Penda puis on calcule différentes métriques (distance kantorovitch, pval student, ks, etc.) Prend en entrée résultats penda pré-traités et A, renvoie la matrice des métriques (res_dereg_s ici)
+
 options(warn = -1)
 res_dereg_s = c()
 
@@ -150,7 +113,7 @@ for(g in rownames(penda_cond_s)){
     #On fait les deux groupes
     x = A_60p[t, p_dereg]
     y = A_60p[t, p_zero]
-    
+    #On calcule les métriques
     kanto_dist = kantorovich(x, y)
     student = -log10(t.test(x, y)$p.value)
     ks = ks.test(x, y)
@@ -164,13 +127,14 @@ for(g in rownames(penda_cond_s)){
 
 colnames(res_dereg_s) = c("Gene", "nb_dereg", "nb_zero", "type", "kanto", "student", "ks d", "ks pvalue", "cvx", "cvy")
 options(warn = 0)
+##Fin de la fonction 2
 
 print("Dim des matrices de résultat")
 dim(res_dereg_s)
 ```
 
 ```{r simu_c, echo = FALSE }
-
+##Copié/collé pour c
 options(warn = -1)
 res_dereg_c = c()
 
@@ -204,120 +168,18 @@ print("Dim des matrices de résultat")
 dim(res_dereg_c)
 ```
 
-```{r penda_na, echo = FALSE }
-options(warn = -1)
-res_dereg_na = c()
-
-#Pour chaque gène
-for(g in rownames(penda_cond_na)){
-  gene = penda_cond_na[g, ]
-  
-  p_dereg = which(gene != 0)
-  p_zero = which(gene == 0)
-  
-  #Pour chaque type cellulaire
-  for(t in 1:nrow(A_60p)){
-    #On fait les deux groupes
-    x = A_60p[t, p_dereg]
-    y = A_60p[t, p_zero]
-    
-    kanto_dist = kantorovich(x, y)
-    student = -log10(t.test(x, y)$p.value)
-    ks = ks.test(x, y)
-    cvx = sd(x) / mean(x)
-    cvy = sd(y) / mean(y)
-      
-    res_dereg_na = rbind(res_dereg_na, c(g, length(p_dereg), length(p_zero), t, kanto_dist, student, ks$statistic, -log10(ks$p.value), cvx, cvy))
-  }
-}
-
-colnames(res_dereg_na) = c("Gene", "nb_dereg", "nb_zero", "type", "kanto", "student", "ks d", "ks pvalue", "cvx", "cvy")
-options(warn = 0)
-
-print("Dim des matrices de résultat")
-dim(res_dereg_na)
-```
-
-```{r sur res, echo = FALSE }
-
-options(warn = -1)
-res_dereg_s_ctrlres = c()
-
-#Pour chaque gène
-for(g in rownames(penda_cond_s_ctrlres)){
-  gene = penda_cond_s_ctrlres[g, ]
-  
-  p_dereg = which(gene != 0)
-  p_zero = which(gene == 0)
-  
-  if(length(p_dereg) != 0 & length(p_zero) != 0){
-  #Pour chaque type cellulaire
-  for(t in 1:nrow(A_60p)){
-    #On fait les deux groupes
-    x = A_60p[t, p_dereg]
-    y = A_60p[t, p_zero]
-    
-    kanto_dist = kantorovich(x, y)
-    student = -log10(t.test(x, y)$p.value)
-    ks = ks.test(x, y)
-    cvx = sd(x) / mean(x)
-    cvy = sd(y) / mean(y)
-      
-    res_dereg_s_ctrlres = rbind(res_dereg_s_ctrlres, c(g, length(p_dereg), length(p_zero), t, kanto_dist, student, ks$statistic, -log10(ks$p.value), cvx, cvy))
-    }
-  }
-}
-
-colnames(res_dereg_s_ctrlres) = c("Gene", "nb_dereg", "nb_zero", "type", "kanto", "student", "ks d", "ks pvalue", "cvx", "cvy")
-options(warn = 0)
-
-print("Dim des matrices de résultat")
-dim(res_dereg_s_ctrlres)
-
-options(warn = -1)
-res_dereg_c_ctrlres = c()
-
-#Pour chaque gène
-for(g in rownames(penda_cond_c_ctrlres)){
-  gene = penda_cond_c_ctrlres[g, ]
-  
-  p_dereg = which(gene != 0)
-  p_zero = which(gene == 0)
-  
-  #Pour chaque type cellulaire
-  for(t in 1:nrow(A_60p)){
-    #On fait les deux groupes
-    x = A_60p[t, p_dereg]
-    y = A_60p[t, p_zero]
-    
-    kanto_dist = kantorovich(x, y)
-    student = -log10(t.test(x, y)$p.value)
-    ks = ks.test(x, y)
-    cvx = sd(x) / mean(x)
-    cvy = sd(y) / mean(y)
-      
-    res_dereg_c_ctrlres = rbind(res_dereg_c_ctrlres, c(g, length(p_dereg), length(p_zero), t, kanto_dist, student, ks$statistic, -log10(ks$p.value), cvx, cvy))
-  }
-}
-
-colnames(res_dereg_c_ctrlres) = c("Gene", "nb_dereg", "nb_zero", "type", "kanto", "student", "ks d", "ks pvalue", "cvx", "cvy")
-options(warn = 0)
-
-print("Dim des matrices de résultat")
-dim(res_dereg_c_ctrlres)
-
-
-```
-
 ###Corrélation avec l'expression
 
 ```{r, echo = FALSE }
+##Fonction 3 : corrélation entre expression brute et A. Prend en entrée 1 T et 1 A (ici le code fait les 2 en même temps mais on veut pas garder ça), renvoie la matrice de corrélation (cor_T)
 cor_T60_c = c()
 cor_T60_s = c()
 options(warn = -1)
+#Pour chaque gène
 for(g in rownames(T_60tum_s$T)){
+  #Pour chaque type cellulaire
   for(t in 1:nrow(A_60p)){
-    #On fait les deux groupes
+    #On calcule la corrélation entre l'expression brute et la proportion du type cellulaire
     c = cor(T_60tum_c$T[g, ], A_60p[t, ])
     cor_T60_c = rbind(cor_T60_c, c(g, t, c))
     c = cor(T_60tum_s$T[g, ], A_60p[t, ])
@@ -325,7 +187,7 @@ for(g in rownames(T_60tum_s$T)){
   }
 }
 options(warn = 0)
-
+##Fin fonction 3
 
 ```
 
@@ -342,6 +204,8 @@ Student : 75% des -log10(pvalue) < 0.59
 Ks : 75% des -log10(pvalue) < 0.56
 
 ```{r plot_deregul, echo = F}
+#Pas besoin de mettre ça en fonctions
+
 df_s = data.frame(genes = res_dereg_s[, 1],
                 kanto = as.numeric(res_dereg_s[, 5]),
                 type =  factor(res_dereg_s[, 4]),
@@ -353,48 +217,6 @@ df_c = data.frame(genes = res_dereg_c[, 1],
                 type =  factor(res_dereg_c[, 4]),
                 student = as.numeric(res_dereg_c[, 6]),
                 ks = as.numeric(res_dereg_c[, 8]),  stringsAsFactors = F)
-
-df_na = data.frame(genes = res_dereg_na[, 1],
-                kanto = as.numeric(res_dereg_na[, 5]),
-                type =  factor(res_dereg_na[, 4]),
-                student = as.numeric(res_dereg_na[, 6]),
-                ks = as.numeric(res_dereg_na[, 8]),  stringsAsFactors = F)
-
-df_s_ctrlres = data.frame(genes = res_dereg_s_ctrlres[, 1],
-                kanto = as.numeric(res_dereg_s_ctrlres[, 5]),
-                type =  factor(res_dereg_s_ctrlres[, 4]),
-                student = as.numeric(res_dereg_s_ctrlres[, 6]),
-                ks = as.numeric(res_dereg_s_ctrlres[, 8]),  stringsAsFactors = F)
-
-df_c_ctrlres = data.frame(genes = res_dereg_c_ctrlres[, 1],
-                kanto = as.numeric(res_dereg_c_ctrlres[, 5]),
-                type =  factor(res_dereg_c_ctrlres[, 4]),
-                student = as.numeric(res_dereg_c_ctrlres[, 6]),
-                ks = as.numeric(res_dereg_c_ctrlres[, 8]),  stringsAsFactors = F)
-```
-
-```{r, echo = F}
-summary(df_s$kanto)
-summary(df_c$kanto)
-
-summary(df_s$student)
-summary(df_c$student)
-
-summary(df_s$ks)
-summary(df_c$ks)
-
-g_fibro = genes_s_f[genes_s_f%in%rownames(T_60tum_s$T)[T_60tum_s$g_fibro]] 
-df_s[df_s$genes %in% g_fibro & df_s$type == 2 , ]
-
-g_immune = genes_s_f[genes_s_f%in%rownames(T_60tum_s$T)[T_60tum_s$g_immune]] 
-df_s[df_s$genes %in% g_immune & df_s$type == 3 , ]
-
-g_fibro = genes_c_f[genes_c_f%in%rownames(T_60tum_c$T)[T_60tum_c$g_fibro]] 
-df_c[df_c$genes %in% g_fibro & df_c$type == 2 , ]
-
-g_immune = genes_c_f[genes_c_f%in%rownames(T_60tum_c$T)[T_60tum_c$g_immune]] 
-df_c[df_c$genes %in% g_immune & df_c$type == 3 , ]
-
 ```
 
 ###P-valeurs et courbes ROC
@@ -402,12 +224,13 @@ df_c[df_c$genes %in% g_immune & df_c$type == 3 , ]
 #### Simu s et c
 
 ```{r, echo = F}
+##Fonction 4 : calcule les faux positifs, vrais positifs, etc pour une p valeur
 compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
   names(values) = stringr::str_c(genes, rep(1:4))
-  
-  genes_dereg = c(values[stringr::str_c(genes_fibro, rep(2))], values[stringr::str_c(genes_immune, rep(3))])
-  
   values = values[!is.na(values)]
+
+  genes_dereg = c(values[stringr::str_c(genes_fibro, rep(2))], values[stringr::str_c(genes_immune, rep(3))])
+  genes_dereg = genes_dereg[!is.na(genes_dereg)]
   
   TP = sum(genes_dereg > -log10(pval))
   
@@ -424,21 +247,29 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
 
 pvalues = c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
 
+##Je pense pas qu'on puisse simplifier la suite en fonction car ça dépend beaucoup de ce que les gens ont comme données, de ce qu'ils veulent afficher, etc. Il faudrait plutôt en faire une vignette qui explique chaque étape
+
+#On récupère les gènes associés au micro-environnement dans les simus
 g_fibro = unique(genes_s_f[genes_s_f%in%rownames(T_60tum_s$T)[T_60tum_s$g_fibro]])
 g_immune = unique(genes_s_f[genes_s_f%in%rownames(T_60tum_s$T)[T_60tum_s$g_immune]] )
+
+#On calcule les résultats pour toutes les pvalues, pour différentes métriques (ici ks, student et kantorovitch)
 res_ks = sapply(pvalues, function(x){compute_1_res(df_s$ks, df_s$genes, g_fibro, g_immune, x)})
 
 res_st = sapply(pvalues, function(x){compute_1_res(df_s$student, df_s$genes, g_fibro, g_immune, x)})
 
 res_kanto = sapply(pvalues, function(x){compute_1_res(df_s$kanto, df_s$genes, g_fibro, g_immune, x)})
 
+#Là on applique les pvaleurs à la correlation, il y a plus de gènes dans ces résultats là car on a pas le filtre de Penda, donc g_fibro devient rownames(T_60tum_s$T)[T_60tum_s$g_fibro] par exemple
 res_cor = sapply(pvalues, function(x){compute_1_res(abs(as.numeric(cor_T60_s[, 3])), cor_T60_s[, 1], rownames(T_60tum_s$T)[T_60tum_s$g_fibro], rownames(T_60tum_s$T)[T_60tum_s$g_immune], x)})
 
+#Data frame qui combine les résultats pour un format ggplot
 df = data.frame(pval = as.factor(rep(pvalues)),
                 FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
                 TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
                 metrique = rep(c("ks", "student", "kanto", "correlation"), each = length(pvalues)))
 
+#Plot
 plot_s = ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
   geom_point() + 
   geom_line() + 
@@ -448,6 +279,7 @@ plot_s = ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
 plot_s
 
 
+##A partir de là c'est un copier collé pour l'autre simu 
 
 g_fibro = unique(genes_c_f[genes_c_f%in%rownames(T_60tum_c$T)[T_60tum_c$g_fibro]])
 g_immune = unique(genes_c_f[genes_c_f%in%rownames(T_60tum_c$T)[T_60tum_c$g_immune]] )
@@ -468,64 +300,5 @@ plot_c = ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
   labs(title = "Simu c") 
 
 plot_c
-
-
-
-res_na = sapply(pvalues, function(x){sum(df_na$ks > -log10(x))})
-pvalues
-res_na 
-res_na = sapply(pvalues, function(x){sum(df_na$student > -log10(x))})
-pvalues
-res_na 
-
-
-```
-
-####T tum ref VS epi déconvolué
-```{r, echo = F}
-pvalues = c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
-
-g_fibro = unique(genes_s_fb[genes_s_fb%in%rownames(T_60tum_s$T)[T_60tum_s$g_fibro]])
-g_immune = unique(genes_s_fb[genes_s_fb%in%rownames(T_60tum_s$T)[T_60tum_s$g_immune]] )
-
-res_ks = sapply(pvalues, function(x){compute_1_res(df_s_ctrlres$ks, df_s_ctrlres$genes, g_fibro, g_immune, x)})
-res_st = sapply(pvalues, function(x){compute_1_res(df_s_ctrlres$student, df_s_ctrlres$genes, g_fibro, g_immune, x)})
-res_kanto = sapply(pvalues, function(x){compute_1_res(df_s_ctrlres$kanto, df_s_ctrlres$genes, g_fibro, g_immune, x)})
-res_cor = sapply(pvalues, function(x){compute_1_res(abs(as.numeric(cor_T60_s[, 3])), cor_T60_s[, 1], rownames(T_60tum_s$T)[T_60tum_s$g_fibro], rownames(T_60tum_s$T)[T_60tum_s$g_immune], x)})
-
-df = data.frame(pval = as.factor(rep(pvalues)),
-                FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
-                TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
-                metrique = rep(c("ks", "student", "kanto", "correlation"), each = length(pvalues)))
-
-plot_ref_s = ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
-  geom_point() + 
-  geom_line() + 
-  theme_minimal()+
-  labs(title = "T tum s sur T epi calculée") 
-
-plot_ref_s
-
-
-g_fibro = unique(genes_c_fb[genes_c_fb%in%rownames(T_60tum_c$T)[T_60tum_c$g_fibro]])
-g_immune = unique(genes_c_fb[genes_c_fb%in%rownames(T_60tum_c$T)[T_60tum_c$g_immune]] )
-
-res_ks = sapply(pvalues, function(x){compute_1_res(df_c_ctrlres$ks, df_c_ctrlres$genes, g_fibro, g_immune, x)})
-res_st = sapply(pvalues, function(x){compute_1_res(df_c_ctrlres$student, df_c_ctrlres$genes, g_fibro, g_immune, x)})
-res_kanto = sapply(pvalues, function(x){compute_1_res(df_c_ctrlres$kanto, df_c_ctrlres$genes, g_fibro, g_immune, x)})
-res_cor = sapply(pvalues, function(x){compute_1_res(abs(as.numeric(cor_T60_c[, 3])), cor_T60_c[, 1], rownames(T_60tum_c$T)[T_60tum_c$g_fibro], rownames(T_60tum_c$T)[T_60tum_c$g_immune], x)})
-
-df = data.frame(pval = as.factor(rep(pvalues)),
-                FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
-                TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
-                metrique = rep(c("ks", "student", "kanto", "correlation"), each = length(pvalues)))
-
-plot_ref_c = ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
-  geom_point() + 
-  geom_line() + 
-  theme_minimal()+
-  labs(title = "T tum c sur T epi calculée") 
-
-plot_ref_c
 ```
 
