@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r echo=TRUE}
+```{r echo=FALSE}
 T_ctrl = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_rna.rds")
 T_60tum_n = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_n.rds")
 T_60tum_c_t = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_c_t.rds")
@@ -15,7 +15,7 @@ T_60tum_c_t = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_c
 T_80p_n = readRDS("~/projects/pipeline_deconv_analysis/results/deconv/EDec2_80p_n.rds")
 T_80p_c_t = readRDS("~/projects/pipeline_deconv_analysis/results/deconv/EDec2_80p_c_t.rds" )
 ```
-
+data <- load("~/projects/dataPenda/Data_DC_transcriptome_allgenes_notlog.RData")
 ```{r results="verbatim"}
 data_ctrl = T_ctrl[, 1]
 head(data_ctrl)
