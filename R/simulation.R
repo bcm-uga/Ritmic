@@ -23,52 +23,68 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
 #' 
 #' @importFrom stats rnorm
 #' @importFrom mixtools normalmixEM
+#' @import progress
+#' @importFrom utils capture.output
+#' 
+#' @seealso \code{\link[mixtools]{normalmixEM}}
 #'
 #' @return Matrix A: Gene expressions distributions per cell line  
 #' @export
-#'
-#' @examples
 simu_T_cancer = function(tumor_RNAseq, n){
-  # n_simu return the difference between the **n integer and the col number** of the tumor_RNAseq
-  n_simu = n - ncol(tumor_RNAseq)
-  # T_res is assigned to an empty matrix with in columns : the number of cell types n parameter and in rows : gene expressions from tumor_RNAseq
-  T_res = matrix(NA, ncol = n, nrow = nrow(tumor_RNAseq))
-  # Fill the boxes with those from @tumor_RNAseq
-  T_res[, 1:ncol(tumor_RNAseq)] = tumor_RNAseq
-  # Store the rownames from tumor_RNAseq in the new matrix 
-  rownames(T_res) = rownames(tumor_RNAseq)
-  t = 0
-  
-  for(g in rownames(tumor_RNAseq)){
-    # Recuperation of gene expression
-    dist_g = tumor_RNAseq[g, ]
-    # Genes that don't work (à corriger un jour)
-    # Compute formulas if at least, the half of gene expression is not null
-    if(sum(dist_g == 0) < 0.5*length(dist_g) & !g%in%c("CELF3", "ZCCHC24", "DNAH17", "MMP10", "UPK2", "PCAT1", "DPH6-AS1", "PRAF2", "CNTF", "LINC00940", "SNHG7", "LY6G6C", "C2CD4A", "HIST3H2BB", "HIST1H2AI", "TMEM201", "OPTC", "PALM3", "ZPBP2", "MROH2A", "TMEM255B", "AIFM3", "BEGAIN", "DDN", "SERTAD2", "ZFAS1", "KCNJ4", "CXorf58", "PF4", "TMED6", "SMG1", "C18orf25", "FLI1", "HABP2", "CDKAL1", "YARS2", "KHK", "SPOCD1", "IPO8", "GCH1", "AOC3", "IDO1", "SH3BGRL", "VGF", "ZBP1", "FABP3", "CDC20", "SCN4A", "C2CD5", "PDGFRL", "MGAT4A", "UPB1", "ASCL1", "AKAP4", "RHAG", "IGSF1", "SLCO1A2", "LHFPL4", "PGLYRP3",  "PANX2", "KIF6", "CA1", "FNDC1", "TBX4", "KCNC2", "ASPG", "SOAT2", "CYP7B1", "CLCNKB", "ZYG11A", "SNORD121A", "PSG4", "CDH19", "BMP6", "CD300LB", "SOGA3", "SPEG", "TGM1", "VRK1",  "KRT23")){
-      #Computing the bimodal distribution
-      # Recuperation of parameters necessary to maximum likelihood methods 
-      dists_sep <- normalmixEM(dist_g, maxrestarts=10000, k= 2)
-      # Probability of gene expression in cell lines 
-      probs <- dists_sep$lambda
-      # Final mean parameters
-      m <- dists_sep$mu
-      # Final standard deviations
-      s <- dists_sep$sigma
-      N <- 1e5
-      # Random sample : on all probs obtained, each gene are sampled many times to be randomly affected 
-      grp <- sample(length(probs), N, replace=TRUE, prob=probs)
-      # Random generation for the normal distribution with mean=m and sd = s for the gene in for loop  
-      x <- rnorm(N, m[grp], s[grp])
-      # All negative values from the normal distribution of gene expression equals to 0 
-      x[x<0] = 0
-    } else {
-      x = dist_g
-      t = t+1
+  # Parameter checking 
+  if(n <= ncol(tumor_RNAseq)) {
+    stop("n : the new simulation number needs to be greater than the previous dataset")
+  } else {
+    
+    # Number of simulated tumors
+    n_simu = n - ncol(tumor_RNAseq)
+    # T_res is assigned to an empty matrix with in columns : the number of cell types @n parameter and in rows : gene expressions from tumor_RNAseq
+    T_res = matrix(NA, ncol = n, nrow = nrow(tumor_RNAseq))
+    # Fill the already known values with those from @tumor_RNAseq
+    T_res[, 1:ncol(tumor_RNAseq)] = tumor_RNAseq
+    rownames(T_res) = rownames(tumor_RNAseq)
+    t = 0
+    # Progress bar
+    pb <- progress_bar$new(format = "  Running simu_T_cancer [:bar] :current/:total (:percent) in :elapsed",total = nrow(tumor_RNAseq), clear = FALSE, width= 80)
+    # For loop to create new simulations : gene per gene 
+    for(g in rownames(tumor_RNAseq)){
+      pb$tick()
+      # Extraction of the gene expression
+      dist_g = tumor_RNAseq[g, ]
+      #if the gene is not expressed in any sample : we don't try to compute the normalmixtest
+      if(sum(dist_g) == 0){
+        x = dist_g
+      } else {
+        dists_sep = NA
+        #Computing the bimodal distribution
+        res <- try(capture.output(dists_sep <- normalmixEM(dist_g, maxrestarts=1000, k= 2)), silent = T)
+        # If it doesn't work (too much 0s, extreme value, etc.), we sample in the gene distribution
+        if((inherits(res, "try-error")) || (is.na(dists_sep))){
+          x = dist_g
+          t = t+1    
+          # Else we sample in the computed distribution
+        } else { 
+          # Probability of gene expression in cell types 
+          probs <- dists_sep$lambda
+          # Final mean parameters
+          m <- dists_sep$mu
+          # Final standard deviations
+          s <- dists_sep$sigma
+          N <- 1e5
+          # Random sampling on all probs obtained : each gene are sampled many times to be randomly affected 
+          grp <- sample(length(probs), N, replace=TRUE, prob=probs)
+          # Random generation for the normal distribution with mean=m and sd = s for the gene in for loop  
+          x <- rnorm(N, m[grp], s[grp])
+          # Cutoff : All negative values from the normal distribution of gene expression equals to 0 
+          x[x < 0] = 0
+        }
+      }
+      # Import the new generated values in the matrix T_res, following the previous dataset   
+      T_res[g, (ncol(tumor_RNAseq)+1):n] = sample(x, n_simu, replace=TRUE)
     }
-    # The values from the matrix T_res are replaced by x with n_simu reordered  
-    T_res[g, (ncol(tumor_RNAseq)+1):n] = sample(x, n_simu, replace=TRUE)
+    cat("Number of genes failing the test normalmixEM:",t)
+    return(T_res)
   }
-  return(T_res)
 }
 
 #' Simple deregulations in tumors micro-environment 
@@ -78,31 +94,35 @@ simu_T_cancer = function(tumor_RNAseq, n){
 #' Step 2: Over-expression induced to these genes : \cr \cr
 #' newGeneExpression = geneExpression + x * cellTypeProportion
 #' @param T_cancer RNAseq data
-#' @param G Gene number(integer type) to be sampled 
+#' @param G Gene number to be sampled, this function requires an \strong{even} Gene number 
 #' @param A Matrix A : distribution of cell lines per tumor \code{simu_A} 
 #' @param x Coefficient, by default it's settled to 100
 #' 
 #' @return List with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 #' @export
-#'
-#' @examples
 corr_prop_s = function(T_cancer, G, A, x = 100){
-  # Sampling of the gene names from T_cancer 
-  genes = sample(nrow(T_cancer), G, replace = F)
-  # First half part of selected genes represents the immune cell lines
-  g_immune = genes[1:(G/2)]
-  # The other half represents the tumor cell lines
-  g_fibro =  genes[(G/2 +1):G]
-  T_f = T_cancer
-  for(n in 1:ncol(T_cancer)){
-    # Capturing immune and fibro cells proportions in the n tumor from matrix @parameter A 
-    immune = A[3, n]
-    fibro = A[2, n]
-    # Deregulation of random genes for fibro cell types and immune cell types : Adding the coefficient x multiply by the cell type proportion to induce over-expression 
-    T_f[g_immune, n] =  T_f[g_immune, n]+ x*immune
-    T_f[g_fibro, n] =  T_f[g_fibro, n]+ x*fibro
-  }
-  return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
+  if (G%%2 != 0) {
+    stop("G the gene number needs to be an even number")
+  } else if (ncol(T_cancer) != ncol(A)){
+    stop("Patient number is not equal between the matrices A and T_cancer")    
+  } else {
+    # Sampling of the gene names from T_cancer 
+    genes = sample(nrow(T_cancer), G, replace = F)
+    # First half part of selected genes represents the immune cell lines
+    g_immune = genes[1:(G/2)]
+    # The other half represents the tumor cell lines
+    g_fibro =  genes[(G/2 +1):G]
+    T_f = T_cancer
+    for(n in 1:ncol(T_cancer)){
+      # Capturing immune and fibro cells proportions in the n tumor from matrix @parameter A 
+      immune = A[3, n]
+      fibro = A[2, n]
+      # Deregulation of random genes for fibro cell types and immune cell types : Adding the coefficient x multiply by the cell type proportion to induce over-expression 
+      T_f[g_immune, n] =  T_f[g_immune, n]+ x*immune
+      T_f[g_fibro, n] =  T_f[g_fibro, n]+ x*fibro
+    }
+    return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
+    }
 }
 
 #' Complex deregulations in tumors micro-environment 
@@ -114,7 +134,7 @@ corr_prop_s = function(T_cancer, G, A, x = 100){
 #' newGeneExpression = geneExpression * y
 #' 
 #' @param T_cancer The matrix T, for more documentation : \code{simu_T_cancer}
-#' @param G Number of random Genes to be drawn
+#' @param G Gene number to be sampled, this function requires an \strong{even} Gene number 
 #' @param A The matrix A, for more documentation \code{simu_A}
 #' @param y Overexpression coefficient to multiply the gene expression, {default} = 2
 #' @param thres_i Threshold to induce overexpression in immune cells, {default} = 0.1
@@ -122,24 +142,28 @@ corr_prop_s = function(T_cancer, G, A, x = 100){
 #'
 #' @return List with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 #' @export
-#'
-#' @examples
 corr_prop_c = function(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
-  genes = sample(nrow(T_cancer), G, replace = F)
-  g_immune = genes[1:(G/2)]
-  g_fibro =  genes[(G/2 +1):G]
-  T_f = T_cancer
-  for(n in 1:ncol(T_cancer)){
-    immune = A[3, n]
-    fibro = A[2, n]
-    if(immune > thres_i){
-      T_f[g_immune, n] =  T_f[g_immune, n] * y
+  if (G%%2 != 0) {
+    stop("G the gene number needs to be an even number")
+  } else if (ncol(T_cancer) != ncol(A)){
+    stop("Patient number is not equal between the matrices A and T_cancer")    
+  } else {
+    genes = sample(nrow(T_cancer), G, replace = F)
+    g_immune = genes[1:(G/2)]
+    g_fibro =  genes[(G/2 +1):G]
+    T_f = T_cancer
+    for(n in 1:ncol(T_cancer)){
+      immune = A[3, n]
+      fibro = A[2, n]
+      if(immune > thres_i){
+        T_f[g_immune, n] =  T_f[g_immune, n] * y
+      }
+      if(fibro > thres_f){
+        T_f[g_fibro, n] =  T_f[g_fibro, n] * y
+      }
     }
-    if(fibro > thres_f){
-      T_f[g_fibro, n] =  T_f[g_fibro, n] * y
-    }
+    return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
   }
-  return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
 }
 
 #On pioche g gènes au hasard pour fibro et immune, puis pour chaque patient on fait expression*(1 + z*proportion(immune ou fibro))
@@ -151,26 +175,30 @@ corr_prop_c = function(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
 #' newGeneExpression = geneExpression + [(1 + z)* cellTypeProportion)]
 #'
 #' @param T_cancer The matrix T, for more documentation \code{simu_T_cancer}
-#' @param G Number of random Genes to be drawn
+#' @param G Gene number to be sampled, this function requires an \strong{even} Gene number 
 #' @param A The matrix A, for more documentation \code{simu_A}
 #' @param z Overexpression coefficient to multiply the gene expression, by default z = 2
 #'
 #' @return A list with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 #' @export
-#'
-#' @examples
 corr_prop_n = function(T_cancer, G, A, z = 2){
-  genes = sample(nrow(T_cancer), G, replace = F)
-  g_immune = genes[1:(G/2)]
-  g_fibro =  genes[(G/2 +1):G]
-  T_f = T_cancer
-  for(n in 1:ncol(T_cancer)){
-    immune = A[3, n]
-    fibro = A[2, n]
-    T_f[g_immune, n] =  T_f[g_immune, n]*(1 + z*immune)
-    T_f[g_fibro, n] =  T_f[g_fibro, n]*(1 + z*fibro)
+  if (G%%2 != 0) {
+    stop("G the gene number needs to be an even number")
+  } else if (ncol(T_cancer) != ncol(A)){
+    stop("Patient number is not equal between the matrices A and T_cancer")    
+  } else {
+    genes = sample(nrow(T_cancer), G, replace = F)
+    g_immune = genes[1:(G/2)]
+    g_fibro =  genes[(G/2 +1):G]
+    T_f = T_cancer
+    for(n in 1:ncol(T_cancer)){
+      immune = A[3, n]
+      fibro = A[2, n]
+      T_f[g_immune, n] =  T_f[g_immune, n]*(1 + z*immune)
+      T_f[g_fibro, n] =  T_f[g_fibro, n]*(1 + z*fibro)
+    }
+    return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
   }
-  return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
 }
 
 #' Add noise to the analysis or simulations of the tumor micro-environments gene expressions
@@ -187,8 +215,6 @@ corr_prop_n = function(T_cancer, G, A, z = 2){
 #'
 #' @return New matrix D with dimensions : tumors_number x gene_name
 #' @export
-#'
-#' @examples
 add_noise = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
   noise = matrix(rnorm(prod(dim(data)), mean = mean, sd = sd), nrow = nrow(data))
   datam = data + noise

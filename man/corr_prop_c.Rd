@@ -9,7 +9,7 @@ corr_prop_c(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45)
 \arguments{
 \item{T_cancer}{The matrix T, for more documentation : \code{simu_T_cancer}}
 
-\item{G}{Number of random Genes to be drawn}
+\item{G}{Gene number to be sampled, this function requires an \strong{even} Gene number}
 
 \item{A}{The matrix A, for more documentation \code{simu_A}}
 

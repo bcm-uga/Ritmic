@@ -9,7 +9,7 @@ corr_prop_n(T_cancer, G, A, z = 2)
 \arguments{
 \item{T_cancer}{The matrix T, for more documentation \code{simu_T_cancer}}
 
-\item{G}{Number of random Genes to be drawn}
+\item{G}{Gene number to be sampled, this function requires an \strong{even} Gene number}
 
 \item{A}{The matrix A, for more documentation \code{simu_A}}
 

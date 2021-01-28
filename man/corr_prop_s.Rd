@@ -9,7 +9,7 @@ corr_prop_s(T_cancer, G, A, x = 100)
 \arguments{
 \item{T_cancer}{RNAseq data}
 
-\item{G}{Gene number(integer type) to be sampled}
+\item{G}{Gene number to be sampled, this function requires an \strong{even} Gene number}
 
 \item{A}{Matrix A : distribution of cell lines per tumor \code{simu_A}}
 

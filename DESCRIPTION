@@ -14,7 +14,8 @@ Imports:
   gtools,
   stats,
   mixtools,
-  penda
+  penda,
+  progress
 License: CeCILL
 Encoding: UTF-8
 LazyData: true

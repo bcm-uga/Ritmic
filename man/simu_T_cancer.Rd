@@ -20,3 +20,6 @@ Generate a \strong{matrix T} with random \strong{gene expression} distributions 
 \details{
 gene_name is imported from the tumor_RNAseq data \cr Random gene expression distributions is performed by \code{\link{rnorm}} \cr Probability of gene expression in a cell line is computed by \code{\link[mixtools]{normalmixEM}}
 }
+\seealso{
+\code{\link[mixtools]{normalmixEM}}
+}

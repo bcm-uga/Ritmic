@@ -106,7 +106,6 @@ simu_T_cancer = function(tumor_RNAseq, n){
   rownames(T_res) = rownames(tumor_RNAseq)
   t = 0
   
-  
   #For each gene
   for(g in rownames(tumor_RNAseq)){
     print(g)
@@ -152,31 +151,6 @@ simu_T_cancer = function(tumor_RNAseq, n){
 ##Correlation cancer proportion
 
 ```{r, results="verbatim"}
-
-#' Title
-#' On pioche g gènes au hasard pour fibro et immune, puis pour chaque patient on ajoute x*proportion(immune) ou fibro à l'expression
-#' @param T_cancer 
-#' @param G Gene number(integer type) to be sampled 
-#' @param A 
-#' @param x 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-corr_prop_s = function(T_cancer, G, A, x = 100){
-  genes = sample(nrow(T_cancer), G, replace = F)
-  g_immune = genes[1:(G/2)]
-  g_fibro =  genes[(G/2 +1):G]
-  T_f = T_cancer
-  for(n in 1:ncol(T_cancer)){
-    immune = A[3, n]
-    fibro = A[2, n]
-    T_f[g_immune, n] =  T_f[g_immune, n]+ x*immune
-    T_f[g_fibro, n] =  T_f[g_fibro, n]+ x*fibro
-  }
-  return(list(T = T_f, g_immune = g_immune, g_fibro = g_fibro ))
-}
 
 #On pioche g gènes au hasard pour fibro et immune, si la proportion du type est supérieure au seuil, on multiplie l'expression par y
 #' Title
