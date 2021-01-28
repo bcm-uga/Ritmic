@@ -210,10 +210,8 @@ corr_prop_n = function(T_cancer, G, A, z = 2){
 #' @param val_min Minimum value
 #' @param val_max Maximum value
 #' 
-#' @seealso RiTMIC::simu_T_cancer 
-#' @seealso RiTMIC::corr_prop functions...
-#'
-#' @return New matrix D with dimensions : tumors_number x gene_name
+#' @seealso \code{\link[RiTMIC]{simu_T_cancer}}, \code{\link[RiTMIC]{corr_prop_s}}, \code{\link[RiTMIC]{corr_prop_n}}, \code{\link[RiTMIC]{corr_prop_c}}
+#' @return New matrix D with dimensions : gene_name per tumor_number
 #' @export
 add_noise = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
   noise = matrix(rnorm(prod(dim(data)), mean = mean, sd = sd), nrow = nrow(data))

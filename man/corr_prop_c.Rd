@@ -20,7 +20,7 @@ corr_prop_c(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45)
 \item{thres_f}{Threshold to induce overexpression in fibro cells, {default} = 0.45}
 }
 \value{
-List with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
+List with : \cr Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 }
 \description{
 Deregulations with a complex model in the matrix T generated from \code{simu_T_cancer} with cell lines proportions from the return of \code{simu_A} method \cr \cr

@@ -16,7 +16,7 @@ corr_prop_s(T_cancer, G, A, x = 100)
 \item{x}{Coefficient, by default it's settled to 100}
 }
 \value{
-List with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
+List with : \cr Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 }
 \description{
 Generation of deregulations with a simple model in the matrix T generated from \code{simu_T_cancer} with cell lines proportions from the return of \code{simu_A} method \cr\cr

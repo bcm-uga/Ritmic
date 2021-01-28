@@ -16,7 +16,7 @@ corr_prop_n(T_cancer, G, A, z = 2)
 \item{z}{Overexpression coefficient to multiply the gene expression, by default z = 2}
 }
 \value{
-A list with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
+A list with : \cr Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 }
 \description{
 Generation of deregulations from a new model in the matrix T generated from \code{simu_T_cancer} with cell lines proportions from the matrix A \code{simu_A} \cr \cr
