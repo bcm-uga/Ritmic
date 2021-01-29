@@ -28,7 +28,7 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
 #' 
 #' @seealso \code{\link[mixtools]{normalmixEM}}
 #'
-#' @return Matrix A: Gene expressions distributions per cell line  
+#' @return Matrix A: \cr Gene expressions distributions per cell line  
 #' @export
 simu_T_cancer = function(tumor_RNAseq, n){
   # Parameter checking 
@@ -98,7 +98,7 @@ simu_T_cancer = function(tumor_RNAseq, n){
 #' @param A Matrix A : distribution of cell lines per tumor \code{simu_A} 
 #' @param x Coefficient, by default it's settled to 100
 #' 
-#' @return List with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
+#' @return List with : \cr Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 #' @export
 corr_prop_s = function(T_cancer, G, A, x = 100){
   if (G%%2 != 0) {
@@ -140,13 +140,13 @@ corr_prop_s = function(T_cancer, G, A, x = 100){
 #' @param thres_i Threshold to induce overexpression in immune cells, {default} = 0.1
 #' @param thres_f Threshold to induce overexpression in fibro cells, {default} = 0.45
 #'
-#' @return List with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
+#' @return List with : \cr Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 #' @export
 corr_prop_c = function(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
   if (G%%2 != 0) {
     stop("G the gene number needs to be an even number")
   } else if (ncol(T_cancer) != ncol(A)){
-    stop("Patient number is not equal between the matrices A and T_cancer")    
+    stop("Patient number is not equal between the matrices A and T_cancer")
   } else {
     genes = sample(nrow(T_cancer), G, replace = F)
     g_immune = genes[1:(G/2)]
@@ -179,7 +179,7 @@ corr_prop_c = function(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
 #' @param A The matrix A, for more documentation \code{simu_A}
 #' @param z Overexpression coefficient to multiply the gene expression, by default z = 2
 #'
-#' @return A list with : Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
+#' @return A list with : \cr Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 #' @export
 corr_prop_n = function(T_cancer, G, A, z = 2){
   if (G%%2 != 0) {
@@ -211,7 +211,7 @@ corr_prop_n = function(T_cancer, G, A, z = 2){
 #' @param val_max Maximum value
 #' 
 #' @seealso \code{\link[RiTMIC]{simu_T_cancer}}, \code{\link[RiTMIC]{corr_prop_s}}, \code{\link[RiTMIC]{corr_prop_n}}, \code{\link[RiTMIC]{corr_prop_c}}
-#' @return New matrix D with dimensions : gene_name per tumor_number
+#' @return New matrix D with dimensions : \cr gene_name per tumor_number
 #' @export
 add_noise = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
   noise = matrix(rnorm(prod(dim(data)), mean = mean, sd = sd), nrow = nrow(data))

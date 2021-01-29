@@ -15,8 +15,10 @@ T_60tum_c_t = readRDS("~/projects/pipeline_deconv_analysis/data/T/T_60_tum_rna_c
 T_80p_n = readRDS("~/projects/pipeline_deconv_analysis/results/deconv/EDec2_80p_n.rds")
 T_80p_c_t = readRDS("~/projects/pipeline_deconv_analysis/results/deconv/EDec2_80p_c_t.rds" )
 ```
-data <- load("~/projects/dataPenda/Data_DC_transcriptome_allgenes_notlog.RData")
+
 ```{r results="verbatim"}
+T_ctrl <- load("/home/quinquif/penda/data/penda_data_ctrl.RData")
+test_data <- load("/home/quinquif/penda/data/penda_data_case.RData")
 data_ctrl = T_ctrl[, 1]
 head(data_ctrl)
 length(data_ctrl)
@@ -136,8 +138,6 @@ regulation_test_1p = function(gene, L_H_list, sample, threshold){
   }
 }
 
-
-
 sample_test_1p = function (sample, iterations, threshold){
 
   l1 = rep(FALSE, length(sample))
@@ -210,9 +210,6 @@ penda_test_1p = function(samples, controls, iterations, L_H_list, threshold){
   }
   return(list(down_genes = down_genes, up_genes = up_genes))
 }
-
-
-
 ```
 
 ```{r, results="verbatim"}

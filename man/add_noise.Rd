@@ -18,7 +18,7 @@ add_noise(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1)
 \item{val_max}{Maximum value}
 }
 \value{
-New matrix D with dimensions : gene_name per tumor_number
+New matrix D with dimensions : \cr gene_name per tumor_number
 }
 \description{
 Applications of \code{add_noise} \cr \cr Simulations : Better reflection of the biological observations \cr
