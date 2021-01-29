@@ -32,8 +32,11 @@ Cellular proportion distribution in each This  gene deregulation in individual s
 
 # Generation of input files for penda analysis
 
-`PenDA` analysis is an open-access R package that detects gene deregulation in individual samples compared to a set of reference, control samples. \cr 
-One matrix of gene expression per sample is required to perform. This matrix can be directly used in `PenDA`. \cr `simulation` has been developed to simulate an increased dataset that fits with your RNAseq gene distribution dataset. This functionality requires the different cell proportions distributions. \cr 
+`PenDA` analysis is an open-access R package that detects gene deregulation in individual samples compared to a set of reference, control samples. 
+
+One matrix of gene expression per sample is required to perform. This matrix can be directly used in `PenDA`.
+
+`simulation` has been developed to simulate an increased dataset that fits with your RNAseq gene distribution dataset. This functionality requires the different cell proportions distributions.
 
 ## Increase your dataset with a randomized gene expression distribution
 
