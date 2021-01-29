@@ -9,7 +9,7 @@ cd RiTMIC
 R
 ```
 
-## Build vignettes 
+## Build vignette 
 ```
 setwd("vignettes")
 rmarkdown::render("simulation.Rmd")

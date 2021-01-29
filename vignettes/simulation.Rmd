@@ -1,7 +1,7 @@
 ---
-title: "RiTMIC: RegulatIon of Tumor MIcroenvironment Composition"
-subtitle: "Increase your RNAseq datasets with a new simulated adapted dataset derivated from yours"
-author: "Magali Richard, Clementine Decamps, Florent Chuffart, Daniel Jost, Fabien Quinquis"
+`title: "RiTMIC: RegulatIon of Tumor MIcroenvironment Composition"
+subtitle: "Step 1 : Increase your RNAseq datasets with a new simulated adapted dataset derivated from yours"
+`author: "Magali Richard, Clementine Decamps, Florent Chuffart, Fabien Quinquis, Daniel Jost"
 contact: 
 date: "`r Sys.Date()`"
 output: 
@@ -15,7 +15,6 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 
-
 ---
 
 ```{r echo=FALSE, eval=TRUE}
@@ -25,10 +24,9 @@ layout(1, respect=TRUE)
 
 # Introduction
 
-`RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package that simulates the necessary tools to perform `PenDA` analysis, perform analysis and apply visualization tools to the `PenDA` output. Inputs required to `PenDA` are simulated with `simulation` functions.\cr
+`RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package that simulates the necessary tools to perform `PenDA` analysis, perform analysis with `PenDA` and apply visualization tools to the `PenDA` output. 
 
-
-Cellular proportion distribution in each This  gene deregulation in individual samples compared to a set of reference, control samples. `penda_1ctrl` is an adaptation of this method for a specific case, only one sample as reference. This particular experimental condition causes a loss of power, as long as possible use the classic version of Penda. This tutorial aims at providing to non-expert users basic informations and illustrations on how to run the package.
+Step 1: Inputs required to `PenDA` are simulated with `simulation` functions.
 
 # Generation of input files for penda analysis
 
@@ -40,4 +38,4 @@ One matrix of gene expression per sample is required to perform. This matrix can
 
 ## Increase your dataset with a randomized gene expression distribution
 
-
+`RiTMIC::simu_T_cancer` 
