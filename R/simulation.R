@@ -140,7 +140,7 @@ corr_prop_s = function(T_cancer, G, A, x = 100){
 #' @param thres_i Threshold to induce overexpression in immune cells, {default} = 0.1
 #' @param thres_f Threshold to induce overexpression in fibro cells, {default} = 0.45
 #'
-#' @return List with : \cr Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
+#' @return List with : Deregulated matrix T and deregulated genes in g_immune and g_fibro
 #' @export
 corr_prop_c = function(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
   if (G%%2 != 0) {
