@@ -11,8 +11,11 @@ output:
     toc_depth: 3
     number_sections: true
 vignette: >
+  %\VignetteIndexEntry{simulation}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+  %\usepackage[utf8]{inputenc}
+
+
 ---
 
 ```{r echo=FALSE, eval=TRUE}
@@ -22,10 +25,16 @@ layout(1, respect=TRUE)
 
 # Introduction
 
-`RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package that simulates the necessary tools  to perform `penda` analysis and apply visualization tools to the `penda` output. `penda` requires three matrices datasets : 
-- A matrix of proportion of cell lines distribution per tumor, simulated by `simu_A`. 
-- The RNAseq dataset matrix gene_name per sample, with a possibility of increasing your dataset with `simu_T_cancer`. In details, `simu_T_cancer`   e a matrix T with random \strong{gene expression} distributions in \strong{n} tumor cell lines \cr Matrix dimension : n x gene_name
+`RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package that simulates the necessary tools to perform `PenDA` analysis, perform analysis and apply visualization tools to the `PenDA` output. Inputs required to `PenDA` are simulated with `simulation` functions.\cr
+
+
 Cellular proportion distribution in each This  gene deregulation in individual samples compared to a set of reference, control samples. `penda_1ctrl` is an adaptation of this method for a specific case, only one sample as reference. This particular experimental condition causes a loss of power, as long as possible use the classic version of Penda. This tutorial aims at providing to non-expert users basic informations and illustrations on how to run the package.
 
-How to cite: Richard, M. et al. PenDA, a rank-based method for personalized differential analysis: Application to lung cancer. PLOS Computational Biology 16, e1007869 (2020).
+# Generation of input files for penda analysis
+
+`PenDA` analysis is an open-access R package that detects gene deregulation in individual samples compared to a set of reference, control samples. \cr 
+One matrix of gene expression per sample is required to perform. This matrix can be directly used in `PenDA`. \cr `simulation` has been developed to simulate an increased dataset that fits with your RNAseq gene distribution dataset. This functionality requires the different cell proportions distributions. \cr 
+
+## Increase your dataset with a randomized gene expression distribution
+
 

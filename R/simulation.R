@@ -19,7 +19,7 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
 #' @description Generate a \strong{matrix T} with random \strong{gene expression} distributions in \strong{n} tumor cell lines \cr Matrix dimension : n x gene_name
 #' @details gene_name is imported from the tumor_RNAseq data \cr Random gene expression distributions is performed by \code{\link{rnorm}} \cr Probability of gene expression in a cell line is computed by \code{\link[mixtools]{normalmixEM}}
 #' @param tumor_RNAseq RNAseq dataset to simulate a random T matrix
-#' @param n Supposed cell types number 
+#' @param n Supposed sample number 
 #' 
 #' @importFrom stats rnorm
 #' @importFrom mixtools normalmixEM

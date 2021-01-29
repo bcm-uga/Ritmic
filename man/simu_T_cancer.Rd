@@ -9,7 +9,7 @@ simu_T_cancer(tumor_RNAseq, n)
 \arguments{
 \item{tumor_RNAseq}{RNAseq dataset to simulate a random T matrix}
 
-\item{n}{Supposed cell types number}
+\item{n}{Supposed sample number}
 }
 \value{
 Matrix A: \cr Gene expressions distributions per cell line
