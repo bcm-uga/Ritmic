@@ -166,7 +166,6 @@ corr_prop_c = function(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
   }
 }
 
-#On pioche g gènes au hasard pour fibro et immune, puis pour chaque patient on fait expression*(1 + z*proportion(immune ou fibro))
 #' New deregulations in tumors micro-environment 
 #' @description 
 #' Generation of deregulations from a new model in the matrix T generated from \code{simu_T_cancer} with cell lines proportions from the matrix A \code{simu_A} \cr \cr
@@ -205,10 +204,10 @@ corr_prop_n = function(T_cancer, G, A, z = 2){
 #' @description Applications of \code{add_noise} \cr \cr Simulations : Better reflection of the biological observations \cr
 #' Biological observation : improve the generalization error to avoid over-learning  
 #' @param data matrix_D with or without deregulations obtained from the combinations of matrix_T * matrix_A
-#' @param mean Mean of the data 
-#' @param sd Standard deviation of the data 
-#' @param val_min Minimum value
-#' @param val_max Maximum value
+#' @param mean Mean of the data, {default} = 0 
+#' @param sd Standard deviation of the data, {default} = 0.1 
+#' @param val_min Minimum value, {default} = 0
+#' @param val_max Maximum value, {default} = 1
 #' 
 #' @seealso \code{\link[RiTMIC]{simu_T_cancer}}, \code{\link[RiTMIC]{corr_prop_s}}, \code{\link[RiTMIC]{corr_prop_n}}, \code{\link[RiTMIC]{corr_prop_c}}
 #' @return New matrix D with dimensions : \cr gene_name per tumor_number
@@ -225,17 +224,17 @@ add_noise = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
 #'
 #' @param matrix_A matrix obtained with \code{simu_A} 
 #' @param matrix_T matrix obtained with \code{simu_T_cancer}
-#' @param noise Boolean statement \cr\cr Do you want to use \code{add_noise} to your resulting matrix to increase the variance ? 
-#' @param mean Mean of the noise 
-#' @param sd Standard deviation of the noise
-#' @param val_min Minimum value of the noise
-#' @param val_max Maximum value of the noise
+#' @param noise Boolean statement, {default} = T \cr\cr Do you want to use \code{add_noise} to your resulting matrix to increase the variance ? 
+#' @param mean Mean of the noise, {default} = 0
+#' @param sd Standard deviation of the noise, {default} = 0.1
+#' @param val_min Minimum value of the noise, {default} = 0
+#' @param val_max Maximum value of the noise, {default} = 1
 #'
 #' @seealso \code{\link[RiTMIC]{add_noise}}
 #'
 #' @return matrix D of gene expression per sample
 #' @export
-simu_D <- function(matrix_A, matrix_T, noise=T, mean =0, sd=0.1, val_min=0, val_max = 1){
+simu_D <- function(matrix_A, matrix_T, noise = T, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
   D_matrix <- matrix_A %*% matrix_T
   if (isTRUE(noise)){
     D_matrix <- add_noise(D_matrix, mean, sd, val_min,val_max)
