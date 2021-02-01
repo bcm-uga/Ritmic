@@ -35,9 +35,6 @@ matrix D of gene expression per sample
 \description{
 Simulation of an RNAseq matrix, obtained with the matrices multiplications of matrix A and T
 }
-\examples{
-matrix_D <- simu_D(A,T, noise=F)
-}
 \seealso{
 \code{\link[RiTMIC]{add_noise}}
 }

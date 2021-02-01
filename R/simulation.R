@@ -235,8 +235,6 @@ add_noise = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
 #'
 #' @return matrix D of gene expression per sample
 #' @export
-#'
-#' @examples matrix_D <- simu_D(A,T, noise=F)
 simu_D <- function(matrix_A, matrix_T, noise=T, mean =0, sd=0.1, val_min=0, val_max = 1){
   D_matrix <- matrix_A %*% matrix_T
   if (isTRUE(noise)){
