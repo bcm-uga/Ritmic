@@ -9,6 +9,14 @@ cd RiTMIC
 R
 ```
 
+## Build package
+
+```R
+install.packages("devtools")
+# mixtools htmltools scales yaml lazyeval plyr rlang ggplot2 gtools caTools KernSmooth
+devtools::load_all(); devtools::document(); devtools::install()
+```
+
 ## Build vignette 
 ```
 setwd("vignettes")
