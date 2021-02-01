@@ -1,7 +1,7 @@
 ---
-`title: "RiTMIC: RegulatIon of Tumor MIcroenvironment Composition"
+title: "RiTMIC: RegulatIon of Tumor MIcroenvironment Composition"
 subtitle: "Step 1 : Increase your RNAseq datasets with a new simulated adapted dataset derivated from yours"
-`author: "Magali Richard, Clementine Decamps, Florent Chuffart, Fabien Quinquis, Daniel Jost"
+author: "Magali Richard, Clementine Decamps, Florent Chuffart, Fabien Quinquis, Daniel Jost"
 contact: 
 date: "`r Sys.Date()`"
 output: 
@@ -14,7 +14,6 @@ vignette: >
   %\VignetteIndexEntry{simulation}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
-
 ---
 
 ```{r echo=FALSE, eval=TRUE}
