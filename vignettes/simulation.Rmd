@@ -26,7 +26,7 @@ layout(1, respect=TRUE)
 
 `RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package that simulates the necessary tools to perform `PenDA` analysis, perform analysis with `PenDA` and apply visualization tools to the `PenDA` output. 
 
-Step 1: Inputs required to `PenDA` are simulated with `simulation` functions.
+`RiTMIC` Step 1: **Inputs required to `penda` are simulated with `simulation` functions.**
 
 # Generation of input files for penda analysis
 
@@ -35,6 +35,14 @@ Step 1: Inputs required to `PenDA` are simulated with `simulation` functions.
 One matrix of gene expression per sample is required to perform. This matrix can be directly used in `PenDA`.
 
 `simulation` has been developed to simulate an increased dataset that fits with your RNAseq gene distribution dataset. This functionality requires the different cell proportions distributions.
+
+## Explanation of dataset
+
+`data_ctrl` is a data matrix containing the normalized counts of the control sample. 
+The names of the matrix correspond to the gene_symbol.
+
+`data_case` is a data matrix containing the normalized counts of each tumor sample. 
+The rownames of the matrix correspond to the gene_symbol, the colnames indicate the sample ID.
 
 ## Increase your dataset with a randomized gene expression distribution
 
