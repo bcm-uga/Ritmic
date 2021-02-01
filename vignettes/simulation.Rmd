@@ -63,6 +63,6 @@ matrix_T = RiTMIC::simu_T_cancer(tumor_dataset,tumorous_sample_number)
 
 head(matrix_T)
 
-New simulated RNAseq samples can be obtained from your RNAseq dataset with `simu_T_cancer`: for each gene, novel gene expressions will be assigned by a random choice inside the normal distribution of the actual gene expression   
+New simulated RNAseq samples can be obtained from a RNAseq dataset with `simu_T_cancer`: for each gene, novel gene expressions will be assigned by a random choice inside the normal distribution of the actual gene expression   
 
 
