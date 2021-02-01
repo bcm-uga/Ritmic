@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulation.R
 \name{simu_T_cancer}
 \alias{simu_T_cancer}
-\title{Simulate a tumor micro-environment}
+\title{Simulate an enhanced tumor micro-environment}
 \usage{
 simu_T_cancer(tumor_RNAseq, n)
 }

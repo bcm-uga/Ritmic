@@ -15,7 +15,7 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
   tmp_mix_Lvar = t(gtools::rdirichlet(n = n, alpha = alpha))
 }
 
-#' Simulate a tumor micro-environment 
+#' Simulate an enhanced tumor micro-environment 
 #' @description Generate a \strong{matrix T} with random \strong{gene expression} distributions in \strong{n} tumor cell lines \cr Matrix dimension : n x gene_name
 #' @details gene_name is imported from the tumor_RNAseq data \cr Random gene expression distributions is performed by \code{\link{rnorm}} \cr Probability of gene expression in a cell line is computed by \code{\link[mixtools]{normalmixEM}}
 #' @param tumor_RNAseq RNAseq dataset to simulate a random T matrix
@@ -219,4 +219,28 @@ add_noise = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
   datam[datam < val_min] = data[datam < val_min]
   datam[datam > val_max] = data[datam > val_max]
   return(datam)
+}
+
+#' Simulation of an RNAseq matrix, obtained with the matrices multiplications of matrix A and T
+#'
+#' @param matrix_A matrix obtained with \code{simu_A} 
+#' @param matrix_T matrix obtained with \code{simu_T_cancer}
+#' @param noise Boolean statement \cr\cr Do you want to use \code{add_noise} to your resulting matrix to increase the variance ? 
+#' @param mean Mean of the noise 
+#' @param sd Standard deviation of the noise
+#' @param val_min Minimum value of the noise
+#' @param val_max Maximum value of the noise
+#'
+#' @seealso \code{\link[RiTMIC]{add_noise}}
+#'
+#' @return matrix D of gene expression per sample
+#' @export
+#'
+#' @examples matrix_D <- simu_D(A,T, noise=F)
+simu_D <- function(matrix_A, matrix_T, noise=T, mean =0, sd=0.1, val_min=0, val_max = 1){
+  D_matrix <- matrix_A %*% matrix_T
+  if (isTRUE(noise)){
+    D_matrix <- add_noise(D_matrix, mean, sd, val_min,val_max)
+  }
+  return(D_matrix)
 }

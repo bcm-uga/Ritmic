@@ -29,11 +29,11 @@ layout(1, respect=TRUE)
 
 # Generation of input files for penda analysis
 
-`PenDA` analysis is an open-access R package that detects gene deregulation in individual samples compared to a set of reference, control samples. 
+`simulation` has been developed to simulate an increased dataset that fits with your RNAseq gene distribution dataset and the proportion of cell lines distribution per sample. This functionality requires the different cell proportions distributions.
 
-One matrix of gene expression per sample is required to perform. This matrix can be directly used in `PenDA`.
+The output matrix of gene expression per sample is required to perform. This matrix can be directly used in `PenDA`.
 
-`simulation` has been developed to simulate an increased dataset that fits with your RNAseq gene distribution dataset. This functionality requires the different cell proportions distributions.
+`PenDA` analysis is an open-access R package that detects gene deregulation in individual samples by relative gene ordering and differential expression testing. This analysis will be performed on step 2 of the pipeline.
 
 ## Explanation of dataset
 
@@ -45,8 +45,22 @@ The rownames of the matrix correspond to the gene_symbol, the colnames indicate 
 
 ## Increase your dataset with a randomized gene expression distribution
 
-```{r, label="penda::simu_A"}
+```{r, label="RiTMIC::simu_A"}
 cell_type_proportions = c(1.5, 4.5, 1, 3)
-cell_type_number = 4
-cell_type_proportion = RiTMIC::simu_A(cell_type_number,cell_type_proportions)
+tumorous_sample_number = 40
+matrix_A = RiTMIC::simu_A(tumorous_sample_number,cell_type_proportions)
 ```
+
+The function `simu_A` simulates the matrix of proportion of cell lines distribution per tumor. Be careful, the `tumorous_sample_number` needs to be the new wanted tumor number for `simu_T_cancer` function
+
+## Generation of the matrix T : gene expressions per cell line  
+
+{r, label="RiTMIC::simu_T_cancer"}
+tumor_dataset <- "Your RNAseq dataset"
+tumorous_sample_number = 40
+matrix_T = RiTMIC::simu_T_cancer(tumor_dataset,tumorous_sample_number)
+
+
+New simulated RNAseq samples can be obtained from your RNAseq dataset with `simu_T_cancer`: for each gene, novel gene expressions will be assigned by a random choice inside the normal distribution of the actual gene expression   
+
+

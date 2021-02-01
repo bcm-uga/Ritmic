@@ -15,6 +15,7 @@ Imports:
   stats,
   mixtools,
   penda,
+  ggplot2,
   progress
 License: CeCILL
 Encoding: UTF-8
