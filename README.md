@@ -13,7 +13,7 @@ R
 
 ```R
 install.packages("devtools")
-# mixtools htmltools scales yaml lazyeval plyr rlang ggplot2 gtools caTools KernSmooth
+# mixtools htmltools scales yaml lazyeval plyr rlang ggplot2 gtools caTools KernSmooth penda progress
 devtools::load_all(); devtools::document(); devtools::install()
 ```
 
