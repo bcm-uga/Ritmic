@@ -108,3 +108,10 @@ summary(matrix_D2)
 `simu_D` is the final step of the analysis. It's the gathering of the two matrices A and T to obtain a complete RNAseq dataset. You can run `simu_D` with or without noise. 
 
 The __noise option__ allows to up the variance in your model. The simulation can be too stringent to simulate properly a biological sample.
+
+
+# Session Information
+
+```{r, results="verbatim"}
+sessionInfo()
+```
