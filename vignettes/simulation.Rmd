@@ -61,7 +61,7 @@ tumor_dataset <- data_case
 dim(tumor_dataset)
 
 tumorous_sample_number = 45
-res <- capture.output(matrix_T <- RiTMIC::simu_T_cancer(tumor_dataset,45), silent = T)
+matrix_T <- RiTMIC::simu_T_cancer(tumor_dataset,45)
 dim(matrix_T)
 ```
 

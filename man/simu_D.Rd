@@ -19,15 +19,15 @@ simu_D(
 
 \item{matrix_T}{matrix obtained with \code{simu_T_cancer}}
 
-\item{noise}{Boolean statement \cr\cr Do you want to use \code{add_noise} to your resulting matrix to increase the variance ?}
+\item{noise}{Boolean statement, {default} = T \cr\cr Do you want to use \code{add_noise} to your resulting matrix to increase the variance ?}
 
-\item{mean}{Mean of the noise}
+\item{mean}{Mean of the noise, {default} = 0}
 
-\item{sd}{Standard deviation of the noise}
+\item{sd}{Standard deviation of the noise, {default} = 0.1}
 
-\item{val_min}{Minimum value of the noise}
+\item{val_min}{Minimum value of the noise, {default} = 0}
 
-\item{val_max}{Maximum value of the noise}
+\item{val_max}{Maximum value of the noise, {default} = 1}
 }
 \value{
 matrix D of gene expression per sample
