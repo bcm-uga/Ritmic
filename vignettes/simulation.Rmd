@@ -17,7 +17,7 @@ vignette: >
 ---
 
 ```{r echo=FALSE, eval=TRUE}
-knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim", dpi=75)
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=FALSE, echo=TRUE, results="verbatim", dpi=75)
 layout(1, respect=TRUE)
 ```
 
@@ -37,9 +37,6 @@ The output matrix of gene expression per sample is required to perform. This mat
 
 ## Explanation of dataset
 
-`data_ctrl` is a data matrix containing the normalized counts of the control sample. 
-The names of the matrix correspond to the gene_symbol.
-
 `data_case` is a data matrix containing the normalized counts of each tumor sample. 
 The rownames of the matrix correspond to the gene_symbol, the colnames indicate the sample ID.
 
@@ -56,12 +53,13 @@ The function `simu_A` simulates the matrix of proportion of cell lines distribut
 
 ## Generation of an enhanced RNAseq matrix T : gene expressions per cell line  
 
-```{r, label="RiTMIC::simu_T_cancer"}
-tumor_dataset <- data_case
+```{r, label="RiTMIC::simu_T_cancer", message=FALSE}
+tumor_dataset <- penda::penda_data_case
 dim(tumor_dataset)
 
 tumorous_sample_number = 45
 matrix_T <- RiTMIC::simu_T_cancer(tumor_dataset,45)
+
 dim(matrix_T)
 ```
 
@@ -71,21 +69,24 @@ New simulated RNAseq samples can be obtained from a RNAseq dataset with `simu_T_
 
 ```{r, label="RiTMIC::corr_prop_s"}
 first_deregulation_possibility <- RiTMIC::corr_prop_s(tumor_dataset, 20, matrix_A)
-rownames(data_case)[first_deregulation_possibility$g_immune]
+rownames(tumor_dataset)[first_deregulation_possibility$g_immune]
 ```
 
 ```{r, label="RiTMIC::corr_prop_n"}
 second_deregulation_possibility <- RiTMIC::corr_prop_n(tumor_dataset, 20, matrix_A)
-rownames(data_case)[second_deregulation_possibility$g_immune]
+rownames(tumor_dataset)[second_deregulation_possibility$g_immune]
 ```
 
 ```{r, label="RiTMIC::corr_prop_c"}
 third_deregulation_possibility <- RiTMIC::corr_prop_c(tumor_dataset, 20, matrix_A)
-rownames(data_case)[third_deregulation_possibility$g_immune]
+rownames(tumor_dataset)[third_deregulation_possibility$g_immune]
 ```
 
 Three methods to disturb the tumor micro environments by a random modification of the gene expressions are available : `corr_prop_s`, `corr_prop_n` and `corr_prop_c`.
 Methods differ by the calcul of coefficients:
+
 - `corr_prop_s`: newGeneExpression = geneExpression + x * cellTypeProportion
+
 - `corr_prop_n`: newGeneExpression = geneExpression + [(1 + z)* cellTypeProportion)]
+
 - `corr_prop_c`: newGeneExpression = geneExpression * y
