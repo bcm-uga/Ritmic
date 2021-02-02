@@ -15,7 +15,7 @@ simu_T_cancer(tumor_RNAseq, n)
 Matrix A: \cr Gene expressions distributions per cell line
 }
 \description{
-Generate a \strong{matrix T} with random \strong{gene expression} distributions in \strong{n} tumor cell lines \cr Matrix dimension : n x gene_name
+Generate a \strong{matrix T} with random \strong{gene expression} distributions in \strong{n} samples \cr Matrix dimension : n x gene_name
 }
 \details{
 gene_name is imported from the tumor_RNAseq data \cr Random gene expression distributions is performed by \code{\link{rnorm}} \cr Probability of gene expression in a cell line is computed by \code{\link[mixtools]{normalmixEM}}

@@ -16,7 +16,7 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
 }
 
 #' Simulate an enhanced tumor micro-environment 
-#' @description Generate a \strong{matrix T} with random \strong{gene expression} distributions in \strong{n} tumor cell lines \cr Matrix dimension : n x gene_name
+#' @description Generate a \strong{matrix T} with random \strong{gene expression} distributions in \strong{n} samples \cr Matrix dimension : n x gene_name
 #' @details gene_name is imported from the tumor_RNAseq data \cr Random gene expression distributions is performed by \code{\link{rnorm}} \cr Probability of gene expression in a cell line is computed by \code{\link[mixtools]{normalmixEM}}
 #' @param tumor_RNAseq RNAseq dataset to simulate a random T matrix
 #' @param n Supposed sample number 
@@ -45,7 +45,7 @@ simu_T_cancer = function(tumor_RNAseq, n){
     rownames(T_res) = rownames(tumor_RNAseq)
     t = 0
     # Progress bar
-    pb <- progress_bar$new(format = "  Running simu_T_cancer [:bar] :current/:total (:percent) in :elapsed",total = nrow(tumor_RNAseq), clear = FALSE, width= 80)
+    pb <- progress_bar$new(format = "  Running RiTMIC::simu_T_cancer [:bar] :current/:total (:percent) in :elapsed",total = nrow(tumor_RNAseq), clear = FALSE, width= 80)
     # For loop to create new simulations : gene per gene 
     for(g in rownames(tumor_RNAseq)){
       pb$tick()
@@ -235,7 +235,7 @@ add_noise = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
 #' @return matrix D of gene expression per sample
 #' @export
 simu_D <- function(matrix_A, matrix_T, noise = T, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
-  D_matrix <- matrix_A %*% matrix_T
+  D_matrix <- matrix_T %*% t(matrix_A) 
   if (isTRUE(noise)){
     D_matrix <- add_noise(D_matrix, mean, sd, val_min,val_max)
   }

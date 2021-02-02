@@ -17,7 +17,7 @@ vignette: >
 ---
 
 ```{r echo=FALSE, eval=TRUE}
-knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=FALSE, echo=TRUE, results="verbatim", dpi=75)
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim", dpi=75)
 layout(1, respect=TRUE)
 ```
 
@@ -40,18 +40,19 @@ The output matrix of gene expression per sample is required to perform. This mat
 `data_case` is a data matrix containing the normalized counts of each tumor sample. 
 The rownames of the matrix correspond to the gene_symbol, the colnames indicate the sample ID.
 
-## Increase your dataset with a randomized gene expression distribution
+## Increase your dataset, Step 1: Create the matrix of cell lines per sample 
 
 ```{r, label="RiTMIC::simu_A"}
 cell_type_proportions = c(1.5, 4.5, 1, 3)
-tumorous_sample_number = 40
+tumorous_sample_number = 45
+
 matrix_A = RiTMIC::simu_A(tumorous_sample_number,cell_type_proportions)
 dim(matrix_A)
 ```
 
 The function `simu_A` simulates the matrix of proportion of cell lines distribution per tumor. Be careful, the `tumorous_sample_number` needs to be the new wanted tumor number for `simu_T_cancer` function
 
-## Generation of an enhanced RNAseq matrix T : gene expressions per cell line  
+## Increase your dataset, Step 2: Generation of an enhanced RNAseq matrix T: Gene expressions per cell line  
 
 ```{r, label="RiTMIC::simu_T_cancer", message=FALSE}
 tumor_dataset <- penda::penda_data_case
@@ -65,24 +66,24 @@ dim(matrix_T)
 
 New simulated RNAseq samples can be obtained from a RNAseq dataset with `simu_T_cancer`: for each gene, novel gene expressions will be assigned by a random choice inside the normal distribution of the actual gene expression   
 
-## Disturbation of gene expressions in the matrix T
+## Increase your dataset, Step 3: Disturbation of gene expressions in the matrix T
 
 ```{r, label="RiTMIC::corr_prop_s"}
-first_deregulation_possibility <- RiTMIC::corr_prop_s(tumor_dataset, 20, matrix_A)
-rownames(tumor_dataset)[first_deregulation_possibility$g_immune]
+first_deregulation_possibility <- RiTMIC::corr_prop_s(matrix_T, 20, matrix_A)
+rownames(matrix_T)[first_deregulation_possibility$g_immune]
 ```
 
 ```{r, label="RiTMIC::corr_prop_n"}
-second_deregulation_possibility <- RiTMIC::corr_prop_n(tumor_dataset, 20, matrix_A)
-rownames(tumor_dataset)[second_deregulation_possibility$g_immune]
+second_deregulation_possibility <- RiTMIC::corr_prop_n(matrix_T, 20, matrix_A)
+rownames(matrix_T)[second_deregulation_possibility$g_immune]
 ```
 
 ```{r, label="RiTMIC::corr_prop_c"}
-third_deregulation_possibility <- RiTMIC::corr_prop_c(tumor_dataset, 20, matrix_A)
-rownames(tumor_dataset)[third_deregulation_possibility$g_immune]
+third_deregulation_possibility <- RiTMIC::corr_prop_c(matrix_T, 20, matrix_A)
+rownames(matrix_T)[third_deregulation_possibility$g_immune]
 ```
 
-Three methods to disturb the tumor micro environments by a random modification of the gene expressions are available : `corr_prop_s`, `corr_prop_n` and `corr_prop_c`.
+Three methods to disturb the tumor micro environments are available by a random modification of the gene expressions  : `corr_prop_s`, `corr_prop_n` and `corr_prop_c`.
 Methods differ by the calcul of coefficients:
 
 - `corr_prop_s`: newGeneExpression = geneExpression + x * cellTypeProportion
@@ -90,3 +91,20 @@ Methods differ by the calcul of coefficients:
 - `corr_prop_n`: newGeneExpression = geneExpression + [(1 + z)* cellTypeProportion)]
 
 - `corr_prop_c`: newGeneExpression = geneExpression * y
+
+Each deregulations are random targeting a gene in the gene name list
+## Increase your dataset, Step 3: Create the RNAseq dataset with a possibility to enhance the variance
+
+```{r, label="RiTMIC::simu_D"}
+matrix_D <- RiTMIC::simu_D(matrix_A = matrix_A, matrix_T = first_deregulation_possibility$T, noise = TRUE, mean = 0, sd = 0.2, val_min = 0, val_max = 2)
+summary(matrix_D)
+
+
+
+matrix_D2 <- RiTMIC::simu_D(matrix_A = matrix_A, matrix_T = second_deregulation_possibility$T, noise = FALSE)
+summary(matrix_D2)
+```
+
+`simu_D` is the final step of the analysis. It's the gathering of the two matrices A and T to obtain a complete RNAseq dataset. You can run `simu_D` with or without noise. 
+
+The __noise option__ allows to up the variance in your model. The simulation can be too stringent to simulate properly a biological sample.
