@@ -93,27 +93,27 @@ simu_T_cancer = function(tumor_RNAseq, n){
 #' Step 1: G genes are drawn\cr \cr 
 #' Step 2: Over-expression induced to these genes : \cr \cr
 #' newGeneExpression = geneExpression + x * cellTypeProportion
-#' @param T_cancer RNAseq data
+#' @param T_no_tumor RNAseq data
 #' @param G Gene number to be sampled, this function requires an \strong{even} Gene number 
 #' @param A Matrix A : distribution of cell lines per tumor \code{simu_A} 
 #' @param x Coefficient, by default it's settled to 100
 #' 
 #' @return List with : \cr Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 #' @export
-corr_prop_s = function(T_cancer, G, A, x = 100){
+corr_prop_s = function(T_no_tumor, G, A, x = 100){
   if (G%%2 != 0) {
     stop("G the gene number needs to be an even number")
-  } else if (ncol(T_cancer) != ncol(A)){
-    stop("Patient number is not equal between the matrices A and T_cancer")    
+  } else if (ncol(T_no_tumor) != ncol(A)){
+    stop("Patient number is not equal between the matrices A and T_no_tumor")    
   } else {
-    # Sampling of the gene names from T_cancer 
-    genes = sample(nrow(T_cancer), G, replace = F)
+    # Sampling of the gene names from T_no_tumor 
+    genes = sample(nrow(T_no_tumor), G, replace = F)
     # First half part of selected genes represents the immune cell lines
     g_immune = genes[1:(G/2)]
     # The other half represents the tumor cell lines
     g_fibro =  genes[(G/2 +1):G]
-    T_f = T_cancer
-    for(n in 1:ncol(T_cancer)){
+    T_f = T_no_tumor
+    for(n in 1:ncol(T_no_tumor)){
       # Capturing immune and fibro cells proportions in the n tumor from matrix @parameter A 
       immune = A[3, n]
       fibro = A[2, n]
@@ -133,7 +133,7 @@ corr_prop_s = function(T_cancer, G, A, x = 100){
 #' Step 3: For the cell lines (fibro, immune) having a proportion greater than threshold: \cr \cr
 #' newGeneExpression = geneExpression * y
 #' 
-#' @param T_cancer The matrix T, for more documentation : \code{simu_T_cancer}
+#' @param T_no_tumor The matrix T, for more documentation : \code{simu_T_cancer}
 #' @param G Gene number to be sampled, this function requires an \strong{even} Gene number 
 #' @param A The matrix A, for more documentation \code{simu_A}
 #' @param y Overexpression coefficient to multiply the gene expression, {default} = 2
@@ -142,17 +142,17 @@ corr_prop_s = function(T_cancer, G, A, x = 100){
 #'
 #' @return List with : Deregulated matrix T and deregulated genes in g_immune and g_fibro
 #' @export
-corr_prop_c = function(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
+corr_prop_c = function(T_no_tumor, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
   if (G%%2 != 0) {
     stop("G the gene number needs to be an even number")
-  } else if (ncol(T_cancer) != ncol(A)){
-    stop("Patient number is not equal between the matrices A and T_cancer")
+  } else if (ncol(T_no_tumor) != ncol(A)){
+    stop("Patient number is not equal between the matrices A and T_no_tumor")
   } else {
-    genes = sample(nrow(T_cancer), G, replace = F)
+    genes = sample(nrow(T_no_tumor), G, replace = F)
     g_immune = genes[1:(G/2)]
     g_fibro =  genes[(G/2 +1):G]
-    T_f = T_cancer
-    for(n in 1:ncol(T_cancer)){
+    T_f = T_no_tumor
+    for(n in 1:ncol(T_no_tumor)){
       immune = A[3, n]
       fibro = A[2, n]
       if(immune > thres_i){
@@ -173,24 +173,24 @@ corr_prop_c = function(T_cancer, G, A, y = 2, thres_i = 0.1, thres_f = 0.45){
 #' Step 2: For the cell lines, over-expressions to every G genes is induced by: \cr \cr
 #' newGeneExpression = geneExpression + [(1 + z)* cellTypeProportion)]
 #'
-#' @param T_cancer The matrix T, for more documentation \code{simu_T_cancer}
+#' @param T_no_tumor The matrix T, for more documentation \code{simu_T_cancer}
 #' @param G Gene number to be sampled, this function requires an \strong{even} Gene number 
 #' @param A The matrix A, for more documentation \code{simu_A}
 #' @param z Overexpression coefficient to multiply the gene expression, by default z = 2
 #'
 #' @return A list with : \cr Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
 #' @export
-corr_prop_n = function(T_cancer, G, A, z = 2){
+corr_prop_n = function(T_no_tumor, G, A, z = 2){
   if (G%%2 != 0) {
     stop("G the gene number needs to be an even number")
-  } else if (ncol(T_cancer) != ncol(A)){
-    stop("Patient number is not equal between the matrices A and T_cancer")    
+  } else if (ncol(T_no_tumor) != ncol(A)){
+    stop("Patient number is not equal between the matrices A and T_no_tumor")    
   } else {
-    genes = sample(nrow(T_cancer), G, replace = F)
+    genes = sample(nrow(T_no_tumor), G, replace = F)
     g_immune = genes[1:(G/2)]
     g_fibro =  genes[(G/2 +1):G]
-    T_f = T_cancer
-    for(n in 1:ncol(T_cancer)){
+    T_f = T_no_tumor
+    for(n in 1:ncol(T_no_tumor)){
       immune = A[3, n]
       fibro = A[2, n]
       T_f[g_immune, n] =  T_f[g_immune, n]*(1 + z*immune)

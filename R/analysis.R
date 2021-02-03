@@ -29,12 +29,10 @@ generate_data_bypatient = function(D_list, U_list){
 #'
 #' @param data_patients 
 #'
+#' @import ggplot2
 #' @return
 #' @export
-#'
-#' @examples
 plot_figure = function(data_patients){
-  library(ggplot2)
   mytheme = theme(panel.background = element_blank(),
                   panel.grid.major = element_line(colour="black", size = (0.1)),
                   panel.grid.minor = element_blank())
@@ -55,14 +53,12 @@ plot_figure = function(data_patients){
   return(p1)
 }
 
-#' Title
+#' Plot the heatmap of 
 #'
 #' @param data 
 #'
 #' @return
 #' @export
-#'
-#' @examples
 plot_heatmap_hclust = function (data) {
   sum(apply(is.na(data), 1, any))
   data = data[!apply(is.na(data), 1, any), ]

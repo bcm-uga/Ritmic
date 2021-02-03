@@ -2,7 +2,7 @@
 % Please edit documentation in R/analysis.R
 \name{generate_data_bypatient}
 \alias{generate_data_bypatient}
-\title{Title}
+\title{Compute the down and up regulated genes in the two lists H and L}
 \usage{
 generate_data_bypatient(D_list, U_list)
 }
@@ -15,5 +15,5 @@ generate_data_bypatient(D_list, U_list)
 
 }
 \description{
-Title
+Compute the down and up regulated genes in the two lists H and L
 }

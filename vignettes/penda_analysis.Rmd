@@ -49,24 +49,38 @@ Please, check out the `simulation` vignette for more details.
 
 ## Data filtering
 ```{r echo=FALSE}
-load("~/Datas/projects/RiTMIC/data/matrix_D2.RData")
 load("~/Datas/projects/RiTMIC/data/matrix_D.RData")
+load("~/Datas/projects/RiTMIC/data/matrix_D2.RData")
+penda_data_case <- penda::penda_data_case
 
-Penda_dataset_60n = make_dataset_1ctrl(data_ctrl, T_60tum_n$T)
-Penda_dataset_60c_t = make_dataset_1ctrl(data_ctrl, T_60tum_c_t$T)
+matrix_D_control <- matrix_D[,41]
+
+rownames(matrix_D_data) <- rownames(penda_data_case)
+colnames(matrix_D_data) <-colnames(penda_data_case)
+
+Penda_dataset2 = penda::make_dataset_1ctrl(matrix_D_control, matrix_D2)
+data_ctrl2 = Penda_dataset2$data_ctrl
+data_case2 = Penda_dataset2$data_case
+
+Penda_dataset = penda::make_dataset_1ctrl(matrix_D_control, matrix_D)
+data_ctrl = Penda_dataset$data_ctrl
+data_case = Penda_dataset$data_case
 ```
 
 The function `make_dataset_1ctrl` sorts the genes based on the value of gene expression in control. This step is essential for the proper functioning of `penda`.
 
 ## Relative gene ordering
 
-```{r, label="penda::compute_lower_and_higher_lists"}
-data_ctrl = penda::penda_data_ctrl
-data_case = penda::penda_data_case
+```{r, label= "penda::compute_lower_and_higher_lists"}
 s_max = 500
 L_H_list = penda::compute_lower_and_higher_lists_1ctrl(data_ctrl, s_max = s_max)
 L = L_H_list$L
 H = L_H_list$H
+
+L_H_list2 = penda::compute_lower_and_higher_lists_1ctrl(data_ctrl2, s_max = s_max)
+L2 = L_H_list2$L
+H2 = L_H_list2$H
+
 ```
 
 The `penda` method uses the relative gene ordering in normal tissue. 
@@ -97,6 +111,11 @@ penda_res = penda::penda_test_1ctrl(samples = data_case,
                    iterations =  iterations, 
                    L_H_list =  L_H_list, 
                    threshold = threshold)
+
+penda_res2 = penda::penda_test_1ctrl(samples = data_case2, 
+                   iterations =  iterations, 
+                   L_H_list =  L_H_list2, 
+                   threshold = threshold)
 ```
 
 The function  `penda_test_1ctrl` infers for each gene and for each sample of the `data_case` matrix its deregulation status (up-regulation, down-regulation or no deregulation). This function analyses case samples one by one. It is based on the `L_H_list` and tracks for changes in relative ordering in the sample of interest. If these changes exceed the given `threshold`, the gene of interest is considered as deregulated. 
@@ -109,12 +128,16 @@ Results are in the form of two matrices `$down_genes` and `$up_genes`. Each row 
 data_bypatient = generate_data_bypatient(D_list = penda_res$down_genes,
                                          U_list = penda_res$up_genes)
 
-plot_figure(data_patients = data_bypatient)
+data_bypatient2 = generate_data_bypatient(D_list = penda_res2$down_genes,
+                                         U_list = penda_res2$up_genes)
 
+plot_figure(data_patients = data_bypatient)
+plot_figure(data_patients = data_bypatient2)
 ```
 
 ```{r fig.width=9, fig.height=9, echo=FALSE}
 plot_heatmap_hclust(data = penda_res$down_genes - penda_res$up_genes)
+plot_heatmap_hclust(data = penda_res2$down_genes - penda_res2$up_genes)
 ```
 
 
