@@ -7,6 +7,8 @@
 add_noise(matrix_D, mean = 0, sd = 0.1, val_min = 0, val_max = 1)
 }
 \arguments{
+\item{matrix_D}{matrix_D with or without deregulations obtained from the combinations of matrix_T * matrix_A}
+
 \item{mean}{Mean of the data, {default} = 0}
 
 \item{sd}{Standard deviation of the data, {default} = 0.1}
@@ -14,8 +16,6 @@ add_noise(matrix_D, mean = 0, sd = 0.1, val_min = 0, val_max = 1)
 \item{val_min}{Minimum value, {default} = 0}
 
 \item{val_max}{Maximum value, {default} = 1}
-
-\item{data}{matrix_D with or without deregulations obtained from the combinations of matrix_T * matrix_A}
 }
 \value{
 New matrix D with dimensions : \cr gene_name per tumor_number

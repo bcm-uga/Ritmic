@@ -4,11 +4,7 @@
 \alias{simu_A}
 \title{Simulate cell lines proportion distribution in tumors}
 \usage{
-simu_A(
-  n,
-  alpha = c(1.5, 4.5, 1, 3),
-  nameCellLines = c("normal", "fibro", "immune", "tumor")
-)
+simu_A(n, alpha = c(1.5, 4.5, 1, 3))
 }
 \arguments{
 \item{n}{patients number}

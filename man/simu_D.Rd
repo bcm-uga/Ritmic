@@ -20,6 +20,8 @@ simu_D(
 
 \item{matrix_T}{matrix obtained with \code{simu_T_cancer}}
 
+\item{corr_matrix_T}{matrix obtained with corr_prop_functions}
+
 \item{noise}{Boolean statement, {default} = T \cr\cr Do you want to use \code{add_noise} to your resulting matrix to increase the variance ?}
 
 \item{mean}{Mean of the noise, {default} = 0}
