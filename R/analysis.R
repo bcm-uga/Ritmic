@@ -1,12 +1,10 @@
-#' Compute the down and up regulated genes in the two lists H and L 
+#' Compute the down and up regulated genes in the two gene lists D and down 
 #'
 #' @param D_list 
 #' @param U_list 
 #'
 #' @return
 #' @export
-#'
-#' @examples
 generate_data_bypatient = function(D_list, U_list){
   down = colSums(D_list)
   up = colSums(U_list)

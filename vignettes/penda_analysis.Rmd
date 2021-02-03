@@ -53,10 +53,8 @@ load("~/Datas/projects/RiTMIC/data/matrix_D.RData")
 load("~/Datas/projects/RiTMIC/data/matrix_D2.RData")
 penda_data_case <- penda::penda_data_case
 
-matrix_D_control <- matrix_D[,41]
 
-rownames(matrix_D_data) <- rownames(penda_data_case)
-colnames(matrix_D_data) <-colnames(penda_data_case)
+matrix_D_control <- penda::penda_data_ctrl[,4]
 
 Penda_dataset2 = penda::make_dataset_1ctrl(matrix_D_control, matrix_D2)
 data_ctrl2 = Penda_dataset2$data_ctrl
@@ -125,19 +123,19 @@ By default, the `threshold` parameter is set to `r threshold` but we strongly ad
 Results are in the form of two matrices `$down_genes` and `$up_genes`. Each row corresponds to a gene and each column to a case sample. A TRUE entry in these matrices means that the corresponding genes are deregulated (down or up-regulated) in the corresponding samples. 
 
 ```{r, echo=FALSE}
-data_bypatient = generate_data_bypatient(D_list = penda_res$down_genes,
+data_bypatient = RiTMIC::generate_data_bypatient(D_list = penda_res$down_genes,
                                          U_list = penda_res$up_genes)
 
-data_bypatient2 = generate_data_bypatient(D_list = penda_res2$down_genes,
+data_bypatient2 = RiTMIC::generate_data_bypatient(D_list = penda_res2$down_genes,
                                          U_list = penda_res2$up_genes)
 
-plot_figure(data_patients = data_bypatient)
-plot_figure(data_patients = data_bypatient2)
+RiTMIC::plot_figure(data_patients = data_bypatient)
+RiTMIC::plot_figure(data_patients = data_bypatient2)
 ```
 
 ```{r fig.width=9, fig.height=9, echo=FALSE}
-plot_heatmap_hclust(data = penda_res$down_genes - penda_res$up_genes)
-plot_heatmap_hclust(data = penda_res2$down_genes - penda_res2$up_genes)
+RiTMIC::plot_heatmap_hclust(data = penda_res$down_genes - penda_res$up_genes)
+RiTMIC::plot_heatmap_hclust(data = penda_res2$down_genes - penda_res2$up_genes)
 ```
 
 

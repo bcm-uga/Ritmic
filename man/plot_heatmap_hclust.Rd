@@ -2,7 +2,7 @@
 % Please edit documentation in R/analysis.R
 \name{plot_heatmap_hclust}
 \alias{plot_heatmap_hclust}
-\title{Title}
+\title{Plot the heatmap of}
 \usage{
 plot_heatmap_hclust(data)
 }
@@ -13,5 +13,5 @@ plot_heatmap_hclust(data)
 
 }
 \description{
-Title
+Plot the heatmap of
 }
