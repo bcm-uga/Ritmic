@@ -106,9 +106,9 @@ matrix_D2 <- RiTMIC::simu_D(matrix_A = matrix_A,  matrix_T = penda::penda_data_c
 summary(matrix_D2)
 ```
 
-`simu_D` is the final step of the analysis. It's the gathering of the two matrices A and T to obtain a complete RNAseq dataset. `simu_D` can be run with or without the `noise` option. 
+`simu_D` is the final step of the analysis. It's the gathering of the two matrices A and T to obtain a complete RNAseq dataset. `simu_D` can be run with or without the __noise__ option. 
 
-The __noise option__ allows to up the variance in your model. The simulation can be too stringent to simulate properly a biological sample.
+The __noise__ option allows to up the variance in your model. The simulation can be too stringent to simulate properly a biological sample.
 
 
 # Session Information
