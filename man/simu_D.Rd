@@ -2,11 +2,12 @@
 % Please edit documentation in R/simulation.R
 \name{simu_D}
 \alias{simu_D}
-\title{Simulation of an RNAseq matrix, obtained with the matrices multiplications of matrix A and T}
+\title{Simulation of an RNAseq matrix, obtained with the matrices combinations of the matrix A and T for each sample}
 \usage{
 simu_D(
   matrix_A,
   matrix_T,
+  corr_matrix_T,
   noise = T,
   mean = 0,
   sd = 0.1,
@@ -33,7 +34,7 @@ simu_D(
 matrix D of gene expression per sample
 }
 \description{
-Simulation of an RNAseq matrix, obtained with the matrices multiplications of matrix A and T
+Simulation of an RNAseq matrix, obtained with the matrices combinations of the matrix A and T for each sample
 }
 \seealso{
 \code{\link[RiTMIC]{add_noise}}

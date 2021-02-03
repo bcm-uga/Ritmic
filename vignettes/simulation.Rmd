@@ -14,7 +14,7 @@ vignette: >
   %\VignetteIndexEntry{simulation}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
----
+
 
 ```{r echo=FALSE, eval=TRUE}
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim", dpi=75)

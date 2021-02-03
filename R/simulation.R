@@ -12,7 +12,7 @@
 #'
 #' @examples simu_A(20,c(1.5, 4.5, 3))
 simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
-  tmp_mix_Lvar = t(gtools::rdirichlet(n = n, alpha = alpha))
+    tmp_mix_Lvar = t(gtools::rdirichlet(n = n, alpha = alpha))
 }
 
 #' Simulate an enhanced tumor micro-environment 
@@ -203,7 +203,7 @@ corr_prop_n = function(T_cancer, G, A, z = 2){
 #' Add noise to the analysis or simulations of the tumor micro-environments gene expressions
 #' @description Applications of \code{add_noise} \cr \cr Simulations : Better reflection of the biological observations \cr
 #' Biological observation : improve the generalization error to avoid over-learning  
-#' @param data matrix_D with or without deregulations obtained from the combinations of matrix_T * matrix_A
+#' @param matrix_D matrix_D with or without deregulations obtained from the combinations of matrix_T * matrix_A
 #' @param mean Mean of the data, {default} = 0 
 #' @param sd Standard deviation of the data, {default} = 0.1 
 #' @param val_min Minimum value, {default} = 0
@@ -212,18 +212,19 @@ corr_prop_n = function(T_cancer, G, A, z = 2){
 #' @seealso \code{\link[RiTMIC]{simu_T_cancer}}, \code{\link[RiTMIC]{corr_prop_s}}, \code{\link[RiTMIC]{corr_prop_n}}, \code{\link[RiTMIC]{corr_prop_c}}
 #' @return New matrix D with dimensions : \cr gene_name per tumor_number
 #' @export
-add_noise = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
-  noise = matrix(rnorm(prod(dim(data)), mean = mean, sd = sd), nrow = nrow(data))
-  datam = data + noise
-  datam[datam < val_min] = data[datam < val_min]
-  datam[datam > val_max] = data[datam > val_max]
+add_noise = function(matrix_D, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
+  noise = matrix(rnorm(prod(dim(matrix_D)), mean = mean, sd = sd), nrow = nrow(matrix_D))
+  datam = matrix_D + noise
+  datam[datam < val_min] = matrix_D[datam < val_min]
+  datam[datam > val_max] = matrix_D[datam > val_max]
   return(datam)
 }
 
-#' Simulation of an RNAseq matrix, obtained with the matrices multiplications of matrix A and T
+#' Simulation of an RNAseq matrix, obtained with the matrices combinations of the matrix A and T for each sample
 #'
 #' @param matrix_A matrix obtained with \code{simu_A} 
 #' @param matrix_T matrix obtained with \code{simu_T_cancer}
+#' @param corr_matrix_T matrix obtained with corr_prop_functions
 #' @param noise Boolean statement, {default} = T \cr\cr Do you want to use \code{add_noise} to your resulting matrix to increase the variance ? 
 #' @param mean Mean of the noise, {default} = 0
 #' @param sd Standard deviation of the noise, {default} = 0.1
@@ -234,10 +235,18 @@ add_noise = function(data, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
 #'
 #' @return matrix D of gene expression per sample
 #' @export
-simu_D <- function(matrix_A, matrix_T, noise = T, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
-  D_matrix <- matrix_T %*% t(matrix_A) 
-  if (isTRUE(noise)){
-    D_matrix <- add_noise(D_matrix, mean, sd, val_min,val_max)
+simu_D <- function(matrix_A, matrix_T, corr_matrix_T, noise = T, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
+  
+  matrix_D = c()
+  for(p in 1:dim(matrix_A)[2]){
+    tumor = corr_matrix_T$T[, p]
+    D_p = cbind(matrix_T, tumor) %*% matrix_A[, p]
+    matrix_D = cbind(matrix_D, D_p)
   }
-  return(D_matrix)
+  colnames(matrix_D) <- paste(1:dim(matrix_D)[2])
+  if (isTRUE(noise)){
+    matrix_D <- add_noise(matrix_D, mean = mean, sd = sd, val_min = val_min, val_max = val_max)
+  }
+  return(matrix_D)
 }
+
