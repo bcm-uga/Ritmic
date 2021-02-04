@@ -21,4 +21,5 @@ devtools::load_all(); devtools::document(); devtools::install()
 ```
 setwd("vignettes")
 rmarkdown::render("simulation.Rmd")
+rmarkdown::render("penda_analysis.Rmd")
 ```
