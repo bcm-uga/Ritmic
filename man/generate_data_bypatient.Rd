@@ -7,12 +7,12 @@
 generate_data_bypatient(D_list, U_list)
 }
 \arguments{
-\item{D_list}{}
+\item{D_list}{List of down regulated genes compared to the control}
 
-\item{U_list}{}
+\item{U_list}{List of up regulated genes compared to the control}
 }
 \value{
-
+A dataframe with in each entry : \cr\cr - The patient ID \cr- "Up or Down or Total" deregulated genes \cr- Number of deregulated genes\cr The percent of the deregulation in the patient
 }
 \description{
 Compute the down and up regulated genes in the two gene lists D and down

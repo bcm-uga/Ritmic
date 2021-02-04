@@ -2,16 +2,16 @@
 % Please edit documentation in R/analysis.R
 \name{plot_figure}
 \alias{plot_figure}
-\title{Title}
+\title{Visualize the gene deregulation per patient in a linear graph}
 \usage{
 plot_figure(data_patients)
 }
 \arguments{
-\item{data_patients}{}
-}
-\value{
-
+\item{data_patients}{Output of \code{generate_data_bypatient}}
 }
 \description{
-Title
+Visualize the gene deregulation per patient in a linear graph
+}
+\seealso{
+\code{generate_data_bypatient}
 }

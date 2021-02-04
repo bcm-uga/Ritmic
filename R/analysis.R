@@ -1,9 +1,9 @@
 #' Compute the down and up regulated genes in the two gene lists D and down 
 #'
-#' @param D_list 
-#' @param U_list 
+#' @param D_list List of down regulated genes compared to the control 
+#' @param U_list List of up regulated genes compared to the control 
 #'
-#' @return
+#' @return A dataframe with in each entry : \cr\cr - The patient ID \cr- "Up or Down or Total" deregulated genes \cr- Number of deregulated genes\cr The percent of the deregulation in the patient 
 #' @export
 generate_data_bypatient = function(D_list, U_list){
   down = colSums(D_list)
@@ -23,14 +23,18 @@ generate_data_bypatient = function(D_list, U_list){
 }
 
 
-#' Title
+#' Visualize the gene deregulation per patient in a linear graph
 #'
-#' @param data_patients 
-#'
+#' @param data_patients Output of \code{generate_data_bypatient}
+#' 
+#' @seealso \code{generate_data_bypatient}
+#' 
 #' @import ggplot2
-#' @return
+#'
 #' @export
 plot_figure = function(data_patients){
+  # Resolve devtools::check() problem of global variable 
+  patients <- pc <- variable <- NULL 
   mytheme = theme(panel.background = element_blank(),
                   panel.grid.major = element_line(colour="black", size = (0.1)),
                   panel.grid.minor = element_blank())
@@ -51,11 +55,15 @@ plot_figure = function(data_patients){
   return(p1)
 }
 
-#' Plot the heatmap of 
+#' Plot the heatmap of the down regulated genes compared to upregulated genes from the \code{\link[penda]{penda_test_1ctrl}} output
 #'
-#' @param data 
+#' @param data Down_regulated_genes_from_\code{\link[penda]{penda_test_1ctrl}} - Up_regulated_genes_from_\code{\link[penda]{penda_test_1ctrl}} 
+#' 
+#' @seealso \code{\link[penda]{penda_test_1ctrl}}
+#' 
+#' @importFrom grDevices colorRampPalette
+#' @importFrom stats as.dendrogram cor dist hclust
 #'
-#' @return
 #' @export
 plot_heatmap_hclust = function (data) {
   sum(apply(is.na(data), 1, any))

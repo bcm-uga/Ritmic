@@ -18,6 +18,8 @@ Imports:
   KernSmooth,
   matrixStats,
   stringr,
+  grDevices,
+  gplots,
   ggplot2,
   progress
 License: CeCILL

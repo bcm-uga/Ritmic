@@ -2,16 +2,16 @@
 % Please edit documentation in R/analysis.R
 \name{plot_heatmap_hclust}
 \alias{plot_heatmap_hclust}
-\title{Plot the heatmap of}
+\title{Plot the heatmap of the down regulated genes compared to upregulated genes from the \code{\link[penda]{penda_test_1ctrl}} output}
 \usage{
 plot_heatmap_hclust(data)
 }
 \arguments{
-\item{data}{}
-}
-\value{
-
+\item{data}{Down_regulated_genes_from_\code{\link[penda]{penda_test_1ctrl}} - Up_regulated_genes_from_\code{\link[penda]{penda_test_1ctrl}}}
 }
 \description{
-Plot the heatmap of
+Plot the heatmap of the down regulated genes compared to upregulated genes from the \code{\link[penda]{penda_test_1ctrl}} output
+}
+\seealso{
+\code{\link[penda]{penda_test_1ctrl}}
 }
