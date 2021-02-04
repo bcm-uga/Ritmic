@@ -82,8 +82,8 @@ simu_T_cancer = function(tumor_RNAseq, n){
       # Import the new generated values in the matrix T_res, following the previous dataset   
       T_res[g, (ncol(tumor_RNAseq)+1):n] = sample(x, n_simu, replace=TRUE)
     }
-    cat("Number of genes failing the test normalmixEM:",t)
-    return(T_res)
+  cat("Number of genes failing the test normalmixEM:",t)
+  return(T_res)
   }
 }
 
