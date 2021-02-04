@@ -49,8 +49,8 @@ Please, check out the `simulation` vignette for more details.
 
 ## Data filtering
 ```{r echo=FALSE, label="data_loading"}
-load("~/Datas/projects/RiTMIC/data/matrix_D.RData")
-load("~/Datas/projects/RiTMIC/data/matrix_D2.RData")
+matrix_D = readRDS("~/Datas/projects/RiTMIC/data/matrix_D.rds")
+matrix_D2 = readRDS("~/Datas/projects/RiTMIC/data/matrix_D2.rds")
 penda_data_case <- penda::penda_data_case
 
 matrix_D_control <- penda::penda_data_ctrl[,4]
