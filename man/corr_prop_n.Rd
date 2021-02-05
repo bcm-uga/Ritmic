@@ -22,5 +22,5 @@ A list with : \cr Deregulated matrix $T and deregulated genes in $g_immune and $
 Generation of deregulations from a new model in the matrix T generated from \code{simu_T_cancer} with cell lines proportions from the matrix A \code{simu_A} \cr \cr
 Step 1: G genes are drawn\cr \cr 
 Step 2: For the cell lines, over-expressions to every G genes is induced by: \cr \cr
-newGeneExpression = geneExpression + [(1 + z)* cellTypeProportion)]
+newGeneExpression = geneExpression x [1 + (z x cellTypeProportion)]
 }

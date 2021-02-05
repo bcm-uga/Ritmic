@@ -25,7 +25,7 @@ List with : Deregulated matrix T and deregulated genes in g_immune and g_fibro
 \description{
 Deregulations with a complex model in the matrix T generated from \code{simu_T_cancer} with cell lines proportions from the return of \code{simu_A} method \cr \cr
 Step 1: G genes are drawn\cr \cr 
-Step 2: Checking : proportions of cell type immune or fibro is respectively greater than \strong{tres_i} and \strong{tres_f} ? \cr \cr
+Step 2: Checking : proportions of cell type immune or fibro are respectively greater than \strong{tres_i} and \strong{tres_f} ? \cr \cr
 Step 3: For the cell lines (fibro, immune) having a proportion greater than threshold: \cr \cr
 newGeneExpression = geneExpression * y
 }
