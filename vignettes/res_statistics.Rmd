@@ -11,6 +11,7 @@ output:
     toc_depth: 3
     number_sections: true
 vignette: >
+  %\VignetteIndexEntry{statistics}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
@@ -31,15 +32,15 @@ layout(1, respect=TRUE)
 
 We have two necessary data type for each cancer :
 
-- Penda output : matrix of dimension n*g \cr - g: gene names \cr - n: the deregulation status of the cancer compared to the control \itemize{
-\item{Down regulated gene}{-1}
-\item{Same expression}{0}
-\item{Up-regulated gene}{+1} 
+- Penda output : the down and up lists concatenated in a matrix of dimension: n*g 
+  - g: gene names 
+  - n: the deregulation status of the cancer compared to the control
+    - -1: Down-regulated gene 
+    - 0: Same expression
+    - +1: Up-regulated gene 
 
-On a deux types de données pour chaque cancer :
-
-* Penda : matrice de taille n*g, avec pour chaque gène g son statut de dérégulation dans les patients n : 0, 1 ou -1
-
-* cell : matrice de proportion k*n avec pour chaque patient n la proportion des différents types cellulaires k
+- Matrix A of cell lines proportion distribution: proportion matrix k*n
+  - n: patient 
+  - k : proportion of the different cell lines
 
 On trie les matrices pour avoir les patients en commun, et seulement les gènes avec plus de 100 patients dérégulés ou non dérégulés.
