@@ -26,3 +26,20 @@ layout(1, respect=TRUE)
 `RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package that simulates the necessary tools to perform `PenDA` analysis, perform analysis with `PenDA` and apply visualization tools to the `PenDA` output. 
 
 `RiTMIC` Part 3: **Statistical analysis of PenDA outputs**
+
+## Presentation of the input dataset
+
+We have two necessary data type for each cancer :
+
+- Penda output : matrix of dimension n*g \cr - g: gene names \cr - n: the deregulation status of the cancer compared to the control \itemize{
+\item{Down regulated gene}{-1}
+\item{Same expression}{0}
+\item{Up-regulated gene}{+1} 
+
+On a deux types de données pour chaque cancer :
+
+* Penda : matrice de taille n*g, avec pour chaque gène g son statut de dérégulation dans les patients n : 0, 1 ou -1
+
+* cell : matrice de proportion k*n avec pour chaque patient n la proportion des différents types cellulaires k
+
+On trie les matrices pour avoir les patients en commun, et seulement les gènes avec plus de 100 patients dérégulés ou non dérégulés.
