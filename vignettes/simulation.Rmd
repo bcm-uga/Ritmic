@@ -25,7 +25,7 @@ layout(1, respect=TRUE)
 
 `RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package that simulates the necessary tools to perform `PenDA` analysis, perform analysis with `PenDA` and apply visualization tools to the `PenDA` output. 
 
-`RiTMIC` Part 1: **Simulation of inputs required to the R package analysis: `penda`**
+`RiTMIC` Part 1: **Simulation of inputs required to the R package analysis: penda**
 
 # Generation of input files for penda analysis
 

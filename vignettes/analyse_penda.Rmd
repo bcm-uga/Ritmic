@@ -1,0 +1,28 @@
+---
+title: "RiTMIC: RegulatIon of Tumor MIcroenvironment Composition"
+subtitle: "Part 3 : Statistical analysis of penda outputs"
+author: "Magali Richard, Clementine Decamps, Florent Chuffart, Fabien Quinquis, Daniel Jost"
+contact: 
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+```{r echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim", dpi=75)
+layout(1, respect=TRUE)
+```
+
+
+# Introduction
+
+`RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package that simulates the necessary tools to perform `PenDA` analysis, perform analysis with `PenDA` and apply visualization tools to the `PenDA` output. 
+
+`RiTMIC` Part 3: **Statistical analysis of PenDA outputs**
