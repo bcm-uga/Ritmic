@@ -59,7 +59,7 @@ simu_T_cancer = function(tumor_RNAseq, n){
         #Computing the bimodal distribution
         res <- try(capture.output(dists_sep <- normalmixEM(dist_g, maxrestarts=1000, k= 2)), silent = T)
         # If it doesn't work (too much 0s, extreme value, etc.), we sample in the gene distribution
-        if(any(inherits(res, "try-error") || (is.na(dists_sep)))){
+        if(inherits(res, "try-error") || any(is.na(dists_sep$mu))){
           x = dist_g
           t = t+1    
           # Else we sample in the computed distribution
