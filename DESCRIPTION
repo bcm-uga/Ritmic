@@ -19,7 +19,7 @@ Imports:
   matrixStats,
   stringr,
   grDevices,
-  pltmapper,
+  ptlmapper,
   gplots,
   ggplot2,
   progress
