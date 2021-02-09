@@ -28,7 +28,7 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
 #' 
 #' @seealso \code{\link[mixtools]{normalmixEM}}
 #'
-#' @return Matrix A: \cr Gene expressions distributions per cell line  
+#' @return Matrix T: \cr Gene expressions distributions per cell line  
 #' @export
 simu_T_cancer = function(tumor_RNAseq, n){
   # Parameter checking 
