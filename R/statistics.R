@@ -130,20 +130,20 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
   return(c(TP, FP, TN, FN, FPR, TPR))
 }
 
-#' Plot the ROC curves of the ks, student, kantorovitch and correlation
+#' Plot ROC curves to see PenDA improvement 
+#' @description Compare the panda efficiency with tests: Kolmogorov-Smirnov, Student and Kantorovich versus a correlation test
 #'
-#' @param genes_f 
-#' @param df_res 
-#' @param cor_T 
-#' @param titre_graph 
+#' @param T_matrix Matrix T output from corr_prop functions  
+#' @param df_res Output from \code{as_df_res} function
+#' @param pre_plot_res Output from \code{pre_plot_res} function
+#' @param titre_graph The title of the ROC curve graph 
 #'
-#' @return
 #' @export
 #'
 #' @examples
-plot_res = function(genes_f, T, df_res, cor_T, titre_graph){
-  g_fibro = unique(genes_f[genes_f%in%rownames(T$T)[T$g_fibro]])
-  g_immune = unique(genes_f[genes_f%in%rownames(T$T)[T$g_immune]])
+plot_res = function(T_matrix, df_res, pre_plot_res, titre_graph){
+  g_fibro = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_fibro]])
+  g_immune = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_immune]])
   res_ks = sapply(pvalues, function(x){
     compute_1_res(df_res$ks, df_res$genes, g_fibro, g_immune, x)
   })
@@ -154,7 +154,7 @@ plot_res = function(genes_f, T, df_res, cor_T, titre_graph){
     compute_1_res(df_res$kanto, df_res$genes, g_fibro, g_immune, x)
   })
   res_cor = sapply(pvalues, function(x){
-    compute_1_res(abs(as.numeric(cor_T[, 3])), cor_T[, 1], rownames(T$T)[T$g_fibro], rownames(T$T)[T$g_immune], x)})
+    compute_1_res(abs(as.numeric(cor_T[, 3])), cor_T[, 1], rownames(T_matrix$T)[T_matrix$g_fibro], rownames(T_matrix$T)[T_matrix$g_immune], x)})
   df = data.frame(pval = as.factor(rep(pvalues)),
                   FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
                   TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
