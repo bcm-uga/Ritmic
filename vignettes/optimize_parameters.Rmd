@@ -1,0 +1,93 @@
+---
+title: "optimize_parameter"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo = FALSE}
+# matrice D, , calculée pour T deconv et A deconv (= data case)
+D_2v2_c <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/D_2v2_c.rds")
+dim(D_2v2_c)
+# matrice T, T deconv, il faut prendre la colonne 1 pour avoir le type épi qui sert de data ctrl Penda
+EDec2_80p_c_t <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/EDec2_80p_c_t.rds")
+dim(EDec2_80p_c_t)
+
+matrice_T_control <- EDec2_80p_c_t[,1]
+dim(matrice_T_control)
+# matrice T après déconv [,1] = Epithelium: matrice contrôle de penda
+T_tum_ref <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/T_60_tum_rna_c_t.rds")
+dim(T_tum_ref$T)
+
+# matrice T tumeur de référence, composée de $T, $g_immune et $g_fibro, sert pour la vignette analyse_deconv
+T_60tum_c <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/T_60_tum_rna_c_t.rds")
+dim(T_60tum_c$T)
+# matrice A de référence 
+A_60p <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/A_60.rds")
+dim(A_60)
+
+```
+
+```{r,echo=FALSE}
+Penda_dataset = penda::make_dataset_1ctrl(control = matrice_T_control, data_case = D_2v2_c)
+data_ctrl = Penda_dataset$data_ctrl
+data_case = Penda_dataset$data_case
+
+s_max = 500
+L_H_list = penda::compute_lower_and_higher_lists_1ctrl(data_ctrl, s_max = s_max)
+L = L_H_list$L
+H = L_H_list$H
+
+list1 <- (0:7)/10
+list2 <- (81:100)/100
+listf <- c(list1,list2)
+iterations =  20
+dir.create("~/Datas/projects/RiTMIC/data")
+for (threshold in listf){
+  penda_res = penda::penda_test_1ctrl(samples = data_case, 
+                   iterations =  iterations, 
+                   L_H_list =  L_H_list, 
+                   threshold = threshold)
+  saveRDS(penda_res,file = paste('~/Datas/projects/RiTMIC/data/res_', threshold, '.RDS',sep=""))
+}
+
+```
+
+```{r,echo=TRUE}
+cor_T60_c = c() 
+cor_T60_n = c()
+options(warn = -1)
+for(g in rownames(T_60tum_c$T)){
+  for(t in 1:nrow(A_60p)){
+    #On fait les deux groupes
+    c = cor(T_60tum_c$T[g, ], A_60p[t, ])
+    cor_T60_c = rbind(cor_T60_c, c(g, t, c))
+  }
+}
+options(warn = 0)
+
+for (threshold in listf){
+  file <- paste('data_',threshold,'.RDS',sep="")
+  file <- readRDS('~/Datas/projects/RiTMIC/data/res', '_', threshold, '.RDS',sep="")
+  
+  penda_abs = abs(file$up_genes - file$down_genes)
+  treated_file <- RiTMIC::pre_treat(penda_abs)
+  dim(treated_file)
+    
+  genes_file = genes_c[(genes_c %in% rownames(treated_file))]
+  length(genes_c_f_1v1)
+  
+  res_dereg <- calc_dist(treated_file)
+  print("Dim des matrices de résultat")
+  dim(res_dereg_1v1_c)
+
+  df_res <- RiTMIC::as_df_res(res_dereg = res_dereg)
+  
+  pvalues = c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+  
+  plot_res(genes_c_f_1v1, T_60tum_c, df_1v1_c, cor_T60_c, "T tum ref VS T epi ref c" )
+  }
+```
+
