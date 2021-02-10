@@ -1,21 +1,27 @@
 
-#' Pretreatment for statistical analysis
-#'
+#' Pre-treatment for statistical analysis
+#' @description Matrix are sorted to have the common patients with only genes that are deregulated in more than a minimum number of patients  
 #' @param penda_res Output from \code{\link[penda]{penda_test_1ctrl}}
+#' @param minPatientNumber Minimum number of patients with the gene deregulation
 #'
-#' @return
+#' @return Matrix without non deregulated genes 
+#' 
 #' @export
-#'
-pre_treat = function(penda_res){
-  g_egaux = which(apply(penda_res, 1, function(g) {
-    length(table(g)) == 1
-  }))
-  penda_res = penda_res[-g_egaux, ]
-  
-  g_sup = which(apply(penda_res, 1, function(g) {
-    table(g)[1] > 5 & table(g)[2] > 5
-  }))
-  penda_res = penda_res[g_sup, ]
+pre_treat = function(penda_res,patientNumber){
+  if (patientNumber > colnames(penda_res)){
+    stop("The minimum of patient number needs to be less than the sample dataset")
+  } else {
+    penda_res <- abs(penda_res$up_genes - penda_res$down_genes)
+    g_egaux = which(apply(penda_res, 1, function(g) {
+      length(table(g)) == 1
+    }))
+    penda_res = penda_res[-g_egaux, ]
+    
+    g_sup = which(apply(penda_res, 1, function(g) {
+      table(g)[1] > patientNumber & table(g)[2] > patientNumber
+    }))
+    penda_res = penda_res[g_sup, ]
+  }
 }
 
 
@@ -37,11 +43,9 @@ pre_treat = function(penda_res){
 #'
 #' @examples
 calc_dist = function(penda_res){
-  penda_1v1c = abs(penda_res_1v1c$up_genes - penda_res_1v1c$down_genes)
   options(warn = -1)
   res_dereg = c()
   
-  #Pour chaque gène
   for(g in rownames(penda_res)){
     gene = penda_res[g, ]
     
@@ -49,9 +53,7 @@ calc_dist = function(penda_res){
     p_zero = which(gene == 0)
     
     if(length(p_dereg) != 0 & length(p_zero) != 0){
-      #Pour chaque type cellulaire
       for(t in 1:nrow(A_60p)){
-        #On fait les deux groupes
         x = A_60p[t, p_dereg]
         y = A_60p[t, p_zero]
         
