@@ -43,10 +43,12 @@ pre_treat = function(penda_res,patientNumber){
 #'
 #' @param penda_res output from \code{pre_treat} function
 #' @importFrom stats ks.test sd t.test
+#' @importFrom ptlmapper kantorovich
+#' 
 #' @return Matrix of dimension geneNumber*cellLineNumber\cr Each element is filled by the four statistical tests: kanto, t-test, ks and cor 
 #' @export
 #'
-calc_dist = function(penda_res){
+calc_dist = function(penda_res,matrix_A){
   options(warn = -1)
   res_dereg = c()
   
@@ -57,9 +59,9 @@ calc_dist = function(penda_res){
     p_zero = which(gene == 0)
     
     if(length(p_dereg) != 0 & length(p_zero) != 0){
-      for(t in 1:nrow(A_60p)){
-        x = A_60p[t, p_dereg]
-        y = A_60p[t, p_zero]
+      for(t in 1:nrow(matrix_A)){
+        x = matrix_A[t, p_dereg]
+        y = matrix_A[t, p_zero]
         
         kanto_dist = kantorovich(x, y)
         student = -log10(t.test(x, y)$p.value)
@@ -87,8 +89,9 @@ calc_dist = function(penda_res){
 
 #Ks : 75% des distances < 0.30
 
-#' Observe deregulation between groups
+#' Find cell marker from deregulated genes between cell lines
 #'
+#' @description Find specific cell line markers by observe a high deregulation between a single cell line and the others 
 #' @param res_dereg the output from \code{calc_dist}
 #'
 #' @return Results 
@@ -146,13 +149,13 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
 #' @export 
 #'
 pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
+  globalVariables(c("genes_c", "res_deg_output"))
   genes = c(rownames(matrix_T$T)[matrix_T$g_immune], rownames(matrix_T$T)[matrix_T$g_fibro])
   genes_f = genes_c[(genes %in% rownames(res_deg_output))]
   cor_T60_c = c()
   options(warn = -1)
   for(g in rownames(matrix_T$T)){
     for(t in 1:nrow(matrix_A)){
-      #On fait les deux groupes
       c = cor(matrix_T$T[g, ], matrix_A[t, ])
       cor_T60_c = rbind(cor_T60_c, c(g, t, c))
     }
@@ -168,11 +171,12 @@ pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
 #' @param T_matrix Matrix T output from corr_prop functions  
 #' @param df_res Output from \code{as_df_res} function
 #' @param pre_plot_res Output from \code{pre_plot_res} function
-#' @param titre_graph The title of the ROC curve graph 
+#' @param graph_title The title of the ROC curve graph 
 #'
 #' @export
 #'
-plot_res = function(T_matrix, df_res, pre_plot_res, titre_graph){
+plot_res = function(T_matrix, df_res, pre_plot_res, graph_title){
+  genes_f <- pvalues <- FPR <- TPR <- metrique <- c()
   g_fibro = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_fibro]])
   g_immune = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_immune]])
   res_ks = sapply(pvalues, function(x){
@@ -185,7 +189,7 @@ plot_res = function(T_matrix, df_res, pre_plot_res, titre_graph){
     compute_1_res(df_res$kanto, df_res$genes, g_fibro, g_immune, x)
   })
   res_cor = sapply(pvalues, function(x){
-    compute_1_res(abs(as.numeric(cor_T[, 3])), cor_T[, 1], rownames(T_matrix$T)[T_matrix$g_fibro], rownames(T_matrix$T)[T_matrix$g_immune], x)})
+    compute_1_res(abs(as.numeric(pre_plot_res[, 3])), pre_plot_res[, 1], rownames(T_matrix$T)[T_matrix$g_fibro], rownames(T_matrix$T)[T_matrix$g_immune], x)})
   df = data.frame(pval = as.factor(rep(pvalues)),
                   FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
                   TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
@@ -195,7 +199,7 @@ plot_res = function(T_matrix, df_res, pre_plot_res, titre_graph){
     geom_point() + 
     geom_line() + 
     theme_minimal()+
-    labs(title = titre_graph) 
+    labs(title = graph_title) 
   
   return(plot)
 }
