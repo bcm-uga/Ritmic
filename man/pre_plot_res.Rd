@@ -20,5 +20,5 @@ correlation values between gene expressions
 Load environment required to \code{plot_res} function
 }
 \seealso{
-\code{plot_res}
+\code{compute_1_res} \code{plot_res}
 }

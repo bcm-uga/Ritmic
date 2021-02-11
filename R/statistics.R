@@ -1,4 +1,3 @@
-
 #' Pre-treatment for statistical analysis
 #' @description Matrix are sorted to have the common patients with only genes that are deregulated in more than a minimum number of patients  
 #' @param penda_res Output from \code{\link[penda]{penda_test_1ctrl}}
@@ -35,11 +34,14 @@ pre_treat = function(penda_res,patientNumber){
 #* cv de chaque groupe
 
 #' Compute distances between two groups: deregulated genes versus regulated genes
-#' @description  For each cell line and gene, four statistical tests are applied to evaluate the distance: \itemize{
-#' \item{Kantorovich metric: Wasserstein distance, result : distance}
-#' \item{Student test: mean comparison, result: -log10(p-value)}
-#' \item{Kolmogorov-Smirnov: repartition comparison, result: distance and -log(p-value)}
-#' \item{Correlation: Variability between two groups}}
+#' @description  For each cell line and gene, four statistical tests are applied to evaluate the distance: 
+#' \tabular{lll}{
+#' Statistical test   \tab Tested parameter               \tab Result type\cr 
+#' Kantorovich metric \tab Wasserstein distance           \tab distance\cr
+#' Student test       \tab Mean comparison                \tab -log10(p-value)\cr
+#' Kolmogorov-Smirnov \tab Repartition comparison         \tab distance and   -log(p-value)\cr
+#' Correlation        \tab Variability between two groups \tab Correlation coefficient 
+#' }
 #'
 #' @param penda_res Output from \code{pre_treat} function
 #' @param matrix_A Matrix A of proportion of cell lines distribution per tumor \cr \cr  Dimensions: n(cell lines) x alpha(cell lines proportion per patient) 
@@ -98,7 +100,7 @@ calc_dist = function(penda_res,matrix_A){
 #' 
 #' @seealso \code{calc_dist}
 #'
-#' @return Results 
+#' @return Data_frame with accurate  
 #' @export
 #'
 as_df_res = function(res_dereg){
@@ -147,11 +149,10 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
 #' @param matrix_A The matrix_A from \code{simu_A}
 #' @param compute_1_res_output output from \code{compute_1_res} function
 #' 
-#' @seealso \code{plot_res}
+#' @seealso \code{compute_1_res} \code{plot_res}
 #'
 #' @return correlation values between gene expressions
 #' @export 
-#'
 pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
   genes = c(rownames(matrix_T$T)[matrix_T$g_immune], rownames(matrix_T$T)[matrix_T$g_fibro])
   genes_f = genes[(genes %in% rownames(compute_1_res_output))]
@@ -178,6 +179,7 @@ pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
 #' 
 #' @seealso \code{as_def_res} \code{pre_plot_res}
 #'
+#'@return ROC curves
 #' @export
 plot_res = function(T_matrix, df_res, pre_plot_res, graph_title){
   genes_f <- pvalues <- FPR <- TPR <- metrique <- c()

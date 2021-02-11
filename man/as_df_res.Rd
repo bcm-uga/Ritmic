@@ -10,7 +10,7 @@ as_df_res(res_dereg)
 \item{res_dereg}{Output from \code{calc_dist} function}
 }
 \value{
-Results
+Data_frame with accurate
 }
 \description{
 Find specific cell line markers by observe a high deregulation between a single cell line and the others

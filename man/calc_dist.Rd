@@ -15,9 +15,12 @@ calc_dist(penda_res, matrix_A)
 Matrix of dimension geneNumber*cellLineNumber\cr \cr Each element is filled out by the four statistical tests: kanto, t-test, ks and cor
 }
 \description{
-For each cell line and gene, four statistical tests are applied to evaluate the distance: \itemize{
-\item{Kantorovich metric: Wasserstein distance, result : distance}
-\item{Student test: mean comparison, result: -log10(p-value)}
-\item{Kolmogorov-Smirnov: repartition comparison, result: distance and -log(p-value)}
-\item{Correlation: Variability between two groups}}
+For each cell line and gene, four statistical tests are applied to evaluate the distance: 
+\tabular{lll}{
+Statistical test   \tab Tested parameter               \tab Result type\cr 
+Kantorovich metric \tab Wasserstein distance           \tab distance\cr
+Student test       \tab Mean comparison                \tab -log10(p-value)\cr
+Kolmogorov-Smirnov \tab Repartition comparison         \tab distance and   -log(p-value)\cr
+Correlation        \tab Variability between two groups \tab Correlation coefficient 
+}
 }

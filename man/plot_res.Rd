@@ -15,6 +15,12 @@ plot_res(T_matrix, df_res, pre_plot_res, graph_title)
 
 \item{graph_title}{The title of the ROC curve graph}
 }
+\value{
+ROC curves
+}
 \description{
 Compare the panda efficiency with tests: Kolmogorov-Smirnov, Student and Kantorovich versus a correlation test
+}
+\seealso{
+\code{as_def_res} \code{pre_plot_res}
 }
