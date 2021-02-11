@@ -7,10 +7,12 @@
 calc_dist(penda_res, matrix_A)
 }
 \arguments{
-\item{penda_res}{output from \code{pre_treat} function}
+\item{penda_res}{Output from \code{pre_treat} function}
+
+\item{matrix_A}{Matrix A of proportion of cell lines distribution per tumor \cr \cr  Dimensions: n(cell lines) x alpha(cell lines proportion per patient)}
 }
 \value{
-Matrix of dimension geneNumber*cellLineNumber\cr Each element is filled by the four statistical tests: kanto, t-test, ks and cor
+Matrix of dimension geneNumber*cellLineNumber\cr \cr Each element is filled out by the four statistical tests: kanto, t-test, ks and cor
 }
 \description{
 For each cell line and gene, four statistical tests are applied to evaluate the distance: \itemize{

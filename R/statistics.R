@@ -41,11 +41,13 @@ pre_treat = function(penda_res,patientNumber){
 #' \item{Kolmogorov-Smirnov: repartition comparison, result: distance and -log(p-value)}
 #' \item{Correlation: Variability between two groups}}
 #'
-#' @param penda_res output from \code{pre_treat} function
+#' @param penda_res Output from \code{pre_treat} function
+#' @param matrix_A Matrix A of proportion of cell lines distribution per tumor \cr \cr  Dimensions: n(cell lines) x alpha(cell lines proportion per patient) 
+#' 
 #' @importFrom stats ks.test sd t.test
 #' @importFrom ptlmapper kantorovich
 #' 
-#' @return Matrix of dimension geneNumber*cellLineNumber\cr Each element is filled by the four statistical tests: kanto, t-test, ks and cor 
+#' @return Matrix of dimension geneNumber*cellLineNumber\cr \cr Each element is filled out by the four statistical tests: kanto, t-test, ks and cor 
 #' @export
 #'
 calc_dist = function(penda_res,matrix_A){
@@ -92,7 +94,9 @@ calc_dist = function(penda_res,matrix_A){
 #' Find cell marker from deregulated genes between cell lines
 #'
 #' @description Find specific cell line markers by observe a high deregulation between a single cell line and the others 
-#' @param res_dereg the output from \code{calc_dist}
+#' @param res_dereg Output from \code{calc_dist} function 
+#' 
+#' @seealso \code{calc_dist}
 #'
 #' @return Results 
 #' @export
@@ -149,9 +153,8 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
 #' @export 
 #'
 pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
-  globalVariables(c("genes_c", "res_deg_output"))
   genes = c(rownames(matrix_T$T)[matrix_T$g_immune], rownames(matrix_T$T)[matrix_T$g_fibro])
-  genes_f = genes_c[(genes %in% rownames(res_deg_output))]
+  genes_f = genes[(genes %in% rownames(compute_1_res_output))]
   cor_T60_c = c()
   options(warn = -1)
   for(g in rownames(matrix_T$T)){
@@ -172,9 +175,10 @@ pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
 #' @param df_res Output from \code{as_df_res} function
 #' @param pre_plot_res Output from \code{pre_plot_res} function
 #' @param graph_title The title of the ROC curve graph 
+#' 
+#' @seealso \code{as_def_res} \code{pre_plot_res}
 #'
 #' @export
-#'
 plot_res = function(T_matrix, df_res, pre_plot_res, graph_title){
   genes_f <- pvalues <- FPR <- TPR <- metrique <- c()
   g_fibro = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_fibro]])
