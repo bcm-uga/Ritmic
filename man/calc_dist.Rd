@@ -4,7 +4,7 @@
 \alias{calc_dist}
 \title{Compute distances between two groups: deregulated genes versus regulated genes}
 \usage{
-calc_dist(penda_res)
+calc_dist(penda_res, matrix_A)
 }
 \arguments{
 \item{penda_res}{output from \code{pre_treat} function}

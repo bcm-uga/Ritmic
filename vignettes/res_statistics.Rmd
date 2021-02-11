@@ -28,9 +28,9 @@ layout(1, respect=TRUE)
 
 `RiTMIC` Part 3: **Statistical analysis of PenDA outputs**
 
-## Presentation of the input dataset
+# Presentation of the input dataset
 
-We have two necessary data type for each cancer :
+Three data input are required to perform the statistical analysis :
 
 - Penda output : the down and up lists concatenated in a matrix of dimension: n*g 
   - g: gene names 
@@ -41,6 +41,8 @@ We have two necessary data type for each cancer :
 
 - Matrix A of cell lines proportion distribution: proportion matrix k*n
   - n: patient 
-  - k : proportion of the different cell lines
+  - k: proportion of the different cell lines
+- 
 
+Matrices are sorted to have patien
 On trie les matrices pour avoir les patients en commun, et seulement les gènes avec plus de 100 patients dérégulés ou non dérégulés.

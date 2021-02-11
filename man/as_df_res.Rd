@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistics.R
 \name{as_df_res}
 \alias{as_df_res}
-\title{Observe deregulation between groups}
+\title{Find cell marker from deregulated genes between cell lines}
 \usage{
 as_df_res(res_dereg)
 }
@@ -13,5 +13,5 @@ as_df_res(res_dereg)
 Results
 }
 \description{
-Observe deregulation between groups
+Find specific cell line markers by observe a high deregulation between a single cell line and the others
 }

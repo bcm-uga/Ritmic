@@ -4,7 +4,7 @@
 \alias{plot_res}
 \title{Plot ROC curves to see PenDA improvement}
 \usage{
-plot_res(T_matrix, df_res, pre_plot_res, titre_graph)
+plot_res(T_matrix, df_res, pre_plot_res, graph_title)
 }
 \arguments{
 \item{T_matrix}{Matrix T output from corr_prop functions}
@@ -13,7 +13,7 @@ plot_res(T_matrix, df_res, pre_plot_res, titre_graph)
 
 \item{pre_plot_res}{Output from \code{pre_plot_res} function}
 
-\item{titre_graph}{The title of the ROC curve graph}
+\item{graph_title}{The title of the ROC curve graph}
 }
 \description{
 Compare the panda efficiency with tests: Kolmogorov-Smirnov, Student and Kantorovich versus a correlation test
