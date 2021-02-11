@@ -2,7 +2,7 @@
 #' Pre-treatment for statistical analysis
 #' @description Matrix are sorted to have the common patients with only genes that are deregulated in more than a minimum number of patients  
 #' @param penda_res Output from \code{\link[penda]{penda_test_1ctrl}}
-#' @param minPatientNumber Minimum number of patients with the gene deregulation
+#' @param patientNumber Minimum number of patients with the gene deregulation
 #'
 #' @return Matrix without non deregulated genes 
 #' 
@@ -34,14 +34,18 @@ pre_treat = function(penda_res,patientNumber){
 #* Distance et -log10(p-valeur) du test de Kolmogorov-Smirnov
 #* cv de chaque groupe
 
-#' Compute distances between two groups
+#' Compute distances between two groups: deregulated genes versus regulated genes
+#' @description  For each cell line and gene, four statistical tests are applied to evaluate the distance: \itemize{
+#' \item{Kantorovich metric: Wasserstein distance, result : distance}
+#' \item{Student test: mean comparison, result: -log10(p-value)}
+#' \item{Kolmogorov-Smirnov: repartition comparison, result: distance and -log(p-value)}
+#' \item{Correlation: Variability between two groups}}
 #'
 #' @param penda_res output from \code{pre_treat} function
-#'
-#' @return
+#' @importFrom stats ks.test sd t.test
+#' @return Matrix of dimension geneNumber*cellLineNumber\cr Each element is filled by the four statistical tests: kanto, t-test, ks and cor 
 #' @export
 #'
-#' @examples
 calc_dist = function(penda_res){
   options(warn = -1)
   res_dereg = c()
@@ -90,7 +94,6 @@ calc_dist = function(penda_res){
 #' @return Results 
 #' @export
 #'
-#' @examples
 as_df_res = function(res_dereg){
   df =  data.frame(genes = res_dereg[, 1],
                    kanto = as.numeric(res_dereg[, 5]),
@@ -102,16 +105,13 @@ as_df_res = function(res_dereg){
 
 #' P values and ROC curves
 #'
-#' @param values 
-#' @param genes 
-#' @param genes_fibro 
-#' @param genes_immune 
-#' @param pval 
+#' @param values statistical test used
+#' @param genes gene names  
+#' @param genes_fibro gene expression in fibro cell line
+#' @param genes_immune gene expression in immune cell line
+#' @param pval list of p-values observed
 #'
-#' @return
-#' @export
-#'
-#' @examples
+#' @return In a list: True positive, False positive, True negative and False negative with associated rates 
 compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
   names(values) = stringr::str_c(genes, rep(1:4))
   values = values[!is.na(values)]
@@ -132,6 +132,34 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
   return(c(TP, FP, TN, FN, FPR, TPR))
 }
 
+#' Load environment required to \code{plot_res} function
+#'
+#' @param matrix_T The matrix_T output from corr_prop functions
+#' @param matrix_A The matrix_A from \code{simu_A}
+#' @param compute_1_res_output output from \code{compute_1_res} function
+#' 
+#' @seealso \code{plot_res}
+#'
+#' @return correlation values between gene expressions
+#' @export 
+#'
+pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
+  genes = c(rownames(matrix_T$T)[matrix_T$g_immune], rownames(matrix_T$T)[matrix_T$g_fibro])
+  genes_f = genes_c[(genes %in% rownames(res_deg_output))]
+  cor_T60_c = c()
+  options(warn = -1)
+  for(g in rownames(matrix_T$T)){
+    for(t in 1:nrow(matrix_A)){
+      #On fait les deux groupes
+      c = cor(matrix_T$T[g, ], matrix_A[t, ])
+      cor_T60_c = rbind(cor_T60_c, c(g, t, c))
+    }
+    return(list(gene = genes_f, corr = cor_T60_c))
+  }
+  options(warn = 0)
+  return(cor_T60_c)
+}
+
 #' Plot ROC curves to see PenDA improvement 
 #' @description Compare the panda efficiency with tests: Kolmogorov-Smirnov, Student and Kantorovich versus a correlation test
 #'
@@ -142,7 +170,6 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
 #'
 #' @export
 #'
-#' @examples
 plot_res = function(T_matrix, df_res, pre_plot_res, titre_graph){
   g_fibro = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_fibro]])
   g_immune = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_immune]])
@@ -169,32 +196,4 @@ plot_res = function(T_matrix, df_res, pre_plot_res, titre_graph){
     labs(title = titre_graph) 
   
   return(plot)
-}
-
-#' Load environment required to \code{plot_res} function
-#'
-#' @param matrix_T The matrix_T output from corr_prop functions
-#' @param matrix_A The matrix_A from \code{simu_A}
-#' 
-#' @seealso \code{plot_res}
-#'
-#' @return correlation values between gene expressions
-#' @export 
-#'
-#' @examples
-pre_plot_res <- function(matrix_T,matrix_A,res_deg_output) {
-  genes = c(rownames(matrix_T$T)[matrix_T$g_immune], rownames(matrix_T$T)[matrix_T$g_fibro])
-  genes_f = genes_c[(genes %in% rownames(res_deg_output))]
-  cor_T60_c = c()
-  options(warn = -1)
-  for(g in rownames(matrix_T$T)){
-    for(t in 1:nrow(matrix_A)){
-      #On fait les deux groupes
-      c = cor(matrix_T$T[g, ], matrix_A[t, ])
-      cor_T60_c = rbind(cor_T60_c, c(g, t, c))
-    }
-    return(list(gene = genes_f, corr = cor_T60_c))
-  }
-  options(warn = 0)
-  return(cor_T60_c)
 }
