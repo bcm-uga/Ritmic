@@ -35,14 +35,13 @@ pre_treat = function(penda_res,patientNumber){
 
 #' Compute distances between two groups: deregulated genes versus regulated genes
 #' @description  For each cell line and gene, four statistical tests are applied to evaluate the distance: 
-#' 
-#' Statistical test    | Tested parameter               | Result type                  |
-#' --------------------|:------------------------------:|-----------------------------:|
-#' Kantorovich metric  | Wasserstein distance           | Distance                     |
-#' Student test        | Mean comparison                | -log10(p-value)              |  
-#' Kolmogorov-Smirnov  | Repartition comparison         | Distance and   -log(p-value) |
-#' Correlation         | Variability between two groups | Correlation coefficient      |
-#' @md
+#' \tabular{lll}{
+#' Statistical test   \tab Tested parameter               \tab Result type\cr 
+#' Kantorovich metric \tab Wasserstein distance           \tab distance\cr
+#' Student test       \tab Mean comparison                \tab -log10(p-value)\cr
+#' Kolmogorov-Smirnov \tab Repartition comparison         \tab distance and   -log(p-value)\cr
+#' Correlation        \tab Variability between two groups \tab Correlation coefficient 
+#' }
 #'
 #' @param penda_res Output from \code{pre_treat} function
 #' @param matrix_A Matrix A of proportion of cell lines distribution per tumor \cr \cr  Dimensions: n(cell lines) x alpha(cell lines proportion per patient) 
@@ -157,17 +156,17 @@ pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
   return(cor_T60_c)
 }
 
-#' Plot ROC curves to check the PenDA improvement 
+#' Plot ROC curves to check PenDA improvement 
 #' @description Compare the panda efficiency with tests: Kolmogorov-Smirnov, Student and Kantorovich versus a correlation test
 #'
 #' @param T_matrix Matrix T output from corr_prop functions  
 #' @param compute_1_res_output Output from \code{compute_1_res} function
 #' @param pre_plot_res_output Output from \code{pre_plot_res} function
-#' @param graph_title The title of the ROC curve graph 
+#' @param graph_title Title of the ROC curve graph 
 #' 
 #' @seealso \code{as_def_res} \code{pre_plot_res}
 #'
-#' @return ROC curves
+#'@return ROC curves
 #' @export
 plot_res = function(T_matrix, compute_1_res_output, pre_plot_res_output, graph_title){
   genes_f <- pvalues <- FPR <- TPR <- metrique <- c()
