@@ -3,4 +3,4 @@
 ^doc$
 ^Meta$
 ^data
-^inst
+^inst\extdata

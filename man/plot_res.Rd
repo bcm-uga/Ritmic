@@ -2,16 +2,16 @@
 % Please edit documentation in R/statistics.R
 \name{plot_res}
 \alias{plot_res}
-\title{Plot ROC curves to see PenDA improvement}
+\title{Plot ROC curves to check the PenDA improvement}
 \usage{
-plot_res(T_matrix, df_res, pre_plot_res, graph_title)
+plot_res(T_matrix, compute_1_res_output, pre_plot_res_output, graph_title)
 }
 \arguments{
 \item{T_matrix}{Matrix T output from corr_prop functions}
 
-\item{df_res}{Output from \code{as_df_res} function}
+\item{compute_1_res_output}{Output from \code{compute_1_res} function}
 
-\item{pre_plot_res}{Output from \code{pre_plot_res} function}
+\item{pre_plot_res_output}{Output from \code{pre_plot_res} function}
 
 \item{graph_title}{The title of the ROC curve graph}
 }

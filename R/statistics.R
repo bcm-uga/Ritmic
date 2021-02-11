@@ -35,13 +35,14 @@ pre_treat = function(penda_res,patientNumber){
 
 #' Compute distances between two groups: deregulated genes versus regulated genes
 #' @description  For each cell line and gene, four statistical tests are applied to evaluate the distance: 
-#' \tabular{lll}{
-#' Statistical test   \tab Tested parameter               \tab Result type\cr 
-#' Kantorovich metric \tab Wasserstein distance           \tab distance\cr
-#' Student test       \tab Mean comparison                \tab -log10(p-value)\cr
-#' Kolmogorov-Smirnov \tab Repartition comparison         \tab distance and   -log(p-value)\cr
-#' Correlation        \tab Variability between two groups \tab Correlation coefficient 
-#' }
+#' 
+#' Statistical test    | Tested parameter               | Result type                  |
+#' --------------------|:------------------------------:|-----------------------------:|
+#' Kantorovich metric  | Wasserstein distance           | Distance                     |
+#' Student test        | Mean comparison                | -log10(p-value)              |  
+#' Kolmogorov-Smirnov  | Repartition comparison         | Distance and   -log(p-value) |
+#' Correlation         | Variability between two groups | Correlation coefficient      |
+#' @md
 #'
 #' @param penda_res Output from \code{pre_treat} function
 #' @param matrix_A Matrix A of proportion of cell lines distribution per tumor \cr \cr  Dimensions: n(cell lines) x alpha(cell lines proportion per patient) 
@@ -79,7 +80,13 @@ calc_dist = function(penda_res,matrix_A){
   }
   options(warn = 0)
   colnames(res_dereg) = c("Gene", "nb_dereg", "nb_zero", "type", "kanto", "student", "ks d", "ks pvalue", "cvx", "cvy")
-  return(res_dereg)
+  
+  df =  data.frame(genes = res_dereg[, 1],
+                   kanto = as.numeric(res_dereg[, 5]),
+                   type =  factor(res_dereg[, 4]),
+                   student = as.numeric(res_dereg[, 6]),
+                   ks = as.numeric(res_dereg[, 8]),  stringsAsFactors = F)
+  return(df)
 }
 
 
@@ -92,25 +99,6 @@ calc_dist = function(penda_res,matrix_A){
 #Student : 75% des -log10(pvalue) < 0.8
 
 #Ks : 75% des distances < 0.30
-
-#' Find cell marker from deregulated genes between cell lines
-#'
-#' @description Find specific cell line markers by observe a high deregulation between a single cell line and the others 
-#' @param res_dereg Output from \code{calc_dist} function 
-#' 
-#' @seealso \code{calc_dist}
-#'
-#' @return Data_frame with accurate  
-#' @export
-#'
-as_df_res = function(res_dereg){
-  df =  data.frame(genes = res_dereg[, 1],
-                   kanto = as.numeric(res_dereg[, 5]),
-                   type =  factor(res_dereg[, 4]),
-                   student = as.numeric(res_dereg[, 6]),
-                   ks = as.numeric(res_dereg[, 8]),  stringsAsFactors = F)
-  return(df)
-}
 
 #' Compute the confusion matrix   
 #' 
@@ -169,33 +157,33 @@ pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
   return(cor_T60_c)
 }
 
-#' Plot ROC curves to see PenDA improvement 
+#' Plot ROC curves to check the PenDA improvement 
 #' @description Compare the panda efficiency with tests: Kolmogorov-Smirnov, Student and Kantorovich versus a correlation test
 #'
 #' @param T_matrix Matrix T output from corr_prop functions  
-#' @param df_res Output from \code{as_df_res} function
-#' @param pre_plot_res Output from \code{pre_plot_res} function
+#' @param compute_1_res_output Output from \code{compute_1_res} function
+#' @param pre_plot_res_output Output from \code{pre_plot_res} function
 #' @param graph_title The title of the ROC curve graph 
 #' 
 #' @seealso \code{as_def_res} \code{pre_plot_res}
 #'
-#'@return ROC curves
+#' @return ROC curves
 #' @export
-plot_res = function(T_matrix, df_res, pre_plot_res, graph_title){
+plot_res = function(T_matrix, compute_1_res_output, pre_plot_res_output, graph_title){
   genes_f <- pvalues <- FPR <- TPR <- metrique <- c()
   g_fibro = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_fibro]])
   g_immune = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_immune]])
   res_ks = sapply(pvalues, function(x){
-    compute_1_res(df_res$ks, df_res$genes, g_fibro, g_immune, x)
+    compute_1_res(compute_1_res_output$ks, compute_1_res_output$genes, g_fibro, g_immune, x)
   })
   res_st = sapply(pvalues, function(x){
-    compute_1_res(df_res$student, df_res$genes, g_fibro, g_immune, x)
+    compute_1_res(compute_1_res_output$student, compute_1_res_output$genes, g_fibro, g_immune, x)
   })
   res_kanto = sapply(pvalues, function(x){
-    compute_1_res(df_res$kanto, df_res$genes, g_fibro, g_immune, x)
+    compute_1_res(compute_1_res_output$kanto, compute_1_res_output$genes, g_fibro, g_immune, x)
   })
   res_cor = sapply(pvalues, function(x){
-    compute_1_res(abs(as.numeric(pre_plot_res[, 3])), pre_plot_res[, 1], rownames(T_matrix$T)[T_matrix$g_fibro], rownames(T_matrix$T)[T_matrix$g_immune], x)})
+    compute_1_res(abs(as.numeric(pre_plot_res_output[, 3])), pre_plot_res_output[, 1], rownames(T_matrix$T)[T_matrix$g_fibro], rownames(T_matrix$T)[T_matrix$g_immune], x)})
   df = data.frame(pval = as.factor(rep(pvalues)),
                   FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
                   TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
