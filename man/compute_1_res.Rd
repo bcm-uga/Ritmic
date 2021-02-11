@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistics.R
 \name{compute_1_res}
 \alias{compute_1_res}
-\title{P values and ROC curves}
+\title{Compute the confusion matrix}
 \usage{
 compute_1_res(values, genes, genes_fibro, genes_immune, pval)
 }
@@ -21,5 +21,5 @@ compute_1_res(values, genes, genes_fibro, genes_immune, pval)
 In a list: True positive, False positive, True negative and False negative with associated rates
 }
 \description{
-P values and ROC curves
+Compute the confusion matrix(TP,FP,TN,FN) necessary to plot ROC curves
 }

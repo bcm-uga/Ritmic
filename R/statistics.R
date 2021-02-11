@@ -103,8 +103,10 @@ as_df_res = function(res_dereg){
   return(df)
 }
 
-#' P values and ROC curves
-#'
+#' Compute the confusion matrix   
+#' 
+#' @description Compute the confusion matrix(TP,FP,TN,FN) necessary to plot ROC curves 
+#'  
 #' @param values statistical test used
 #' @param genes gene names  
 #' @param genes_fibro gene expression in fibro cell line
