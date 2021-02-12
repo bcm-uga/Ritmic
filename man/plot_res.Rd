@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistics.R
 \name{plot_res}
 \alias{plot_res}
-\title{Plot ROC curves to check the PenDA improvement}
+\title{Check the PenDA enrichment: Plot ROC curves}
 \usage{
 plot_res(T_matrix, compute_1_res_output, pre_plot_res_output, graph_title)
 }
@@ -13,13 +13,15 @@ plot_res(T_matrix, compute_1_res_output, pre_plot_res_output, graph_title)
 
 \item{pre_plot_res_output}{Output from \code{pre_plot_res} function}
 
-\item{graph_title}{The title of the ROC curve graph}
+\item{graph_title}{Title of the ROC curve graph}
 }
 \value{
 ROC curves
 }
 \description{
-Compare the panda efficiency with tests: Kolmogorov-Smirnov, Student and Kantorovich versus a correlation test
+Compare non-enriched data by PenDA with a correlation test versus the PenDA efficiency with tests: \cr \itemize{
+\item{Kolmogorov-Smirnov} \item{Student} \item{Kantorovich}
+}
 }
 \seealso{
 \code{as_def_res} \code{pre_plot_res}
