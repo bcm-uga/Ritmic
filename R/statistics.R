@@ -23,16 +23,6 @@ pre_treat = function(penda_res,patientNumber){
   }
 }
 
-
-#On étudie la distance entre deux groupes, qui contiennent les gènes dérégulés VS les gènes inchangés, dans 100 individus chacun minimum.
-
-#On passe chaque gène de Penda un par un. Pour chaque type cellulaire, on calcule la distance des deux groupes. On obtient pour chacun des trois paramètres une matrice de distances de taille g*k avec pour chaque gène et pour chaque type cellulaire les valeurs : 
-  
-#  * Distance de kantorovich
-#* -log10(p-valeur) du test de Student
-#* Distance et -log10(p-valeur) du test de Kolmogorov-Smirnov
-#* cv de chaque groupe
-
 #' Compute distances between two groups: deregulated genes versus regulated genes
 #' @description  For each cell line and gene, four statistical tests are applied to evaluate the distance: 
 #' \tabular{lll}{
@@ -156,8 +146,11 @@ pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
   return(cor_T60_c)
 }
 
-#' Plot ROC curves to check PenDA improvement 
-#' @description Compare the panda efficiency with tests: Kolmogorov-Smirnov, Student and Kantorovich versus a correlation test
+#' Check the PenDA enrichment: Plot ROC curves  
+#' @description Compare non-enriched data by PenDA with a correlation test versus the PenDA efficiency with tests: \cr \itemize{
+#' \item{Kolmogorov-Smirnov} \item{Student} \item{Kantorovich}
+#' } 
+#' 
 #'
 #' @param T_matrix Matrix T output from corr_prop functions  
 #' @param compute_1_res_output Output from \code{compute_1_res} function
