@@ -7,7 +7,7 @@
 #' 
 #' @export
 pre_treat = function(penda_res,patientNumber){
-  if (patientNumber > ncol(penda_res$up_genes)){
+  if (patientNumber >= ncol(penda_res$up_genes)){
     stop("The minimum of patient number needs to be less than the sample dataset")
   } else {
     penda_res <- abs(penda_res$up_genes - penda_res$down_genes)
@@ -20,6 +20,8 @@ pre_treat = function(penda_res,patientNumber){
       table(g)[1] > patientNumber & table(g)[2] > patientNumber
     }))
     penda_res = penda_res[g_sup, ]
+    genes = genes_c[(genes_c %in% rownames(penda_res))]
+    return (list(penda_res = penda_res, genes = genes))
   }
 }
 
@@ -33,21 +35,22 @@ pre_treat = function(penda_res,patientNumber){
 #' Correlation        \tab Variability between two groups \tab Correlation coefficient 
 #' }
 #'
-#' @param penda_res Output from \code{pre_treat} function
+#' @param pre_treat_output Output from \code{pre_treat} function
 #' @param matrix_A Matrix A of proportion of cell lines distribution per tumor \cr \cr  Dimensions: n(cell lines) x alpha(cell lines proportion per patient) 
 #' 
 #' @importFrom stats ks.test sd t.test
 #' @importFrom ptlmapper kantorovich
+#' @import progress
 #' 
 #' @return Matrix of dimension geneNumber*cellLineNumber\cr \cr Each element is filled out by the four statistical tests: kanto, t-test, ks and cor 
 #' @export
 #'
-calc_dist = function(penda_res,matrix_A){
+calc_dist = function(pre_treat_output,matrix_A){
   options(warn = -1)
   res_dereg = c()
-  
+  penda_res <- pre_treat_output$penda_res
   # Progress bar
-  pb <- progress_bar$new(format = "  Running RiTMIC::calc_dist [:bar] :current/:total (:percent) in :elapsed",total = nrow(penda_res$down_genes), clear = FALSE, width= 80)
+  pb <- progress_bar$new(format = "  Running RiTMIC::calc_dist [:bar] :current/:total (:percent) in :elapsed",total = nrow(penda_res), clear = FALSE, width= 80)
   for(g in rownames(penda_res)){
     pb$tick()
     gene = penda_res[g, ]
@@ -57,9 +60,10 @@ calc_dist = function(penda_res,matrix_A){
     
     if(length(p_dereg) != 0 & length(p_zero) != 0){
       for(t in 1:nrow(matrix_A)){
+      
         x = matrix_A[t, p_dereg]
         y = matrix_A[t, p_zero]
-        
+      
         kanto_dist = kantorovich(x, y)
         student = -log10(t.test(x, y)$p.value)
         ks = ks.test(x, y)
@@ -78,7 +82,7 @@ calc_dist = function(penda_res,matrix_A){
                    type =  factor(res_dereg[, 4]),
                    student = as.numeric(res_dereg[, 6]),
                    ks = as.numeric(res_dereg[, 8]),  stringsAsFactors = F)
-  return(df)
+  return(list(df = df, genes = pre_treat_output$genes))
 }
 
 
@@ -133,18 +137,18 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
 #'
 #' @return correlation values between gene expressions
 #' @export 
-pre_plot_res <- function(matrix_T,matrix_A) {
+pre_plot_res <- function(matrix_T_control,matrix_A) {
   cor_T60_c = c()
   options(warn = -1)
-  for(g in rownames(matrix_T$T)){
+  for(g in rownames(matrix_T_control)){
     for(t in 1:nrow(matrix_A)){
-      c = cor(matrix_T$T[g, ], matrix_A[t, ])
+      print(matrix_T_control[g,])
+      c = cor(matrix_T_control[g, ], matrix_A[t, ])
       cor_T60_c = rbind(cor_T60_c, c(g, t, c))
     }
-    return(list(gene = genes_f, corr = cor_T60_c))
   }
   options(warn = 0)
-  return(c(cor_T60_c,matrix_T))
+  return(list(cor_T60_c = cor_T60_c, matrix_T = matrix_T_control))
 }
 
 #' Check the PenDA enrichment: Plot ROC curves  
@@ -152,8 +156,6 @@ pre_plot_res <- function(matrix_T,matrix_A) {
 #' \item{Kolmogorov-Smirnov} \item{Student} \item{Kantorovich}
 #' } 
 #'
-#' @param T_matrix Matrix T output from corr_prop functions  
-#' @param compute_1_res_output Output from \code{compute_1_res} function
 #' @param pre_plot_res_output Output from \code{pre_plot_res} function
 #' @param graph_title Title of the ROC curve graph 
 #' 
@@ -161,25 +163,29 @@ pre_plot_res <- function(matrix_T,matrix_A) {
 #'
 #'@return ROC curves
 #' @export
-plot_res = function(pre_plot_res_output, graph_title){
-  genes_f <- pvalues <- FPR <- TPR <- metrique <- c()
-  T_matrix <- pre_plot_res_output$matrix_T
-  pvalues = c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
-  genes = c(rownames(matrix_T$T)[matrix_T$g_immune], rownames(matrix_T$T)[matrix_T$g_fibro])
-  genes_f = genes[(genes %in% rownames(compute_1_res_output))]
-  g_fibro = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_fibro]])
-  g_immune = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_immune]])
+plot_res = function(pre_plot_res_output, calc_dist_output, graph_title){
+  
+  T <- pre_plot_res_output$matrix_T
+  cor_T <- pre_plot_res_output$cor_T60_c
+  
+  pvalues <- c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+  genes = c(rownames(T$T)[T$g_immune], rownames(T$T)[T$g_fibro])
+  genes_f <- calc_dist_output$genes
+  g_fibro = unique(genes_f[genes_f%in%rownames(T$T)[T$g_fibro]])
+  g_immune = unique(genes_f[genes_f%in%rownames(T$T)[T$g_immune]])
+  df <- calc_dist_output$df
+  
   res_ks = sapply(pvalues, function(x){
-    compute_1_res(compute_1_res_output$ks, compute_1_res_output$genes, g_fibro, g_immune, x)
+    compute_1_res(df$ks, df$genes, g_fibro, g_immune, x)
   })
   res_st = sapply(pvalues, function(x){
-    compute_1_res(compute_1_res_output$student, compute_1_res_output$genes, g_fibro, g_immune, x)
+    compute_1_res(df$student, df$genes, g_fibro, g_immune, x)
   })
   res_kanto = sapply(pvalues, function(x){
-    compute_1_res(compute_1_res_output$kanto, compute_1_res_output$genes, g_fibro, g_immune, x)
+    compute_1_res(df$kanto, df$genes, g_fibro, g_immune, x)
   })
   res_cor = sapply(pvalues, function(x){
-    compute_1_res(abs(as.numeric(pre_plot_res_output[, 3])), pre_plot_res_output[, 1], rownames(T_matrix$T)[T_matrix$g_fibro], rownames(T_matrix$T)[T_matrix$g_immune], x)})
+    compute_1_res(abs(as.numeric(cor_T[, 3])), cor_T[, 1], rownames(T$T)[T$g_fibro], rownames(T$T)[T$g_immune], x)})
   df = data.frame(pval = as.factor(rep(pvalues)),
                   FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
                   TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),

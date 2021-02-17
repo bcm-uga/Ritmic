@@ -4,16 +4,12 @@
 \alias{plot_res}
 \title{Check the PenDA enrichment: Plot ROC curves}
 \usage{
-plot_res(pre_plot_res_output, graph_title)
+plot_res(pre_plot_res_output, calc_dist_output, graph_title)
 }
 \arguments{
 \item{pre_plot_res_output}{Output from \code{pre_plot_res} function}
 
 \item{graph_title}{Title of the ROC curve graph}
-
-\item{T_matrix}{Matrix T output from corr_prop functions}
-
-\item{compute_1_res_output}{Output from \code{compute_1_res} function}
 }
 \value{
 ROC curves

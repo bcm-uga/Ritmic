@@ -4,10 +4,10 @@
 \alias{calc_dist}
 \title{Compute distances between two groups: deregulated genes versus regulated genes}
 \usage{
-calc_dist(penda_res, matrix_A)
+calc_dist(pre_treat_output, matrix_A)
 }
 \arguments{
-\item{penda_res}{Output from \code{pre_treat} function}
+\item{pre_treat_output}{Output from \code{pre_treat} function}
 
 \item{matrix_A}{Matrix A of proportion of cell lines distribution per tumor \cr \cr  Dimensions: n(cell lines) x alpha(cell lines proportion per patient)}
 }

@@ -4,12 +4,12 @@
 \alias{pre_plot_res}
 \title{Load environment required to \code{plot_res} function}
 \usage{
-pre_plot_res(matrix_T, matrix_A)
+pre_plot_res(matrix_T_control, matrix_A)
 }
 \arguments{
-\item{matrix_T}{The matrix_T output from corr_prop functions}
-
 \item{matrix_A}{The matrix_A from \code{simu_A}}
+
+\item{matrix_T}{The matrix_T output from corr_prop functions}
 
 \item{compute_1_res_output}{output from \code{compute_1_res} function}
 }

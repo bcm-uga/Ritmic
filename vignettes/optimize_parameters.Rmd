@@ -9,23 +9,23 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, echo = FALSE}
 # matrice D, , calculée pour T deconv et A deconv (= data case)
-D_2v2_c <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/D_2v2_c.rds")
+D_2v2_c <- readRDS("~/Datas/projects/data/extdata/D_2v2_c.rds")
 dim(D_2v2_c)
 # matrice T, T deconv, il faut prendre la colonne 1 pour avoir le type épi qui sert de data ctrl Penda
-EDec2_80p_c_t <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/EDec2_80p_c_t.rds")
+EDec2_80p_c_t <- readRDS("~/Datas/projects/data/extdata/EDec2_80p_c_t.rds")
 dim(EDec2_80p_c_t)
 
 matrice_T_control <- EDec2_80p_c_t[,1]
 dim(matrice_T_control)
 # matrice T après déconv [,1] = Epithelium: matrice contrôle de penda
-T_tum_ref <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/T_60_tum_rna_c_t.rds")
+T_tum_ref <- readRDS("~/Datas/projects/data/extdata/T_60_tum_rna_c_t.rds")
 dim(T_tum_ref$T)
 
 # matrice T tumeur de référence, composée de $T, $g_immune et $g_fibro, sert pour la vignette analyse_deconv
-T_60tum_c <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/T_60_tum_rna_c_t.rds")
+T_60tum_c <- readRDS("~/Datas/projects/data/extdata/T_60_tum_rna_c_t.rds")
 dim(T_60tum_c$T)
 # matrice A de référence 
-A_60p <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/A_60.rds")
+A_60p <- readRDS("~/Datas/projects/data/extdata/A_60.rds")
 dim(A_60)
 
 ```
@@ -44,24 +44,27 @@ list1 <- (0:7)/10
 list2 <- (81:100)/100
 listf <- c(list1,list2)
 iterations =  20
-dir.create("~/Datas/projects/RiTMIC/data")
+dir.create("~/Datas/projects/data/optimize_parameters",recursive = TRUE)
 for (threshold in listf){
   penda_res = penda::penda_test_1ctrl(samples = data_case, 
                    iterations =  iterations, 
                    L_H_list =  L_H_list, 
                    threshold = threshold)
-  saveRDS(penda_res,file = paste('~/Datas/projects/RiTMIC/data/res_', threshold, '.RDS',sep=""))
+  saveRDS(penda_res,file = paste('~/Datas/projects/data/optimize_parameters/res_', threshold, '.RDS',sep=""))
 }
 
 ```
 
 ```{r,echo=TRUE}
-test_matrix <- readRDS('~/Datas/projects/RiTMIC/data/res_0.8.RDS')
-dim(test_matrix)
-test_matrix
+test_matrix <- readRDS('~/Datas/projects/data/optimize_parameters/res_0.8.RDS')
+dim(test_matrix$down_genes)
+dim(test_matrix$up_genes)
 pre_treat_res <- RiTMIC::pre_treat(penda_res = test_matrix, patientNumber=5)
-dist <- RiTMIC ::calc_dist(penda_res=pre_treat_res, matrix_A = A_60p)
-pre_plot <- RiTMIC::pre_plot_res(matrix_T = )
+distance <- RiTMIC ::calc_dist(pre_treat_output = pre_treat_res, matrix_A = A_60p)
+saveRDS(distance,file = paste('~/Datas/projects/data/optimize_parameters/dist_0.8.RDS',sep=""))
+distance <- readRDS('~/Datas/projects/data/optimize_parameters/dist_0.8.RDS')
+pre_plot <- RiTMIC::pre_plot_res(matrix_T = T_60tum_c, matrix_A = A_60p)
+RiTMIC::plot_res(pre_plot_res_output = pre_plot, calc_dist_output = distance, graph_title = "Test")
 
 ```
 
