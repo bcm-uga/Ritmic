@@ -7,11 +7,9 @@
 calc_corr(matrix_T_control, matrix_A)
 }
 \arguments{
+\item{matrix_T_control}{The matrix_T output from corr_prop functions}
+
 \item{matrix_A}{The matrix_A from \code{simu_A}}
-
-\item{matrix_T}{The matrix_T output from corr_prop functions}
-
-\item{compute_1_res_output}{output from \code{compute_1_res} function}
 }
 \value{
 correlation values between gene expressions

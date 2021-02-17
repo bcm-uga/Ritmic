@@ -9,6 +9,8 @@ plot_res(calc_corr_output, calc_dist_output, graph_title)
 \arguments{
 \item{calc_corr_output}{Output from \code{pre_plot_res} function}
 
+\item{calc_dist_output}{Output from \code{calc_dist} function}
+
 \item{graph_title}{Title of the ROC curve graph}
 }
 \value{
