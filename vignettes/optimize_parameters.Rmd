@@ -65,10 +65,10 @@ saveRDS(distance,file = '~/Datas/projects/data/optimize_parameters/dist_0.8.RDS'
 
 distance <- readRDS('~/Datas/projects/data/optimize_parameters/dist_0.8.RDS')
 
-pre_plot <- RiTMIC::calc_corr(matrix_T = T_60tum_c, matrix_A = A_60p)
-saveRDS(pre_plot,file = '~/Datas/projects/data/optimize_parameters/pre_plot.RDS')
-pre_plot <- readRDS('~/Datas/projects/data/optimize_parameters/pre_plot.RDS')
-RiTMIC::plot_res(calc_corr_output = pre_plot, calc_dist_output = distance, graph_title = "Test")
+calc_corr <- RiTMIC::calc_corr(matrix_T = T_60tum_c, matrix_A = A_60p)
+saveRDS(calc_corr,file = '~/Datas/projects/data/optimize_parameters/calc_corr')
+calc_corr <- readRDS('~/Datas/projects/data/optimize_parameters/calc_corr')
+RiTMIC::plot_res(calc_corr_output = calc_corr, calc_dist_output = distance, graph_title = "Test")
 
 ```
 
