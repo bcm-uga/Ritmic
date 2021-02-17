@@ -28,11 +28,23 @@ layout(1, respect=TRUE)
 
 `RiTMIC` Part 3: **Statistical analysis of PenDA outputs**
 
+# Statistical analysis 
+
+`statistics` has been developed to show the model improvement  thanks to the __PenDA__ analysis. 
+
+The ROC curve is plotted at the end of the pipeline to observe __different distance methods(ks, student, kanto) versus the standard correlation comparison__.
+
+`PenDA` analysis is an open-access R package that detects gene deregulation in individual samples by relative gene ordering and differential expression testing. This analysis will be performed on step 2 of the pipeline.
+
+# Understanding results 
+
+If curves of distance methods has a higher True Positive Rate (TPR) combined a lower False Positive Rate(FPR) than correlation curve, __PenDA__ improves the model.  
+
 # Presentation of the input dataset
 
 Three data input are required to perform the statistical analysis :
 
-- Penda output : the down and up lists concatenated in a matrix of dimension: n*g 
+- penda::penda_test_1ctrl output : the down and up matrices of dimension: n*g 
   - g: gene names 
   - n: the deregulation status of the cancer compared to the control
     - -1: Down-regulated gene 
@@ -42,7 +54,41 @@ Three data input are required to perform the statistical analysis :
 - Matrix A of cell lines proportion distribution: proportion matrix k*n
   - n: patient 
   - k: proportion of the different cell lines
-- 
+  
+- Matrix T of reference cell lines: proportion matrix ge x nc
+  - ge: gene expression
+  - nc: number of cell lines 
+  
+## Step 1: Loading required dataset and apply RiTMIC::pre_treat function
 
-Matrices are sorted to have patien
-On trie les matrices pour avoir les patients en commun, et seulement les gènes avec plus de 100 patients dérégulés ou non dérégulés.
+```{r, label="loading_data_set_and_pre_treat_function"}
+# Penda::penda_test_1_ctrl output 
+test_matrix <- readRDS('~/Datas/projects/data/optimize_parameters/res_0.8.RDS')
+dim(test_matrix$down_genes)
+dim(test_matrix$up_genes)
+
+# Matrix_A of cell line proportions distribution per sample
+matrix_A <- readRDS("~/Datas/projects/data/extdata/A_60.rds")
+dim(matrix_A)
+
+# Matrix T control 
+matrix_T_control <- readRDS("~/Datas/projects/data/extdata/T_60_tum_rna_c_t.rds")
+
+pre_treat_res <- RiTMIC::pre_treat(penda_res = test_matrix, patientNumber=5)
+
+```
+
+```{r,label="RiTMIC::calc_dist"}
+distance <- RiTMIC ::calc_dist(pre_treat_output = pre_treat_res, matrix_A = matrix_A)
+calc_corr <- RiTMIC::calc_corr(matrix_T = matrix_T_control, matrix_A = A_60p)
+```
+
+```{r,label="RiTMIC::plot_res"}
+RiTMIC::plot_res(calc_corr_output = calc_corr, calc_dist_output = distance, graph_title = "Analyse the model improvement thanks to PenDA with ROC curves")
+```
+
+# Session Information
+
+```{r, results="verbatim"}
+sessionInfo()
+```

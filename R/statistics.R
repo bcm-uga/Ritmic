@@ -50,7 +50,7 @@ calc_dist = function(pre_treat_output,matrix_A){
   res_dereg = c()
   penda_res <- pre_treat_output$penda_res
   # Progress bar
-  pb <- progress_bar$new(format = "  Running RiTMIC::calc_dist [:bar] :current/:total (:percent) in :elapsed",total = nrow(penda_res), clear = FALSE, width= 80)
+  pb <- progress_bar$new(format = "  Running RiTMIC::calc_dist [:bar] :current/:total (:percent)",total = nrow(penda_res), clear = FALSE, width= 80)
   for(g in rownames(penda_res)){
     pb$tick()
     gene = penda_res[g, ]
@@ -74,7 +74,7 @@ calc_dist = function(pre_treat_output,matrix_A){
       }
     }
   }
-  options(warn = 0)
+  
   colnames(res_dereg) = c("Gene", "nb_dereg", "nb_zero", "type", "kanto", "student", "ks d", "ks pvalue", "cvx", "cvy")
   
   df =  data.frame(genes = res_dereg[, 1],
@@ -82,6 +82,7 @@ calc_dist = function(pre_treat_output,matrix_A){
                    type =  factor(res_dereg[, 4]),
                    student = as.numeric(res_dereg[, 6]),
                    ks = as.numeric(res_dereg[, 8]),  stringsAsFactors = F)
+  options(warn = 0)
   return(list(df = df, genes = pre_treat_output$genes))
 }
 
@@ -106,7 +107,8 @@ calc_dist = function(pre_treat_output,matrix_A){
 #' @param genes_immune gene expression in immune cell line
 #' @param pval list of p-values observed
 #'
-#' @return In a list: True positive, False positive, True negative and False negative with associated rates 
+#' @return In a list: True positive, False positive, True negative and False negative with associated rates
+#' @export  
 compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
   names(values) = stringr::str_c(genes, rep(1:4))
   values = values[!is.na(values)]
@@ -188,8 +190,9 @@ plot_res = function(calc_corr_output, calc_dist_output, graph_title){
   })
   
   res_cor = sapply(pvalues, function(x){
-    compute_1_res(abs(as.numeric(cor_T[, 3])), cor_T[, 1], rownames(T$T)[T$g_fibro], rownames(T$T)[T$g_immune], x)})
-  print(res_cor)
+    compute_1_res(abs(as.numeric(cor_T[, 3])), cor_T[, 1], rownames(T$T)[T$g_fibro], rownames(T$T)[T$g_immune], x)
+  })
+  
   df = data.frame(pval = as.factor(rep(pvalues)),
                   FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
                   TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
