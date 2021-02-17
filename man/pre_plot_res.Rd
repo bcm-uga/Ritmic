@@ -4,7 +4,7 @@
 \alias{pre_plot_res}
 \title{Load environment required to \code{plot_res} function}
 \usage{
-pre_plot_res(matrix_T, matrix_A, compute_1_res_output)
+pre_plot_res(matrix_T, matrix_A)
 }
 \arguments{
 \item{matrix_T}{The matrix_T output from corr_prop functions}
