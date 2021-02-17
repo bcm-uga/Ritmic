@@ -63,8 +63,10 @@ pre_treat_res <- RiTMIC::pre_treat(penda_res = test_matrix, patientNumber=5)
 distance <- RiTMIC ::calc_dist(pre_treat_output = pre_treat_res, matrix_A = A_60p)
 saveRDS(distance,file = paste('~/Datas/projects/data/optimize_parameters/dist_0.8.RDS',sep=""))
 distance <- readRDS('~/Datas/projects/data/optimize_parameters/dist_0.8.RDS')
-pre_plot <- RiTMIC::pre_plot_res(matrix_T = T_60tum_c, matrix_A = A_60p)
-RiTMIC::plot_res(pre_plot_res_output = pre_plot, calc_dist_output = distance, graph_title = "Test")
+pre_plot <- RiTMIC::calc_corr(matrix_T = T_60tum_c, matrix_A = A_60p)
+saveRDS(pre_plot,file = paste('~/Datas/projects/data/optimize_parameters/pre_plot.RDS',sep=""))
+pre_plot <- readRDS('~/Datas/projects/data/optimize_parameters/pre_plot.RDS')
+RiTMIC::plot_res(calc_corr_output = pre_plot, calc_dist_output = distance, graph_title = "Test")
 
 ```
 

@@ -137,18 +137,18 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
 #'
 #' @return correlation values between gene expressions
 #' @export 
-pre_plot_res <- function(matrix_T_control,matrix_A) {
-  cor_T60_c = c()
+calc_corr <- function(matrix_T_control,matrix_A) {
   options(warn = -1)
-  for(g in rownames(matrix_T_control)){
+  cor_T60_c = c()
+  pb <- progress_bar$new(format = "  Running RiTMIC::pre_plot_res [:bar] :current/:total (:percent) in :elapsed",total = nrow(matrix_T_control$T), clear = FALSE, width= 80)
+  for(g in rownames(matrix_T_control$T)){
     for(t in 1:nrow(matrix_A)){
-      print(matrix_T_control[g,])
-      c = cor(matrix_T_control[g, ], matrix_A[t, ])
+      c = cor(matrix_T_control$T[g, ], matrix_A[t, ])
       cor_T60_c = rbind(cor_T60_c, c(g, t, c))
     }
   }
   options(warn = 0)
-  return(list(cor_T60_c = cor_T60_c, matrix_T = matrix_T_control))
+  return(list(cor_T = cor_T60_c, matrix_T = matrix_T_control))
 }
 
 #' Check the PenDA enrichment: Plot ROC curves  
@@ -156,18 +156,18 @@ pre_plot_res <- function(matrix_T_control,matrix_A) {
 #' \item{Kolmogorov-Smirnov} \item{Student} \item{Kantorovich}
 #' } 
 #'
-#' @param pre_plot_res_output Output from \code{pre_plot_res} function
+#' @param calc_corr_output Output from \code{pre_plot_res} function
 #' @param graph_title Title of the ROC curve graph 
 #' 
 #' @seealso \code{as_def_res} \code{pre_plot_res}
 #'
 #'@return ROC curves
 #' @export
-plot_res = function(pre_plot_res_output, calc_dist_output, graph_title){
+plot_res = function(calc_corr_output, calc_dist_output, graph_title){
   
-  T <- pre_plot_res_output$matrix_T
-  cor_T <- pre_plot_res_output$cor_T60_c
-  
+  T <- calc_corr_output$matrix_T
+
+  cor_T <- calc_corr_output$cor_T
   pvalues <- c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
   genes = c(rownames(T$T)[T$g_immune], rownames(T$T)[T$g_fibro])
   genes_f <- calc_dist_output$genes
@@ -178,14 +178,18 @@ plot_res = function(pre_plot_res_output, calc_dist_output, graph_title){
   res_ks = sapply(pvalues, function(x){
     compute_1_res(df$ks, df$genes, g_fibro, g_immune, x)
   })
+  
   res_st = sapply(pvalues, function(x){
     compute_1_res(df$student, df$genes, g_fibro, g_immune, x)
   })
+ 
   res_kanto = sapply(pvalues, function(x){
     compute_1_res(df$kanto, df$genes, g_fibro, g_immune, x)
   })
+  
   res_cor = sapply(pvalues, function(x){
     compute_1_res(abs(as.numeric(cor_T[, 3])), cor_T[, 1], rownames(T$T)[T$g_fibro], rownames(T$T)[T$g_immune], x)})
+  print(res_cor)
   df = data.frame(pval = as.factor(rep(pvalues)),
                   FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
                   TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
