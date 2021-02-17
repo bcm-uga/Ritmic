@@ -144,7 +144,7 @@ RiTMIC::plot_heatmap_hclust(data = penda_res2$down_genes - penda_res2$up_genes)
 
 The PenDA vignette of the specific version for one control of the `penda` package version 1.0 was executed on genes, using 1 control sample and case samples. #CF : Initial file 
 
-1 control were used to generate L and H lists using the following parameters: s_max = `r s_max`.
+1 control was used to generate L and H lists using the following parameters: s_max = `r s_max`.
 
 The PenDA method was then applied on `r ncol(data_case)` cases, with the following set of parameters: threshold = `r threshold`.
 
