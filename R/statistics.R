@@ -46,7 +46,10 @@ calc_dist = function(penda_res,matrix_A){
   options(warn = -1)
   res_dereg = c()
   
+  # Progress bar
+  pb <- progress_bar$new(format = "  Running RiTMIC::calc_dist [:bar] :current/:total (:percent) in :elapsed",total = nrow(penda_res$down_genes), clear = FALSE, width= 80)
   for(g in rownames(penda_res)){
+    pb$tick()
     gene = penda_res[g, ]
     
     p_dereg = which(gene != 0)
@@ -130,9 +133,7 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
 #'
 #' @return correlation values between gene expressions
 #' @export 
-pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
-  genes = c(rownames(matrix_T$T)[matrix_T$g_immune], rownames(matrix_T$T)[matrix_T$g_fibro])
-  genes_f = genes[(genes %in% rownames(compute_1_res_output))]
+pre_plot_res <- function(matrix_T,matrix_A) {
   cor_T60_c = c()
   options(warn = -1)
   for(g in rownames(matrix_T$T)){
@@ -143,7 +144,7 @@ pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
     return(list(gene = genes_f, corr = cor_T60_c))
   }
   options(warn = 0)
-  return(cor_T60_c)
+  return(c(cor_T60_c,matrix_T))
 }
 
 #' Check the PenDA enrichment: Plot ROC curves  
@@ -160,8 +161,12 @@ pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
 #'
 #'@return ROC curves
 #' @export
-plot_res = function(T_matrix, compute_1_res_output, pre_plot_res_output, graph_title){
+plot_res = function(pre_plot_res_output, graph_title){
   genes_f <- pvalues <- FPR <- TPR <- metrique <- c()
+  T_matrix <- pre_plot_res_output$matrix_T
+  pvalues = c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+  genes = c(rownames(matrix_T$T)[matrix_T$g_immune], rownames(matrix_T$T)[matrix_T$g_fibro])
+  genes_f = genes[(genes %in% rownames(compute_1_res_output))]
   g_fibro = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_fibro]])
   g_immune = unique(genes_f[genes_f%in%rownames(T_matrix$T)[T_matrix$g_immune]])
   res_ks = sapply(pvalues, function(x){
