@@ -7,7 +7,7 @@
 #' 
 #' @export
 pre_treat = function(penda_res,patientNumber){
-  if (patientNumber > colnames(penda_res)){
+  if (patientNumber > colnames(penda_res$up_genes)){
     stop("The minimum of patient number needs to be less than the sample dataset")
   } else {
     penda_res <- abs(penda_res$up_genes - penda_res$down_genes)
@@ -150,7 +150,6 @@ pre_plot_res <- function(matrix_T,matrix_A,compute_1_res_output) {
 #' @description Compare non-enriched data by PenDA with a correlation test versus the PenDA efficiency with tests: \cr \itemize{
 #' \item{Kolmogorov-Smirnov} \item{Student} \item{Kantorovich}
 #' } 
-#' 
 #'
 #' @param T_matrix Matrix T output from corr_prop functions  
 #' @param compute_1_res_output Output from \code{compute_1_res} function
