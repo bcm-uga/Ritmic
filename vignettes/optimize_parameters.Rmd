@@ -56,18 +56,16 @@ for (threshold in listf){
 ```
 
 ```{r,echo=TRUE}
-cor_T60_c = c() 
-cor_T60_n = c()
-options(warn = -1)
-for(g in rownames(T_60tum_c$T)){
-  for(t in 1:nrow(A_60p)){
-    #On fait les deux groupes
-    c = cor(T_60tum_c$T[g, ], A_60p[t, ])
-    cor_T60_c = rbind(cor_T60_c, c(g, t, c))
-  }
-}
-options(warn = 0)
+test_matrix <- readRDS('~/Datas/projects/RiTMIC/data/res_0.8.RDS')
+dim(test_matrix)
+test_matrix
+pre_treat_res <- RiTMIC::pre_treat(penda_res = test_matrix, patientNumber=5)
+dist <- RiTMIC ::calc_dist(penda_res=pre_treat_res, matrix_A = A_60p)
+pre_plot <- RiTMIC::pre_plot_res(matrix_T = )
 
+```
+
+```{r,echo=TRUE}
 for (threshold in listf){
   file <- paste('data_',threshold,'.RDS',sep="")
   file <- readRDS('~/Datas/projects/RiTMIC/data/res', '_', threshold, '.RDS',sep="")
@@ -90,4 +88,3 @@ for (threshold in listf){
   plot_res(genes_c_f_1v1, T_60tum_c, df_1v1_c, cor_T60_c, "T tum ref VS T epi ref c" )
   }
 ```
-
