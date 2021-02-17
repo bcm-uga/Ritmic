@@ -129,9 +129,8 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
 
 #' Load environment required to \code{plot_res} function
 #'
-#' @param matrix_T The matrix_T output from corr_prop functions
+#' @param matrix_T_control The matrix_T output from corr_prop functions
 #' @param matrix_A The matrix_A from \code{simu_A}
-#' @param compute_1_res_output output from \code{compute_1_res} function
 #' 
 #' @seealso \code{compute_1_res} \code{plot_res}
 #'
@@ -157,6 +156,7 @@ calc_corr <- function(matrix_T_control,matrix_A) {
 #' } 
 #'
 #' @param calc_corr_output Output from \code{pre_plot_res} function
+#' @param calc_dist_output Output from \code{calc_dist} function
 #' @param graph_title Title of the ROC curve graph 
 #' 
 #' @seealso \code{as_def_res} \code{pre_plot_res}
