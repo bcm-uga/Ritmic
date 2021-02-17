@@ -7,7 +7,7 @@
 #' 
 #' @export
 pre_treat = function(penda_res,patientNumber){
-  if (patientNumber > colnames(penda_res$up_genes)){
+  if (patientNumber > ncol(penda_res$up_genes)){
     stop("The minimum of patient number needs to be less than the sample dataset")
   } else {
     penda_res <- abs(penda_res$up_genes - penda_res$down_genes)
