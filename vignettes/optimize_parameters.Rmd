@@ -41,7 +41,7 @@ L = L_H_list$L
 H = L_H_list$H
 
 list1 <- (0:7)/10
-list2 <- (81:100)/100
+list2 <- (80:100)/100
 listf <- c(list1,list2)
 iterations =  20
 dir.create("~/Datas/projects/data/optimize_parameters",recursive = TRUE)
@@ -61,35 +61,75 @@ dim(test_matrix$down_genes)
 dim(test_matrix$up_genes)
 pre_treat_res <- RiTMIC::pre_treat(penda_res = test_matrix, patientNumber=5)
 distance <- RiTMIC ::calc_dist(pre_treat_output = pre_treat_res, matrix_A = A_60p)
-saveRDS(distance,file = paste('~/Datas/projects/data/optimize_parameters/dist_0.8.RDS',sep=""))
+saveRDS(distance,file = '~/Datas/projects/data/optimize_parameters/dist_0.8.RDS')
+
 distance <- readRDS('~/Datas/projects/data/optimize_parameters/dist_0.8.RDS')
+
 pre_plot <- RiTMIC::calc_corr(matrix_T = T_60tum_c, matrix_A = A_60p)
-saveRDS(pre_plot,file = paste('~/Datas/projects/data/optimize_parameters/pre_plot.RDS',sep=""))
+saveRDS(pre_plot,file = '~/Datas/projects/data/optimize_parameters/pre_plot.RDS')
 pre_plot <- readRDS('~/Datas/projects/data/optimize_parameters/pre_plot.RDS')
 RiTMIC::plot_res(calc_corr_output = pre_plot, calc_dist_output = distance, graph_title = "Test")
 
 ```
 
 ```{r,echo=TRUE}
-for (threshold in listf){
-  file <- paste('data_',threshold,'.RDS',sep="")
-  file <- readRDS('~/Datas/projects/RiTMIC/data/res', '_', threshold, '.RDS',sep="")
-  
-  penda_abs = abs(file$up_genes - file$down_genes)
-  treated_file <- RiTMIC::pre_treat(penda_abs)
-  dim(treated_file)
-    
-  genes_file = genes_c[(genes_c %in% rownames(treated_file))]
-  length(genes_c_f_1v1)
-  
-  res_dereg <- calc_dist(treated_file)
-  print("Dim des matrices de résultat")
-  dim(res_dereg_1v1_c)
+A_60p <- readRDS("~/Datas/projects/data/extdata/A_60.rds")
+calc_corr_output <- readRDS('~/Datas/projects/data/optimize_parameters/pre_plot.RDS')
+T <- calc_corr_output$matrix_T
+cor_T <- calc_corr_output$cor_T
+pvalues <- c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+genes = c(rownames(T$T)[T$g_immune], rownames(T$T)[T$g_fibro])
+df = data.frame(pval = c(),
+                  FPR = c(),
+                  TPR = c(),
+                  metrique = c(),
+                  'threshold' = c())
 
-  df_res <- RiTMIC::as_df_res(res_dereg = res_dereg)
+list1 <- (1:7)/10
+list2 <- (80:100)/100
+listf <- c(list1,list2)
+
+for (threshold in listf){
+  penda_res <- readRDS(paste('~/Datas/projects/data/optimize_parameters/res_',threshold,'.RDS',sep=""))
+  pre_treat_res <- RiTMIC::pre_treat(penda_res = penda_res, patientNumber=5)
+  calc_dist_output <- RiTMIC ::calc_dist(pre_treat_output = pre_treat_res, matrix_A = A_60p)
+  genes_f <- calc_dist_output$genes
+  df <- calc_dist_output$df
+  g_fibro = unique(genes_f[genes_f%in%rownames(T$T)[T$g_fibro]])
+  g_immune = unique(genes_f[genes_f%in%rownames(T$T)[T$g_immune]])
+
+  res_ks = sapply(pvalues, function(x){
+    compute_1_res(df$ks, df$genes, g_fibro, g_immune, x)
+  })
+  res_st = sapply(pvalues, function(x){
+    compute_1_res(df$student, df$genes, g_fibro, g_immune, x)
+  })
+  res_kanto = sapply(pvalues, function(x){
+    compute_1_res(df$kanto, df$genes, g_fibro, g_immune, x)
+  })
+  res_cor = sapply(pvalues, function(x){
+    compute_1_res(abs(as.numeric(cor_T[, 3])), cor_T[, 1], rownames(T$T)[T$g_fibro], rownames(T$T)[T$g_immune], x)})
+  df = rbind(df,pval = as.factor(rep(pvalues)),
+                  FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
+                  TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
+                  metrique = rep(c("ks", "student", "kanto", "correlation",threshold), each = length(pvalues)))
   
-  pvalues = c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
-  
-  plot_res(genes_c_f_1v1, T_60tum_c, df_1v1_c, cor_T60_c, "T tum ref VS T epi ref c" )
-  }
+}
+saveRDS(df, file = '~/Datas/projects/data/optimize_parameters/df.RDS')
+plot_kanto = ggplot(c(df[df$metrique == "kanto"],df[df$metrique == "cor"][1,]), aes(x = FPR, y = TPR, color = threshold)) +
+    geom_point() + 
+    geom_line() + 
+    theme_minimal()+
+    labs(title = Kanto)
+plot_student = ggplot(df[df$metrique == "student"], aes(x = FPR, y = TPR, color = threshold)) +
+    geom_point() + 
+    geom_line() + 
+    theme_minimal()+
+    labs(title = Student)
+plot_ks = ggplot(df[df$metrique == "ks"], aes(x = FPR, y = TPR, color = threshold)) +
+    geom_point() + 
+    geom_line() + 
+    theme_minimal()+
+    labs(title = ks)
+
 ```
