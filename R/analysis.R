@@ -66,7 +66,7 @@ plot_figure = function(data_patients){
 #'
 #' @export
 plot_heatmap_hclust = function (data) {
-  if ("up_genes" %in% colnames(data)){
+  if (is.matrix(data$up_genes)){
     data <- data$down_genes - data$up_genes
     sum(apply(is.na(data), 1, any))
     data = data[!apply(is.na(data), 1, any), ]
