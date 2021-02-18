@@ -20,8 +20,8 @@ pre_treat = function(penda_res,patientNumber){
       table(g)[1] > patientNumber & table(g)[2] > patientNumber
     }))
     penda_res = penda_res[g_sup, ]
-    genes = genes_c[(genes_c %in% rownames(penda_res))]
-    return (list(penda_res = penda_res, genes = genes))
+    
+    return (penda_res)
   }
 }
 
@@ -48,12 +48,12 @@ pre_treat = function(penda_res,patientNumber){
 calc_dist = function(pre_treat_output,matrix_A){
   options(warn = -1)
   res_dereg = c()
-  penda_res <- pre_treat_output$penda_res
+  genes = genes_c[(genes_c %in% rownames(pre_treat_output))]
   # Progress bar
-  pb <- progress_bar$new(format = "  Running RiTMIC::calc_dist [:bar] :current/:total (:percent)",total = nrow(penda_res), clear = FALSE, width= 80)
-  for(g in rownames(penda_res)){
+  pb <- progress_bar$new(format = "  Running RiTMIC::calc_dist [:bar] :current/:total (:percent)",total = nrow(pre_treat_output), clear = FALSE, width= 80)
+  for(g in rownames(pre_treat_output)){
     pb$tick()
-    gene = penda_res[g, ]
+    gene = pre_treat_output[g, ]
     
     p_dereg = which(gene != 0)
     p_zero = which(gene == 0)
@@ -83,7 +83,7 @@ calc_dist = function(pre_treat_output,matrix_A){
                    student = as.numeric(res_dereg[, 6]),
                    ks = as.numeric(res_dereg[, 8]),  stringsAsFactors = F)
   options(warn = 0)
-  return(list(df = df, genes = pre_treat_output$genes))
+  return(list(df = df, genes = genes))
 }
 
 
@@ -168,7 +168,6 @@ calc_corr <- function(matrix_T_control,matrix_A) {
 plot_res = function(calc_corr_output, calc_dist_output, graph_title){
   
   T <- calc_corr_output$matrix_T
-
   cor_T <- calc_corr_output$cor_T
   pvalues <- c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
   genes = c(rownames(T$T)[T$g_immune], rownames(T$T)[T$g_fibro])
