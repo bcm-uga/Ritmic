@@ -63,12 +63,12 @@ Three data input are required to perform the statistical analysis :
 
 ```{r, label="loading_data_set_and_pre_treat_function"}
 # Penda::penda_test_1_ctrl output 
-test_matrix <- readRDS('~/Datas/projects/data/optimize_parameters/res_0.8.RDS')
+test_matrix <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/penda_res.RDS")
 dim(test_matrix$down_genes)
 dim(test_matrix$up_genes)
 
 # Matrix_A of cell line proportions distribution per sample
-matrix_A <- readRDS("~/Datas/projects/data/extdata/A_60.rds")
+matrix_A <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/matrix_A")
 dim(matrix_A)
 
 # Matrix T control 

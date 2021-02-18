@@ -48,6 +48,7 @@ tumorous_sample_number = 12
 
 matrix_A = RiTMIC::simu_A(tumorous_sample_number,cell_type_proportions)
 dim(matrix_A)
+saveRDS(matrix_A, file="~/Datas/projects/RiTMIC/inst/extdata/matrix_A.RDS")
 ```
 
 The function `simu_A` simulates the matrix of proportion of cell lines distribution per tumor. Be careful, the `tumorous_sample_number` needs to be the new wanted tumor number for `simu_T_cancer` function
