@@ -115,7 +115,7 @@ penda_res2 = penda::penda_test_1ctrl(samples = data_case2,
                    threshold = threshold)
 
 #Store the penda_res output for the res_statistics vignette
-saveRDS(penda_res, file="~/Datas/projects/RiTMIC/inst/extdata/penda_res.rds")
+saveRDS(penda_res, file="~/Datas/projects/RiTMIC/inst/extdata/penda_res.RDS")
 ```
 
 The function  `penda_test_1ctrl` infers for each gene and for each sample of the `data_case` matrix its deregulation status (up-regulation, down-regulation or no deregulation). This function analyses case samples one by one. It is based on the `L_H_list` and tracks for changes in relative ordering in the sample of interest. If these changes exceed the given `threshold`, the gene of interest is considered as deregulated. 
@@ -136,6 +136,7 @@ RiTMIC::plot_figure(data_patients = data_bypatient2)
 ```
 
 ```{r fig.width=9, fig.height=9, echo=FALSE}
+
 RiTMIC::plot_heatmap_hclust(data = penda_res)
 RiTMIC::plot_heatmap_hclust(data = penda_res2)
 ```
