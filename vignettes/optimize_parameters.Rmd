@@ -56,6 +56,7 @@ for (threshold in listf){
 ```
 
 ```{r,echo=TRUE}
+#Test on 1 res analysis 
 test_matrix <- readRDS('~/Datas/projects/data/optimize_parameters/res_0.8.RDS')
 dim(test_matrix$down_genes)
 dim(test_matrix$up_genes)
@@ -73,6 +74,7 @@ RiTMIC::plot_res(calc_corr_output = calc_corr, calc_dist_output = distance, grap
 ```
 
 ```{r,echo=TRUE}
+# Test all samples
 A_60p <- readRDS("~/Datas/projects/data/extdata/A_60.rds")
 calc_corr_output <- readRDS('~/Datas/projects/data/optimize_parameters/pre_plot.RDS')
 T <- calc_corr_output$matrix_T
@@ -120,7 +122,6 @@ for (threshold in listf){
                   metrique = rep(c("ks", "student", "kanto", "correlation"),each = length(pvalues)))
     dfFinal <- rbind(dfFinal,temp)
   }
-  
 }
 saveRDS(dfFinal, file = '~/Datas/projects/data/optimize_parameters/df.RDS')
 ```
