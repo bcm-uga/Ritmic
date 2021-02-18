@@ -66,31 +66,36 @@ plot_figure = function(data_patients){
 #'
 #' @export
 plot_heatmap_hclust = function (data) {
-  sum(apply(is.na(data), 1, any))
-  data = data[!apply(is.na(data), 1, any), ]
-  
-  # clustering base on correlation for tissues
-  tmp_d = data
-  tmp_d = t(tmp_d) - apply(tmp_d, 2, mean)
-  tmp_d = t(tmp_d)
-  tmp_d = cor(tmp_d, method="pe")
-  dim(tmp_d)
-  hc_col = hclust(dist(1 - tmp_d), method="complete")
-  
-  Colv = as.dendrogram(hc_col)
-  dendrogram="col"      
-  
-  # clustering base on eucl. dist. for genes
-  d = dist(data)
-  hc_row = hclust(d, method="complete")
-  Rowv = as.dendrogram(hc_row)
-  dendrogram="both"      
-  
-  # col
-  colors=c("blue", "gray", "red")
-  cols = colorRampPalette(colors)(20)
-  
-  foo = gplots::heatmap.2(data, Rowv=Rowv, Colv=Colv, dendrogram="col", trace="none", col=cols,
-                          labRow = FALSE,labCol = FALSE,
-                          main=paste0("Penda (", nrow(data), " genes x ", ncol(data), " samples)"), mar=c(10,5), useRaster=TRUE)
+  if ("up_genes" %in% colnames(data)){
+    data <- data$down_genes - data$up_genes
+    sum(apply(is.na(data), 1, any))
+    data = data[!apply(is.na(data), 1, any), ]
+    
+    # clustering base on correlation for tissues
+    tmp_d = data
+    tmp_d = t(tmp_d) - apply(tmp_d, 2, mean)
+    tmp_d = t(tmp_d)
+    tmp_d = cor(tmp_d, method="pe")
+    dim(tmp_d)
+    hc_col = hclust(dist(1 - tmp_d), method="complete")
+    
+    Colv = as.dendrogram(hc_col)
+    dendrogram="col"      
+    
+    # clustering base on eucl. dist. for genes
+    d = dist(data)
+    hc_row = hclust(d, method="complete")
+    Rowv = as.dendrogram(hc_row)
+    dendrogram="both"      
+    
+    # col
+    colors=c("blue", "gray", "red")
+    cols = colorRampPalette(colors)(20)
+    
+    foo = gplots::heatmap.2(data, Rowv=Rowv, Colv=Colv, dendrogram="col", trace="none", col=cols,
+                            labRow = FALSE,labCol = FALSE,
+                            main=paste0("Penda (", nrow(data), " genes x ", ncol(data), " samples)"), mar=c(10,5), useRaster=TRUE)
+  } else {
+      stop("Wrong format, you need to use penda::penda_test functions")
+  }
 }
