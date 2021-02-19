@@ -48,7 +48,7 @@ pre_treat = function(penda_res,patientNumber){
 calc_dist = function(pre_treat_output,matrix_A){
   options(warn = -1)
   res_dereg = c()
-  genes = genes_c[(genes_c %in% rownames(pre_treat_output))]
+  genes = rownames(pre_treat_output)
   # Progress bar
   pb <- progress_bar$new(format = "  Running RiTMIC::calc_dist [:bar] :current/:total (:percent)",total = nrow(pre_treat_output), clear = FALSE, width= 80)
   for(g in rownames(pre_treat_output)){
@@ -161,12 +161,12 @@ calc_corr <- function(matrix_T_control,matrix_A) {
 #' @param calc_dist_output Output from \code{calc_dist} function
 #' @param graph_title Title of the ROC curve graph 
 #' 
-#' @seealso \code{as_def_res} \code{pre_plot_res}
+#' @seealso \code{as_def_res} \code{pre_plot_res} \code{compute_1_res}
 #'
 #'@return ROC curves
 #' @export
 plot_res = function(calc_corr_output, calc_dist_output, graph_title){
-  
+  "FPR" <- "TPR" <- "metrique" <- c()
   T <- calc_corr_output$matrix_T
   cor_T <- calc_corr_output$cor_T
   pvalues <- c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)

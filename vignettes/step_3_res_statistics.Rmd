@@ -51,11 +51,13 @@ Three data input are required to perform the statistical analysis :
     - 0: Same expression
     - +1: Up-regulated gene 
 
-- Matrix A of cell lines proportion distribution: proportion matrix k*n
+- Matrix A of cell lines proportion distribution simulated in `step_1_simulation`
+  - proportion: k*n
   - n: patient 
   - k: proportion of the different cell lines
   
-- Matrix T of reference cell lines: proportion matrix ge x nc
+- Matrix T of reference cell lines simulated for the example in `step_1_simulation`
+  - proportion: ge x nc
   - ge: gene expression
   - nc: number of cell lines 
   
@@ -82,9 +84,14 @@ pre_treat_res <- RiTMIC::pre_treat(penda_res = test_matrix, patientNumber=5)
 distance <- RiTMIC ::calc_dist(pre_treat_output = pre_treat_res, matrix_A = matrix_A)
 calc_corr <- RiTMIC::calc_corr(matrix_T = matrix_T_control, matrix_A = matrix_A)
 ```
+## Did PenDA had an impact to the simulated results ? 
 
+To build this vignette, we needed to do some approximation: the controle matrix is not related to a real T matrix dataset. 
+So, a greater correlation score than the distance scores simulated with kanto, ks, student do not reveal a true result. 
+
+To have a reliable result, please run the pipeline with real dataset. 
 ```{r,label="RiTMIC::plot_res"}
-RiTMIC::plot_res(calc_corr_output = calc_corr, calc_dist_output = distance, graph_title = "Analyse the model improvement thanks to PenDA with ROC curves")
+RiTMIC::plot_res(calc_corr_output = calc_corr, calc_dist_output = distance, graph_title = "ROC curves to test the model improvement induce by PenDA")
 ```
 
 # Session Information

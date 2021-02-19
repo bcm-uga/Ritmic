@@ -22,5 +22,5 @@ Compare non-enriched data by PenDA with a correlation test versus the PenDA effi
 }
 }
 \seealso{
-\code{as_def_res} \code{pre_plot_res}
+\code{as_def_res} \code{pre_plot_res} \code{compute_1_res}
 }

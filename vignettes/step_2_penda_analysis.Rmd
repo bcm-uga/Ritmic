@@ -49,15 +49,11 @@ Please, check out the `simulation` vignette for more details.
 
 ## Data filtering
 ```{r echo=FALSE, label="data_loading"}
-matrix_D = readRDS("~/Datas/projects/RiTMIC/inst/extdata/matrix_D.rds")
-matrix_D2 = readRDS("~/Datas/projects/RiTMIC/inst/extdata/matrix_D2.rds")
+matrix_D = readRDS("~/Datas/projects/RiTMIC/inst/extdata/matrix_D.RDS")
+
 penda_data_case <- penda::penda_data_case
 
 matrix_D_control <- penda::penda_data_ctrl[,4]
-
-Penda_dataset2 = penda::make_dataset_1ctrl(matrix_D_control, matrix_D2)
-data_ctrl2 = Penda_dataset2$data_ctrl
-data_case2 = Penda_dataset2$data_case
 
 Penda_dataset = penda::make_dataset_1ctrl(matrix_D_control, matrix_D)
 data_ctrl = Penda_dataset$data_ctrl
@@ -73,11 +69,6 @@ s_max = 500
 L_H_list = penda::compute_lower_and_higher_lists_1ctrl(data_ctrl, s_max = s_max)
 L = L_H_list$L
 H = L_H_list$H
-
-L_H_list2 = penda::compute_lower_and_higher_lists_1ctrl(data_ctrl2, s_max = s_max)
-L2 = L_H_list2$L
-H2 = L_H_list2$H
-
 ```
 
 The `penda` method uses the relative gene ordering in normal tissue. 
@@ -109,11 +100,6 @@ penda_res = penda::penda_test_1ctrl(samples = data_case,
                    L_H_list =  L_H_list, 
                    threshold = threshold)
 
-penda_res2 = penda::penda_test_1ctrl(samples = data_case2, 
-                   iterations =  iterations, 
-                   L_H_list =  L_H_list2, 
-                   threshold = threshold)
-
 #Store the penda_res output for the res_statistics vignette
 saveRDS(penda_res, file="~/Datas/projects/RiTMIC/inst/extdata/penda_res.RDS")
 ```
@@ -128,17 +114,11 @@ Results are in the form of two matrices `$down_genes` and `$up_genes`. Each row 
 data_bypatient = RiTMIC::generate_data_bypatient(D_list = penda_res$down_genes,
                                          U_list = penda_res$up_genes)
 
-data_bypatient2 = RiTMIC::generate_data_bypatient(D_list = penda_res2$down_genes,
-                                         U_list = penda_res2$up_genes)
-
 RiTMIC::plot_figure(data_patients = data_bypatient)
-RiTMIC::plot_figure(data_patients = data_bypatient2)
 ```
 
 ```{r fig.width=9, fig.height=9, echo=FALSE}
-
 RiTMIC::plot_heatmap_hclust(data = penda_res)
-RiTMIC::plot_heatmap_hclust(data = penda_res2)
 ```
 
 
