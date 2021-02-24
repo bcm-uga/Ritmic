@@ -48,6 +48,7 @@ tumorous_sample_number = 46
 
 matrix_A = RiTMIC::simu_A(tumorous_sample_number,cell_type_proportions)
 dim(matrix_A)
+dir.create("~/Datas/projects/RiTMIC/inst/extdata",recursive = TRUE)
 saveRDS(matrix_A, file="~/Datas/projects/RiTMIC/inst/extdata/matrix_A.RDS")
 ```
 
