@@ -142,7 +142,8 @@ calc_corr <- function(matrix_D,matrix_A) {
   matrix_T <- matrix_D$T_cancer
   options(warn = -1)
   cor_T60_c = c()
-  pb <- progress_bar$new(format = "  Running RiTMIC::pre_plot_res [:bar] :current/:total (:percent) in :elapsed",total = nrow(matrix_T_control$T), clear = FALSE, width= 80)
+  pb <- progress_bar$new(format = "  Running RiTMIC::pre_plot_res [:bar] :current/:total (:percent) in :elapsed",
+                         total = nrow(matrix_T), clear = FALSE, width= 80)
   for(g in rownames(matrix_T)){
     for(t in 1:nrow(matrix_A)){
       c = cor(matrix_T[g, ], matrix_A[t, ])
@@ -150,7 +151,7 @@ calc_corr <- function(matrix_D,matrix_A) {
     }
   }
   options(warn = 0)
-  return(list(cor_T = cor_T60_c, matrix_T_cancer = matrix_T))
+  return(list(cor_T = cor_T60_c, matrix_D = matrix_D))
 }
 
 #' Check the PenDA enrichment: Plot ROC curves  
@@ -168,13 +169,14 @@ calc_corr <- function(matrix_D,matrix_A) {
 #' @export
 plot_res = function(calc_corr_output, calc_dist_output, graph_title){
   "FPR" <- "TPR" <- "metrique" <- c()
-  T <- calc_corr_output$matrix_T_cancer
+  matrix_D <- calc_corr_output$matrix_D
+  T <- matrix_D$T
+  genes_c = c(rownames(T$T)[T$g_immune], rownames(T$T)[T$g_fibro])
+  genes = genes_c[(genes_c %in% rownames(matrix_D))]
   cor_T <- calc_corr_output$cor_T
   pvalues <- c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
-  genes = c(rownames(T$T)[T$g_immune], rownames(T$T)[T$g_fibro])
-  genes_f <- calc_dist_output$genes
-  g_fibro = unique(genes_f[genes_f%in%rownames(T$T)[T$g_fibro]])
-  g_immune = unique(genes_f[genes_f%in%rownames(T$T)[T$g_immune]])
+  g_fibro = unique(genes[genes%in%rownames(T$T)[T$g_fibro]])
+  g_immune = unique(genes[genes%in%rownames(T$T)[T$g_immune]])
   df <- calc_dist_output$df
   
   res_ks = sapply(pvalues, function(x){
