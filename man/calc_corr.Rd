@@ -4,10 +4,10 @@
 \alias{calc_corr}
 \title{Load environment required to \code{plot_res} function}
 \usage{
-calc_corr(matrix_T_control, matrix_A)
+calc_corr(matrix_D, matrix_A)
 }
 \arguments{
-\item{matrix_T_control}{The matrix_T output from corr_prop functions}
+\item{matrix_D}{matrix_D created with \code{simu_D}}
 
 \item{matrix_A}{The matrix_A from \code{simu_A}}
 }

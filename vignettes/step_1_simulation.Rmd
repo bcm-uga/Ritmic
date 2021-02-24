@@ -59,7 +59,6 @@ The function `simu_A` simulates the matrix of proportion of cell lines distribut
 tumor_dataset <- penda::penda_data_case
 dim(tumor_dataset)
 
-tumorous_sample_number = 46
 matrix_T <- RiTMIC::simu_T_cancer(tumor_dataset,tumorous_sample_number)
 
 dim(matrix_T)

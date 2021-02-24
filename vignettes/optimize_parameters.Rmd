@@ -11,12 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 # matrice D, , calculée pour T deconv et A deconv (= data case)
 D_2v2_c <- readRDS("~/Datas/projects/data/extdata/D_2v2_c.rds")
 dim(D_2v2_c)
+
 # matrice T, T deconv, il faut prendre la colonne 1 pour avoir le type épi qui sert de data ctrl Penda
 EDec2_80p_c_t <- readRDS("~/Datas/projects/data/extdata/EDec2_80p_c_t.rds")
 dim(EDec2_80p_c_t)
-
 matrice_T_control <- EDec2_80p_c_t[,1]
-dim(matrice_T_control)
+length(matrice_T_control)
+
 # matrice T après déconv [,1] = Epithelium: matrice contrôle de penda
 T_tum_ref <- readRDS("~/Datas/projects/data/extdata/T_60_tum_rna_c_t.rds")
 dim(T_tum_ref$T)
@@ -24,10 +25,16 @@ dim(T_tum_ref$T)
 # matrice T tumeur de référence, composée de $T, $g_immune et $g_fibro, sert pour la vignette analyse_deconv
 T_60tum_c <- readRDS("~/Datas/projects/data/extdata/T_60_tum_rna_c_t.rds")
 dim(T_60tum_c$T)
+
 # matrice A de référence 
 A_60p <- readRDS("~/Datas/projects/data/extdata/A_60.rds")
-dim(A_60)
+dim(A_60p)
 
+# Matrice A après déconvolution
+EDec_80p <- readRDS("~/Datas/projects/data/extdata/EDec_80p.rds")
+EDec_80p_a <- EDec_80p$A[,1:60]
+dim(EDec_80p_a)
+dim(EDec_80p$T)
 ```
 
 ```{r,echo=FALSE}
@@ -52,6 +59,13 @@ for (threshold in listf){
                    threshold = threshold)
   saveRDS(penda_res,file = paste('~/Datas/projects/data/optimize_parameters/res_', threshold, '.RDS',sep=""))
 }
+res01 <- readRDS("~/Datas/projects/data/optimize_parameters/res_0.1.RDS")
+res08 <- readRDS("~/Datas/projects/data/optimize_parameters/res_0.8.RDS")
+res096 <- readRDS("~/Datas/projects/data/optimize_parameters/res_0.96.RDS")
+
+total_matrix <- dim(res01$down_genes)[1]*dim(res01$down_genes)[2]
+all.equal(res01$down_genes, res08$down_genes)
+all.equal(res08$down_genes, res096$down_genes)
 
 ```
 
@@ -107,40 +121,97 @@ for (threshold in listf){
   res_cor = sapply(pvalues, function(x){
     compute_1_res(abs(as.numeric(cor_T[, 3])), cor_T[, 1], rownames(T$T)[T$g_fibro], rownames(T$T)[T$g_immune], x)})
   # Initialization
-  if (threshold == 0.10) {
-    dfFinal = data.frame(pval = as.factor(rep(pvalues)),
-                    FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
-                    TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
-                    "threshold" = threshold,
-                    metrique = rep(c("ks", "student", "kanto", "correlation"),each = length(pvalues)))
-  } else {
-    # Continue
-    temp = data.frame(pval = as.factor(rep(pvalues)),
+  dfTemp = data.frame(pval = as.factor(rep(pvalues)),
                   FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
                   TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
-                  "threshold" = threshold,
                   metrique = rep(c("ks", "student", "kanto", "correlation"),each = length(pvalues)))
-    dfFinal <- rbind(dfFinal,temp)
-  }
+  saveRDS(dfTemp, file = paste("~/Datas/projects/data/optimize_parameters/df_",threshold,'.RDS',sep=""))
 }
-saveRDS(dfFinal, file = '~/Datas/projects/data/optimize_parameters/df.RDS')
 ```
 ```{r,echo=TRUE}
-df <- readRDS('~/Datas/projects/data/optimize_parameters/df.RDS')
 
-plot_kanto = ggplot(c(df[df$metrique == "kanto"],df[df$metrique == "cor"][1,]), aes(x = FPR, y = TPR, color = "threshold")) +
+for (threshold in listf){
+  assign('df', readRDS(paste('~/Datas/projects/data/optimize_parameters/df_',threshold,'.RDS',sep="")))
+  assign(paste('df_',threshold,sep=''), readRDS(paste('~/Datas/projects/data/optimize_parameters/df_',threshold,'.RDS',sep="")))
+  plot <- ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
     geom_point() + 
     geom_line() + 
     theme_minimal()+
-    labs(title = Kanto)
-plot_student = ggplot(df[df$metrique == "student"], aes(x = FPR, y = TPR, color = "threshold")) +
-    geom_point() + 
-    geom_line() + 
-    theme_minimal()+
-    labs(title = Student)
-plot_ks = ggplot(df[df$metrique == "ks"], aes(x = FPR, y = TPR, color = "threshold")) +
-    geom_point() + 
-    geom_line() + 
-    theme_minimal()+
-    labs(title = ks)
+    labs(title = threshold)
+assign(paste('plot_',threshold,sep=''),plot)
+}
+
+library("cowplot")
+plotlist <- paste('plot_',listf,sep="")
+plotlist
+plot_grid(plot_0.1, plot_0.6, plot_0.8,plot_0.86, plot_0.92,plot_0.98,
+          ncol = 2, nrow = 3)
+df <- data.frame(df_0.1,"threshold"=0.1)
+
+df_0.2['threshold'] <- threshold
+list2 <- listf[2:28]
+for (threshold in list2){
+  assign('tempDF',eval(parse(text = paste('df_',threshold,sep=""))))
+  tempDF['threshold'] <- threshold
+  df <- rbind(df,tempDF)
+}
+```
+
+```{r}
+df_kanto <- subset(df,df$metrique == "kanto")
+df_kanto$threshold = as.factor(df_kanto$threshold)
+corr <- subset(df,(df$metrique=="correlation" & df$threshold==0.1))
+corr$threshold <- "correlation"
+df_kanto <- rbind(df_kanto,corr)
+
+plot_kanto <- ggplot(df_kanto, aes(x = FPR, y = TPR, color = threshold, group = threshold)) + 
+  geom_point()+
+  geom_line()+
+  theme_minimal()+
+  labs(title="Kantorovich")
+
+plot_kanto
+
+```
+
+```{r}
+df_student <- subset(df,df$metrique == "student")
+df_student$threshold = as.factor(df_student$threshold)
+df_student <- rbind(df_student,corr)
+plot_student <- ggplot(df_student, aes(x = FPR, y = TPR, color = threshold, group = threshold)) + 
+  geom_point()+
+  geom_line()+
+  theme_minimal()+
+  labs(title="Student")
+
+plot_student
+```
+
+```{r}
+df_ks <- subset(df,df$metrique == "ks")
+df_ks$threshold = as.factor(df_ks$threshold)
+df_ks <- rbind(df_ks,corr)
+plot_ks <- ggplot(df_ks, aes(x = FPR, y = TPR, color = threshold, group = threshold)) + 
+  geom_point()+
+  geom_line()+
+  theme_minimal()+
+  labs(title="Kolmogorov Smirnov")
+
+plot_ks
+```
+
+```{r, label="Last modif"}
+library(progress)
+options(warn = -1)
+cor_T60_c = c()
+pb <- progress_bar$new(format = "  Running RiTMIC::pre_plot_res [:bar] :current/:total (:percent) in :elapsed",total = nrow(D_2v2_c), clear = FALSE, width= 80)
+for(g in 1:nrow(D_2v2_c)){
+  pb$tick()
+  for(t in 1:nrow(EDec_80p_a)){
+    c = cor(D_2v2_c[g, ], EDec_80p_a[t, ])
+    cor_T60_c = rbind(cor_T60_c, c(g, t, c))
+  }
+}
+options(warn = 0)
+saveRDS(cor_T60_c,file = '~/Datas/projects/data/optimize_parameters/cor_T60_c')
 ```

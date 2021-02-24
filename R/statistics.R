@@ -131,25 +131,26 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
 
 #' Load environment required to \code{plot_res} function
 #'
-#' @param matrix_T_control The matrix_T output from corr_prop functions
+#' @param matrix_D matrix_D created with \code{simu_D}
 #' @param matrix_A The matrix_A from \code{simu_A}
 #' 
 #' @seealso \code{compute_1_res} \code{plot_res}
 #'
 #' @return correlation values between gene expressions
 #' @export 
-calc_corr <- function(matrix_T_control,matrix_A) {
+calc_corr <- function(matrix_D,matrix_A) {
+  matrix_T <- matrix_D$T_cancer
   options(warn = -1)
   cor_T60_c = c()
   pb <- progress_bar$new(format = "  Running RiTMIC::pre_plot_res [:bar] :current/:total (:percent) in :elapsed",total = nrow(matrix_T_control$T), clear = FALSE, width= 80)
-  for(g in rownames(matrix_T_control$T)){
+  for(g in rownames(matrix_T)){
     for(t in 1:nrow(matrix_A)){
-      c = cor(matrix_T_control$T[g, ], matrix_A[t, ])
+      c = cor(matrix_T[g, ], matrix_A[t, ])
       cor_T60_c = rbind(cor_T60_c, c(g, t, c))
     }
   }
   options(warn = 0)
-  return(list(cor_T = cor_T60_c, matrix_T = matrix_T_control))
+  return(list(cor_T = cor_T60_c, matrix_T_cancer = matrix_T))
 }
 
 #' Check the PenDA enrichment: Plot ROC curves  
@@ -167,7 +168,7 @@ calc_corr <- function(matrix_T_control,matrix_A) {
 #' @export
 plot_res = function(calc_corr_output, calc_dist_output, graph_title){
   "FPR" <- "TPR" <- "metrique" <- c()
-  T <- calc_corr_output$matrix_T
+  T <- calc_corr_output$matrix_T_cancer
   cor_T <- calc_corr_output$cor_T
   pvalues <- c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
   genes = c(rownames(T$T)[T$g_immune], rownames(T$T)[T$g_fibro])

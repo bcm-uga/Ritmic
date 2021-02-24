@@ -238,15 +238,17 @@ add_noise = function(matrix_D, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
 simu_D <- function(matrix_A, matrix_T, corr_matrix_T, noise = T, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
   
   matrix_D = c()
+  matrix_T_cancer = c()
   for(p in 1:dim(matrix_A)[2]){
     tumor = corr_matrix_T$T[, p]
     D_p = cbind(matrix_T, tumor) %*% matrix_A[, p]
     matrix_D = cbind(matrix_D, D_p)
+    matrix_T_cancer = cbind(matrix_T_cancer,tumor)
   }
   colnames(matrix_D) <- paste(1:dim(matrix_D)[2])
   if (isTRUE(noise)){
     matrix_D <- add_noise(matrix_D, mean = mean, sd = sd, val_min = val_min, val_max = val_max)
   }
-  return(matrix_D)
+  return(list(matrix_D = matrix_D,T_cancer = matrix_T_cancer))
 }
 

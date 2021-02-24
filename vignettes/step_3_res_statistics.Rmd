@@ -74,15 +74,14 @@ matrix_A <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/matrix_A.RDS")
 dim(matrix_A)
 
 # Matrix T control 
-matrix_T_control <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/matrix_T.RDS")
-
+simu_D_output <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/matrix_D.RDS")
 pre_treat_res <- RiTMIC::pre_treat(penda_res = test_matrix, patientNumber=5)
 
 ```
 
 ```{r,label="RiTMIC::calc_dist", message=FALSE}
 distance <- RiTMIC ::calc_dist(pre_treat_output = pre_treat_res, matrix_A = matrix_A)
-calc_corr <- RiTMIC::calc_corr(matrix_T = matrix_T_control, matrix_A = matrix_A)
+calc_corr <- RiTMIC::calc_corr(matrix_D = simu_D_output, matrix_A = matrix_A)
 ```
 ## Did PenDA had an impact to the simulated results ? 
 
