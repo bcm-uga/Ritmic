@@ -3,6 +3,7 @@
 export(add_noise)
 export(calc_corr)
 export(calc_dist)
+export(compute_1_res)
 export(corr_prop_c)
 export(corr_prop_n)
 export(corr_prop_s)

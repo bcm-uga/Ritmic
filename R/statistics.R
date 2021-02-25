@@ -139,7 +139,7 @@ compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
 #' @return correlation values between gene expressions
 #' @export 
 calc_corr <- function(matrix_D,matrix_A) {
-  matrix_T <- matrix_D$T_cancer
+  matrix_T <- matrix_D$T$T
   options(warn = -1)
   cor_T60_c = c()
   pb <- progress_bar$new(format = "  Running RiTMIC::pre_plot_res [:bar] :current/:total (:percent) in :elapsed",
@@ -169,8 +169,8 @@ calc_corr <- function(matrix_D,matrix_A) {
 #' @export
 plot_res = function(calc_corr_output, calc_dist_output, graph_title){
   "FPR" <- "TPR" <- "metrique" <- c()
-  matrix_D <- calc_corr_output$matrix_D
-  T <- matrix_D$T
+  matrix_D <- calc_corr_output$matrix_D$matrix_D
+  T <- calc_corr_output$matrix_D$T
   genes_c = c(rownames(T$T)[T$g_immune], rownames(T$T)[T$g_fibro])
   genes = genes_c[(genes_c %in% rownames(matrix_D))]
   cor_T <- calc_corr_output$cor_T
@@ -194,7 +194,6 @@ plot_res = function(calc_corr_output, calc_dist_output, graph_title){
   res_cor = sapply(pvalues, function(x){
     compute_1_res(abs(as.numeric(cor_T[, 3])), cor_T[, 1], rownames(T$T)[T$g_fibro], rownames(T$T)[T$g_immune], x)
   })
-  
   df = data.frame(pval = as.factor(rep(pvalues)),
                   FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
                   TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
