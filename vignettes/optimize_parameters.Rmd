@@ -80,7 +80,7 @@ saveRDS(distance,file = '~/Datas/projects/data/optimize_parameters/dist_0.8.RDS'
 
 distance <- readRDS('~/Datas/projects/data/optimize_parameters/dist_0.8.RDS')
 
-calc_corr <- RiTMIC::calc_corr(matrix_T = T_60tum_c, matrix_A = A_60p)
+calc_corr <- RiTMIC::calc_corr(matrix_D = D_2v2_c, matrix_A = EDec_80p_a)
 saveRDS(calc_corr,file = '~/Datas/projects/data/optimize_parameters/calc_corr')
 calc_corr <- readRDS('~/Datas/projects/data/optimize_parameters/calc_corr')
 RiTMIC::plot_res(calc_corr_output = calc_corr, calc_dist_output = distance, graph_title = "Test")
@@ -89,10 +89,12 @@ RiTMIC::plot_res(calc_corr_output = calc_corr, calc_dist_output = distance, grap
 
 ```{r,echo=TRUE}
 # Test all samples
-A_60p <- readRDS("~/Datas/projects/data/extdata/A_60.rds")
+EDec_80p <- readRDS("~/Datas/projects/data/extdata/EDec_80p.rds")
+EDec_80p_a <- EDec_80p$A[,1:60]
+
 calc_corr_output <- readRDS('~/Datas/projects/data/optimize_parameters/pre_plot.RDS')
 T <- calc_corr_output$matrix_T
-cor_T <- calc_corr_output$cor_T
+cor_T <- readRDS('~/Datas/projects/data/optimize_parameters/cor_T60_c.RDS')
 pvalues <- c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
 genes = c(rownames(T$T)[T$g_immune], rownames(T$T)[T$g_fibro])
 
@@ -128,33 +130,29 @@ for (threshold in listf){
   saveRDS(dfTemp, file = paste("~/Datas/projects/data/optimize_parameters/df_",threshold,'.RDS',sep=""))
 }
 ```
-```{r,echo=TRUE}
 
+```{r,echo=TRUE}
+list1 <- (1:7)/10
+list2 <- (80:100)/100
+listf <- c(list1,list2)
+#Data loading
 for (threshold in listf){
   assign('df', readRDS(paste('~/Datas/projects/data/optimize_parameters/df_',threshold,'.RDS',sep="")))
   assign(paste('df_',threshold,sep=''), readRDS(paste('~/Datas/projects/data/optimize_parameters/df_',threshold,'.RDS',sep="")))
-  plot <- ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
-    geom_point() + 
-    geom_line() + 
-    theme_minimal()+
-    labs(title = threshold)
-assign(paste('plot_',threshold,sep=''),plot)
 }
+cor <- readRDS('~/Datas/projects/data/optimize_parameters/cor_T60_c.RDS')
 
-library("cowplot")
-plotlist <- paste('plot_',listf,sep="")
-plotlist
-plot_grid(plot_0.1, plot_0.6, plot_0.8,plot_0.86, plot_0.92,plot_0.98,
-          ncol = 2, nrow = 3)
 df <- data.frame(df_0.1,"threshold"=0.1)
 
-df_0.2['threshold'] <- threshold
 list2 <- listf[2:28]
 for (threshold in list2){
   assign('tempDF',eval(parse(text = paste('df_',threshold,sep=""))))
   tempDF['threshold'] <- threshold
   df <- rbind(df,tempDF)
 }
+dim(df)
+dim(cor)
+length(df$pval[df$metrique == "correlation"])
 ```
 
 ```{r}
@@ -178,6 +176,7 @@ plot_kanto
 df_student <- subset(df,df$metrique == "student")
 df_student$threshold = as.factor(df_student$threshold)
 df_student <- rbind(df_student,corr)
+
 plot_student <- ggplot(df_student, aes(x = FPR, y = TPR, color = threshold, group = threshold)) + 
   geom_point()+
   geom_line()+
@@ -191,6 +190,7 @@ plot_student
 df_ks <- subset(df,df$metrique == "ks")
 df_ks$threshold = as.factor(df_ks$threshold)
 df_ks <- rbind(df_ks,corr)
+
 plot_ks <- ggplot(df_ks, aes(x = FPR, y = TPR, color = threshold, group = threshold)) + 
   geom_point()+
   geom_line()+
@@ -204,14 +204,45 @@ plot_ks
 library(progress)
 options(warn = -1)
 cor_T60_c = c()
-pb <- progress_bar$new(format = "  Running RiTMIC::pre_plot_res [:bar] :current/:total (:percent) in :elapsed",total = nrow(D_2v2_c), clear = FALSE, width= 80)
+pb <- progress_bar$new(format = "  Running RiTMIC::pre_plot_res [:bar] :current/:total (:percent) in :elapsed",total = (nrow(D_2v2_c)*nrow(EDec_80p_a/2)), clear = FALSE, width= 80)
 for(g in 1:nrow(D_2v2_c)){
   pb$tick()
   for(t in 1:nrow(EDec_80p_a)){
-    c = cor(D_2v2_c[g, ], EDec_80p_a[t, ])
+    res <- try(capture.output(c = cor(D_2v2_c[g, ], EDec_80p_a[t, ])), silent = T)
     cor_T60_c = rbind(cor_T60_c, c(g, t, c))
   }
 }
 options(warn = 0)
-saveRDS(cor_T60_c,file = '~/Datas/projects/data/optimize_parameters/cor_T60_c')
+saveRDS(cor_T60_c,file = '~/Datas/projects/data/optimize_parameters/cor_T60_c.RDS')
+EDec_80p <- readRDS("~/Datas/projects/data/extdata/EDec_80p.rds")
+EDec_80p_a <- EDec_80p$A[,1:60]
+
+calc_corr_output <- readRDS('~/Datas/projects/data/optimize_parameters/pre_plot.RDS')
+T <- calc_corr_output$matrix_T
+cor_T <- readRDS('~/Datas/projects/data/optimize_parameters/cor_T60_c.RDS')
+pvalues <- c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+genes = c(rownames(T$T)[T$g_immune], rownames(T$T)[T$g_fibro])
+
+list1 <- (1:7)/10
+list2 <- (80:100)/100
+listf <- c(list1,list2)
+listf
+dfTempf = data.frame(pval=c(),FPR=c(),TPR=c(),metrique=c())
+for (threshold in listf){
+  penda_res <- readRDS(paste('~/Datas/projects/data/optimize_parameters/res_',threshold,'.RDS',sep=""))
+  pre_treat_res <- RiTMIC::pre_treat(penda_res = penda_res, patientNumber=5)
+  calc_dist_output <- RiTMIC ::calc_dist(pre_treat_output = pre_treat_res, matrix_A = A_60p)
+  genes_f <- calc_dist_output$genes
+  df <- calc_dist_output$df
+  g_fibro = unique(genes_f[genes_f%in%rownames(T$T)[T$g_fibro]])
+  g_immune = unique(genes_f[genes_f%in%rownames(T$T)[T$g_immune]])
+  res_cor = sapply(pvalues, function(x){
+  compute_1_res(abs(as.numeric(cor_T[, 3])), cor_T[, 1], rownames(T$T)[T$g_fibro], rownames(T$T)[T$g_immune], x)})
+  
+  dfTemp = data.frame(pval = as.factor(rep(pvalues)),
+                  FPR = res_cor[5, ],
+                  TPR = res_cor[6, ],
+                  metrique = correlation, each = length(pvalues))
+  dfTempf <- rbind(dfTempf,dfTemp)
+}
 ```
