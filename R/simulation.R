@@ -220,7 +220,8 @@ add_noise = function(matrix_D, mean = 0, sd = 0.1, val_min = 0, val_max = 1){
   return(datam)
 }
 
-#' Simulation of an RNAseq matrix, obtained with the matrices combinations of the matrix A and T for each sample
+#' Build the matrix_D: gene expression per sample
+#' @description Simulation of an RNAseq matrix, obtained with the matrices combinations of the matrix A and T for each sample
 #'
 #' @param matrix_A matrix obtained with \code{simu_A} 
 #' @param matrix_T matrix obtained with \code{simu_T_cancer}
