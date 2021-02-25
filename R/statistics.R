@@ -199,7 +199,6 @@ plot_res = function(calc_corr_output, calc_dist_output, graph_title){
                   FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
                   TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
                   metrique = rep(c("ks", "student", "kanto", "correlation"), each = length(pvalues)))
-  
   plot = ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
     geom_point() + 
     geom_line() + 
