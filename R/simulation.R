@@ -250,6 +250,6 @@ simu_D <- function(matrix_A, matrix_T, corr_matrix_T, noise = T, mean = 0, sd = 
   if (isTRUE(noise)){
     matrix_D <- add_noise(matrix_D, mean = mean, sd = sd, val_min = val_min, val_max = val_max)
   }
-  return(list(matrix_D = matrix_D,T_cancer = matrix_T_cancer, T = corr_matrix_T))
+  return(list(matrix_D = matrix_D, T = corr_matrix_T))
 }
 
