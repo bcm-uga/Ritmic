@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulation.R
 \name{simu_D}
 \alias{simu_D}
-\title{Simulation of an RNAseq matrix, obtained with the matrices combinations of the matrix A and T for each sample}
+\title{Build the matrix_D: gene expression per sample}
 \usage{
 simu_D(
   matrix_A,
