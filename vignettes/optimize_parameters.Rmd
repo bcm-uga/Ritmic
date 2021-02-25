@@ -69,23 +69,6 @@ all.equal(res08$down_genes, res096$down_genes)
 
 ```
 
-```{r,echo=TRUE}
-#Test on 1 res analysis 
-test_matrix <- readRDS('~/Datas/projects/data/optimize_parameters/res_0.8.RDS')
-dim(test_matrix$down_genes)
-dim(test_matrix$up_genes)
-pre_treat_res <- RiTMIC::pre_treat(penda_res = test_matrix, patientNumber=5)
-distance <- RiTMIC ::calc_dist(pre_treat_output = pre_treat_res, matrix_A = A_60p)
-saveRDS(distance,file = '~/Datas/projects/data/optimize_parameters/dist_0.8.RDS')
-
-distance <- readRDS('~/Datas/projects/data/optimize_parameters/dist_0.8.RDS')
-
-calc_corr <- RiTMIC::calc_corr(matrix_D = D_2v2_c, matrix_A = EDec_80p_a)
-saveRDS(calc_corr,file = '~/Datas/projects/data/optimize_parameters/calc_corr')
-calc_corr <- readRDS('~/Datas/projects/data/optimize_parameters/calc_corr')
-RiTMIC::plot_res(calc_corr_output = calc_corr, calc_dist_output = distance, graph_title = "Test")
-
-```
 
 ```{r,echo=TRUE}
 # Test all samples
@@ -201,6 +184,7 @@ plot_ks
 ```
 
 ```{r, label="Last modif"}
+
 library(progress)
 options(warn = -1)
 cor_T60_c = c()
@@ -219,7 +203,8 @@ EDec_80p_a <- EDec_80p$A[,1:60]
 
 calc_corr_output <- readRDS('~/Datas/projects/data/optimize_parameters/pre_plot.RDS')
 T <- calc_corr_output$matrix_T
-cor_T <- readRDS('~/Datas/projects/data/optimize_parameters/cor_T60_c.RDS')
+matrix_D <- list(list(matrix_D = D_2v2_c,T_cancer = T_tum_ref, T = cor_T60_c))
+cor_T <- list(cor_T = cor_T60_c, matrix_D = matrix_D)
 pvalues <- c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
 genes = c(rownames(T$T)[T$g_immune], rownames(T$T)[T$g_fibro])
 
