@@ -147,6 +147,7 @@ calc_corr <- function(matrix_D,matrix_A) {
   for(g in rownames(matrix_T)){
     for(t in 1:nrow(matrix_A)){
       c = cor(matrix_T[g, ], matrix_A[t, ])
+      
       cor_T60_c = rbind(cor_T60_c, c(g, t, c))
     }
   }
