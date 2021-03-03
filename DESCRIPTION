@@ -22,7 +22,8 @@ Imports:
   ptlmapper,
   gplots,
   ggplot2,
-  progress
+  progress,
+  EDec
 License: CeCILL
 Encoding: UTF-8
 LazyData: true
