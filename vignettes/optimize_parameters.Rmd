@@ -254,6 +254,24 @@ plot_grid(plot_ks, plot_sub_ks,
 
 
 ```{r, label="Choose threshold"}
+list1 <- (1:7)/10
+list2 <- (80:100)/100
+listf <- c(list1,list2)
+#Data loading
+for (threshold in listf){
+  assign('df', readRDS(paste('~/Datas/projects/data/optimize_parameters/df_FDR_',threshold,'.RDS',sep="")))
+  assign(paste('df_FDR_',threshold,sep=''), readRDS(paste('~/Datas/projects/data/optimize_parameters/df_FDR_',threshold,'.RDS',sep="")))
+}
+df <- data.frame(df_FDR_0.1,"threshold"=0.1)
+
+list2 <- listf[2:28]
+for (threshold in list2){
+  assign('tempDF',eval(parse(text = paste('df_FDR_',threshold,sep=""))))
+  tempDF['threshold'] <- threshold
+  df <- rbind(df,tempDF)
+}
+dim(df)
+
 choose_threshold_1_ctrl <- function(max_FDR){
   list1 <- c(1:7)/10
   list2 <- (80:100)/100
@@ -279,5 +297,5 @@ choose_threshold_1_ctrl <- function(max_FDR){
   return(threshold_by_method)
 }
 
-choose_threshold_1_ctrl(0.2)
+choose_threshold_1_ctrl(0.08)
 ```
