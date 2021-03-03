@@ -102,7 +102,7 @@ calc_dist = function(pre_treat_output,matrix_A){
 #' @description Compute the confusion matrix(TP,FP,TN,FN) necessary to plot ROC curves 
 #'  
 #' @param values statistical test used
-#' @param genes gene names  
+#' @param genes gene names on the matrix D
 #' @param genes_fibro gene expression in fibro cell line
 #' @param genes_immune gene expression in immune cell line
 #' @param pval list of p-values observed
@@ -110,9 +110,10 @@ calc_dist = function(pre_treat_output,matrix_A){
 #' @return In a list: True positive, False positive, True negative and False negative with associated rates
 #' @export  
 compute_1_res = function(values, genes, genes_fibro, genes_immune, pval){
+  # Recuperation of the deregulated gene list
   names(values) = stringr::str_c(genes, rep(1:4))
   values = values[!is.na(values)]
-  
+  #True deregulation simulated in corr_prop functions
   genes_dereg = c(values[stringr::str_c(genes_fibro, rep(2))], values[stringr::str_c(genes_immune, rep(3))])
   genes_dereg = genes_dereg[!is.na(genes_dereg)]
   
@@ -179,7 +180,6 @@ plot_res = function(calc_corr_output, calc_dist_output, graph_title){
   g_fibro = unique(genes[genes%in%rownames(T$T)[T$g_fibro]])
   g_immune = unique(genes[genes%in%rownames(T$T)[T$g_immune]])
   df <- calc_dist_output$df
-  
   res_ks = sapply(pvalues, function(x){
     compute_1_res(df$ks, df$genes, g_fibro, g_immune, x)
   })
