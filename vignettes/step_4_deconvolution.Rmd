@@ -1,0 +1,95 @@
+---
+title: "RiTMIC: RegulatIon of Tumor MIcroenvironment Composition"
+subtitle: "Part 4 : Deconvolution by calling EDec functions"
+author: "Magali Richard, Clementine Decamps, Florent Chuffart, Fabien Quinquis, Daniel Jost"
+contact: 
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{statistics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+```{r echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim", dpi=75)
+layout(1, respect=TRUE)
+```
+
+
+# Introduction
+
+`RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package that simulates the necessary tools to perform `PenDA` analysis, perform analysis with `PenDA` and apply visualization tools to the `PenDA` output. 
+
+`RiTMIC` Part 4: **Deconvolution by calling EDec functions**
+
+```{r, label="Partie 1: Importation, Vérification et filtration des jeux de données "}
+# Données de références poumon gtex
+gtex <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_gtex.rds")
+gtex_bronch_lungs <-c()
+gtex_bronch_lungs$data <- gtex$data[, idx]
+gtex_bronch_lungs$exp_grp <- subset(gtex$exp_grp,rownames(gtex$exp_grp) %in% colnames(gtex_bronch_lungs$data))
+dim(gtex_bronch_lungs$data)
+dim(gtex_bronch_lungs$exp_grp)
+# Vérification de la position des identifiants de la cohorte entre la matrice D et la matrice de paramètres 
+table(rownames(gtex_bronch_lungs$exp_grp) == colnames(gtex_bronch_lungs$data))
+
+LUNGBRB_trs <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_LUNGBRB_trscr_gs.rds")
+#Important : Utiliser uniquement les variables data (jeu de donnée) et exp_group (pour les parametres ages, sexe blabla... ) 
+table(LUNGBRB_trs$exp_grp[, "histology_type.y"])
+dim(LUNGBRB_trs$exp_grp)
+table_wo_na <- complete.cases(LUNGBRB_trs$exp_grp[, "histology_type.y"])
+LUNGBRB_trs$exp_grp <- LUNGBRB_trs$exp_grp[table_wo_na,]
+dim(LUNGBRB_trs$exp_grp)
+
+# Filtration du groupe adk 
+LUNGBRB_trs_adk <- c()
+LUNGBRB_trs_adk$exp_grp <- LUNGBRB_trs$exp_grp[LUNGBRB_trs$exp_grp[, "histology_type.y"] == "Adenocarcinoma", ]
+dim(LUNGBRB_trs_adk$exp_grp)
+table(LUNGBRB_trs_adk$exp_grp$histology_type.y)
+filter = colnames(LUNGBRB_trs$data) %in% rownames(LUNGBRB_trs_adk$exp_grp)
+LUNGBRB_trs_adk$data <- LUNGBRB_trs$data[, filter]
+# Vérification de la filtration 
+dim(LUNGBRB_trs_adk$data)
+dim(LUNGBRB_trs_adk$exp_grp)
+
+# Filtration du groupe sqc 
+LUNGBRB_trs_sqc <- c()
+LUNGBRB_trs_sqc$ext_grp <- LUNGBRB_trs$exp_grp[LUNGBRB_trs$exp_grp$histology_type.y == "Squamous cell carcinoma", ]
+dim(LUNGBRB_trs_sqc$ext_grp)
+filter = colnames(LUNGBRB_trs$data) %in% rownames(LUNGBRB_trs_sqc$ext_grp)
+LUNGBRB_trs_sqc$data <- LUNGBRB_trs$data[, filter]
+# Vérification de la position des identifiants de la cohorte entre la matrice D et la matrice de paramètres 
+table(rownames(LUNGBRB_trs_sqc$ext_grp) == colnames(LUNGBRB_trs_sqc$data))
+
+TCGA_LUAD_trs <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_TCGA-LUAD_trscr.rds")
+names(TCGA_LUAD_trs)
+# Important : Même chose que pour LUNGBRB_trs, n'utiliser que les variables data et exp_group pour former les matrices 
+TCGA_LUSC_trs <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_TCGA-LUSC_trscr.rds")
+names(TCGA_LUSC_trs)
+# Important : N'utiliser que les variables data et exp_group pour former les matrices D
+dim(TCGA_LUSC_trs$data)
+dim(TCGA_LUSC_trs$exp_grp)
+# Vérification de la position des identifiants de la cohorte entre la matrice D et la matrice de paramètres 
+table(rownames(TCGA_LUSC_trs$exp_grp) == colnames(TCGA_LUSC_trs$data))
+```
+
+```{r, label = "Partie 2: Création de la matrice T et A à partir de matrice D puis création de la surrogate matrix D"}
+
+```
+
+```{r, label = "Partie 3: Creation des matrices A dans immune deconv"}
+
+```
+
+```{r, label= "Partie4: Matrices A par methodes immune deconv"}
+
+```
+
+```{r, label= "Partie 5: PenDA sur surrogate D matrix + immune_deconv_A_matrices"}
+```
