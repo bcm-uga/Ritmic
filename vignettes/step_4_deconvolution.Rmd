@@ -60,12 +60,12 @@ dim(LUNGBRB_trs_adk$exp_grp)
 
 # Filtration du groupe sqc 
 LUNGBRB_trs_sqc <- c()
-LUNGBRB_trs_sqc$ext_grp <- LUNGBRB_trs$exp_grp[LUNGBRB_trs$exp_grp$histology_type.y == "Squamous cell carcinoma", ]
-dim(LUNGBRB_trs_sqc$ext_grp)
-filter = colnames(LUNGBRB_trs$data) %in% rownames(LUNGBRB_trs_sqc$ext_grp)
+LUNGBRB_trs_sqc$exp_grp <- LUNGBRB_trs$exp_grp[LUNGBRB_trs$exp_grp$histology_type.y == "Squamous cell carcinoma", ]
+dim(LUNGBRB_trs_sqc$exp_grp)
+filter = colnames(LUNGBRB_trs$data) %in% rownames(LUNGBRB_trs_sqc$exp_grp)
 LUNGBRB_trs_sqc$data <- LUNGBRB_trs$data[, filter]
 # Vérification de la position des identifiants de la cohorte entre la matrice D et la matrice de paramètres 
-table(rownames(LUNGBRB_trs_sqc$ext_grp) == colnames(LUNGBRB_trs_sqc$data))
+table(rownames(LUNGBRB_trs_sqc$exp_grp) == colnames(LUNGBRB_trs_sqc$data))
 
 TCGA_LUAD_trs <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_TCGA-LUAD_trscr.rds")
 names(TCGA_LUAD_trs)
@@ -77,9 +77,29 @@ dim(TCGA_LUSC_trs$data)
 dim(TCGA_LUSC_trs$exp_grp)
 # Vérification de la position des identifiants de la cohorte entre la matrice D et la matrice de paramètres 
 table(rownames(TCGA_LUSC_trs$exp_grp) == colnames(TCGA_LUSC_trs$data))
+
+LUNGBRB_met <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_epilung_meth2.rds")
+names(LUNGBRB_met)
+
+LUNGBRB_met_adk <- c()
+filter = colnames(LUNGBRB_met$data) %in% colnames(LUNGBRB_trs_adk$data)
+LUNGBRB_met_adk$data <- LUNGBRB_met$data[, filter]
+# Vérification de la filtration 
+dim(LUNGBRB_met_adk$data) # 72 individus
+dim(LUNGBRB_trs_adk$data) # 85 individus
+# Filtration du groupe sqc 
+LUNGBRB_met_sqc <- c()
+filter = colnames(LUNGBRB_met$data) %in% colnames(LUNGBRB_trs_sqc$data)
+LUNGBRB_met_sqc$data <- LUNGBRB_met$data[, filter]
+dim(LUNGBRB_met_sqc$data) # 246 individus
+dim(LUNGBRB_trs_sqc$data) # 293 individus
+# Vérification de la position des identifiants de la cohorte entre la matrice D et la matrice de paramètres 
+table(rownames(LUNGBRB_trs_sqc$ext_grp) == colnames(LUNGBRB_trs_sqc$data))
+
 ```
 
 ```{r, label = "Partie 2: Création de la matrice T et A à partir de matrice D puis création de la surrogate matrix D"}
+# Rentrer la matrice de methylation pour EDec_step_1 donc besoin d'implémenter les matrices met 
 
 ```
 
