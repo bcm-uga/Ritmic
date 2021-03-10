@@ -32,6 +32,7 @@ layout(1, respect=TRUE)
 # Données de références poumon gtex
 gtex <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_gtex.rds")
 gtex_bronch_lungs <-c()
+idx <- rownames(gtex$exp_grp[gtex$exp_grp$tissue_group_level1 == "bronchus_lung", ])
 gtex_bronch_lungs$data <- gtex$data[, idx]
 gtex_bronch_lungs$exp_grp <- subset(gtex$exp_grp,rownames(gtex$exp_grp) %in% colnames(gtex_bronch_lungs$data))
 dim(gtex_bronch_lungs$data)
@@ -67,17 +68,6 @@ LUNGBRB_trs_sqc$data <- LUNGBRB_trs$data[, filter]
 # Vérification de la position des identifiants de la cohorte entre la matrice D et la matrice de paramètres 
 table(rownames(LUNGBRB_trs_sqc$exp_grp) == colnames(LUNGBRB_trs_sqc$data))
 
-TCGA_LUAD_trs <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_TCGA-LUAD_trscr.rds")
-names(TCGA_LUAD_trs)
-# Important : Même chose que pour LUNGBRB_trs, n'utiliser que les variables data et exp_group pour former les matrices 
-TCGA_LUSC_trs <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_TCGA-LUSC_trscr.rds")
-names(TCGA_LUSC_trs)
-# Important : N'utiliser que les variables data et exp_group pour former les matrices D
-dim(TCGA_LUSC_trs$data)
-dim(TCGA_LUSC_trs$exp_grp)
-# Vérification de la position des identifiants de la cohorte entre la matrice D et la matrice de paramètres 
-table(rownames(TCGA_LUSC_trs$exp_grp) == colnames(TCGA_LUSC_trs$data))
-
 LUNGBRB_met <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_epilung_meth2.rds")
 names(LUNGBRB_met)
 
@@ -91,15 +81,94 @@ dim(LUNGBRB_trs_adk$data) # 85 individus
 LUNGBRB_met_sqc <- c()
 filter = colnames(LUNGBRB_met$data) %in% colnames(LUNGBRB_trs_sqc$data)
 LUNGBRB_met_sqc$data <- LUNGBRB_met$data[, filter]
-dim(LUNGBRB_met_sqc$data) # 246 individus
-dim(LUNGBRB_trs_sqc$data) # 293 individus
-# Vérification de la position des identifiants de la cohorte entre la matrice D et la matrice de paramètres 
-table(rownames(LUNGBRB_trs_sqc$ext_grp) == colnames(LUNGBRB_trs_sqc$data))
+dim(LUNGBRB_met_sqc$data) # 50 individus
+dim(LUNGBRB_trs_sqc$data) # 60 individus
 
+TCGA_LUAD_trs <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_TCGA-LUAD_trscr.rds")
+names(TCGA_LUAD_trs)
+dim(TCGA_LUAD_trs$data)
+dim(TCGA_LUAD_trs$exp_grp)
+# Vérification de la position des identifiants de la cohorte entre la matrice D et la matrice de paramètres 
+table(rownames(TCGA_LUAD_trs$exp_grp) == colnames(TCGA_LUAD_trs$data))
+# Important : Même chose que pour LUNGBRB_trs, n'utiliser que les variables data et exp_group pour former les matrices 
+
+TCGA_LUAD_meth <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_TCGA-LUAD_meth.rds")
+
+names(TCGA_LUAD_meth)
+dim(TCGA_LUAD_meth$data) # 636 individus
+dim(TCGA_LUAD_trs$data) # 574 individus 
+
+filter = colnames(TCGA_LUAD_meth$data) %in% colnames(TCGA_LUAD_trs$data)# Filtration du groupe LUAD met 
+TCGA_LUAD_meth$data <- TCGA_LUAD_meth$data[, filter]
+dim(TCGA_LUAD_meth$data) # 534 individus
+filter = colnames(TCGA_LUAD_trs$data) %in% colnames(TCGA_LUAD_meth$data)
+TCGA_LUAD_trs$data <- TCGA_LUAD_trs$data[, filter]
+dim(TCGA_LUAD_trs$data)
+TCGA_LUAD_trs$exp_grp <- TCGA_LUAD_trs$exp_grp[filter, ]
+dim(TCGA_LUAD_trs$exp_grp)
+
+# Reorder column by column names to pass tests 
+TCGA_LUAD_trs$data <- TCGA_LUAD_trs$data[, order(colnames(TCGA_LUAD_trs$data))]
+TCGA_LUAD_meth$data <- na.omit(TCGA_LUAD_meth$data[, order(colnames(TCGA_LUAD_meth$data))])
+TCGA_LUAD_trs$exp_grp  <- TCGA_LUAD_trs$exp_grp[order(rownames(TCGA_LUAD_trs$exp_grp)), ]
+table(colnames(TCGA_LUAD_trs$data) == colnames(TCGA_LUAD_meth$data))
+table(colnames(TCGA_LUAD_trs$data) == rownames(TCGA_LUAD_trs$exp_grp))
+
+
+TCGA_LUSC_trs <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_TCGA-LUSC_trscr.rds")
+names(TCGA_LUSC_trs)
+# Important : N'utiliser que les variables data et exp_group pour former les matrices D
+dim(TCGA_LUSC_trs$data)
+dim(TCGA_LUSC_trs$exp_grp)
+# Vérification de la position des identifiants de la cohorte entre la matrice D et la matrice de paramètres 
+table(rownames(TCGA_LUSC_trs$exp_grp) == colnames(TCGA_LUSC_trs$data))
+
+
+TCGA_LUSC_meth <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_TCGA-LUSC_meth.rds")
+names(TCGA_LUSC_meth)
+dim(TCGA_LUSC_meth$data) # 572 individus
+dim(TCGA_LUSC_trs$data) # 550 individus 
+# Filtration du groupe LUSC met 
+filter = colnames(TCGA_LUSC_meth$data) %in% colnames(TCGA_LUSC_trs$data)
+TCGA_LUSC_meth$data <- na.omit(TCGA_LUSC_meth$data[, filter])
+dim(TCGA_LUSC_meth$data) # 507 individus
+filter = colnames(TCGA_LUSC_trs$data) %in% colnames(TCGA_LUSC_meth$data)
+TCGA_LUSC_trs$data <- TCGA_LUSC_trs$data[, filter]
+dim(TCGA_LUSC_trs$data)
+TCGA_LUSC_trs$exp_grp <- TCGA_LUSC_trs$exp_grp[filter, ]
+dim(TCGA_LUSC_trs$exp_grp)
 ```
 
 ```{r, label = "Partie 2: Création de la matrice T et A à partir de matrice D puis création de la surrogate matrix D"}
 # Rentrer la matrice de methylation pour EDec_step_1 donc besoin d'implémenter les matrices met 
+table(colnames(TCGA_LUAD_meth$data) == rownames(TCGA_LUAD_trs$exp_grp))
+# Filtration du exp_grp 
+TCGA_LUAD_trs$exp_grp <- TCGA_LUAD_trs$exp_grp %>% select(id_sample, sample_source, sex, age_min,age_max,id_morphology,t,n,tnm_stage,dfs_months,os_months, relapsed,exposure)
+LUAD_CF <- medepir::CF_detection(TCGA_LUAD_meth$data,TCGA_LUAD_trs$exp_grp,threshold = 0.15, ncores=2)
+table(rownames(TCGA_LUAD_trs$exp_grp) == colnames(LUAD_CF))
+# Passage de 21785 à 7750 sondes 
+saveRDS(LUAD_CF,"/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_CF.rds")
+LUAD_CF <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_CF.rds")
+dim(LUAD_CF)
+medepir::plot_k(LUAD_CF)
+# PC = 6, donc d'après la loi de Cattel, K = 6+1 = 7
+# Selection des paramètres/sondes
+D_FS = medepir::feature_selection(LUAD_CF)
+# Lancement de la déconvolution avec EDec stage 1 
+deconv = EDec::run_edec_stage_1(meth_bulk_samples = TCGA_LUAD_meth$data, informative_loci = rownames(D_FS), num_cell_types = 7)
+saveRDS(deconv,"/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_deconv.rds")
+TCGA_LUAD_deconv <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_deconv.rds")
+# Extraction des matrices T et A
+T_est = as.matrix(TCGA_LUAD_deconv$methylation)
+A_est = as.matrix(TCGA_LUAD_deconv$proportions)
+# A_est = t(A_est)
+
+TCGA_LUAD_trs$data
+T_final_EDec <- EDec::run_edec_stage_2(TCGA_LUAD_trs$data, A_est)
+while (!is.null(dev.list()))  dev.off()
+pdf("heatmap_T_EDec.pdf")
+heatmap(T_final_EDec$means)
+dev.off()
 
 ```
 
