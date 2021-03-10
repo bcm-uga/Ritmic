@@ -1,0 +1,40 @@
+---
+title: "extraction gtex"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+datagetex = read.gct("GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct")
+colnames(datagetex)=gsub("[.]", "",colnames(datagetex))
+
+annotgetex =
+read.table("GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt",header=TRUE, sep="\t",row.names=1)
+rownames(annotgetex)=gsub("-", "",rownames(annotgetex))
+
+### Selection of tissues of interest ###
+
+fibro = rownames(annotgetex)[which(annotgetex$SMTSD=="Cells - Cultured fibroblasts")]
+spleen = rownames(annotgetex)[which(annotgetex$SMTSD=="Spleen")]
+pancreas = rownames(annotgetex)[which(annotgetex$SMTSD=="Pancreas")]
+
+fibroID = intersect(colnames(datagetex),fibro )
+spleenID = intersect(colnames(datagetex),spleen )
+pancreasID = intersect(colnames(datagetex),pancreas )
+
+DATA.GETEX = data.frame(FIBRO = datagetex[,fibroID], IMMUNE = datagetex[,spleenID], NORMAL = datagetex[,pancreasID])
+
+### From ENSG ID to SYMBOLS ###
+namesID =unlist(lapply(strsplit(rownames(DATA.GETEX), "[.]"), function(x)x[1]))
+DATA.GETEXENSG = collapseRows(DATA.GETEX, namesID,  rownames(DATA.GETEX),method="MaxMean")$datET
+DATA.GETEXrawg  = collapseRows(DATA.GETEXENSG, annot_genes[rownames(DATA.GETEXENSG),"GeneName"],  rownames(DATA.GETEXENSG),method="MaxMean")$datET
+```
