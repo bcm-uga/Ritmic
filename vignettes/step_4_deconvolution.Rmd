@@ -143,10 +143,11 @@ dim(TCGA_LUSC_trs$exp_grp)
 # Rentrer la matrice de methylation pour EDec_step_1 donc besoin d'implémenter les matrices met 
 table(colnames(TCGA_LUAD_meth$data) == rownames(TCGA_LUAD_trs$exp_grp))
 # Filtration du exp_grp 
+library(dplyr)
 TCGA_LUAD_trs$exp_grp <- TCGA_LUAD_trs$exp_grp %>% select(id_sample, sample_source, sex, age_min,age_max,id_morphology,t,n,tnm_stage,dfs_months,os_months, relapsed,exposure)
 LUAD_CF <- medepir::CF_detection(TCGA_LUAD_meth$data,TCGA_LUAD_trs$exp_grp,threshold = 0.15, ncores=2)
 table(rownames(TCGA_LUAD_trs$exp_grp) == colnames(LUAD_CF))
-# Passage de 21785 à 7750 sondes 
+# Passage de 21785 à 11663 sondes 
 saveRDS(LUAD_CF,"/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_CF.rds")
 LUAD_CF <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_CF.rds")
 dim(LUAD_CF)
@@ -155,21 +156,29 @@ medepir::plot_k(LUAD_CF)
 # Selection des paramètres/sondes
 D_FS = medepir::feature_selection(LUAD_CF)
 # Lancement de la déconvolution avec EDec stage 1 
-deconv = EDec::run_edec_stage_1(meth_bulk_samples = TCGA_LUAD_meth$data, informative_loci = rownames(D_FS), num_cell_types = 7)
+deconv = EDec::run_edec_stage_1(meth_bulk_samples = LUAD_CF, informative_loci = rownames(D_FS), num_cell_types = 7)
 saveRDS(deconv,"/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_deconv.rds")
 TCGA_LUAD_deconv <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_deconv.rds")
+
 # Extraction des matrices T et A
 T_est = as.matrix(TCGA_LUAD_deconv$methylation)
 A_est = as.matrix(TCGA_LUAD_deconv$proportions)
-# A_est = t(A_est)
+#A_est = t(A_est)
 
-TCGA_LUAD_trs$data
+
 T_final_EDec <- EDec::run_edec_stage_2(TCGA_LUAD_trs$data, A_est)
+
+library(pheatmap)
 while (!is.null(dev.list()))  dev.off()
-pdf("heatmap_T_EDec.pdf")
-heatmap(T_final_EDec$means)
+pdf("heatmap_T_EDec2.pdf")
+pheatmap(T_final_EDec$means)
 dev.off()
 
+library(ComplexHeatmap)
+while (!is.null(dev.list()))  dev.off()
+pdf("density_heatmap_T_EDec2.pdf")
+ComplexHeatmap::densityHeatmap(T_final_EDec$means)
+dev.off()
 ```
 
 ```{r, label = "Partie 3: Creation des matrices A dans immune deconv"}
