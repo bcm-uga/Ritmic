@@ -152,11 +152,11 @@ saveRDS(LUAD_CF,"/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD
 LUAD_CF <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_CF.rds")
 dim(LUAD_CF)
 medepir::plot_k(LUAD_CF)
-# PC = 6, donc d'après la loi de Cattel, K = 6+1 = 7
+# PC = 6, donc d'après la loi de Cattel, K = 7+1 = 8
 # Selection des paramètres/sondes
 D_FS = medepir::feature_selection(LUAD_CF)
 # Lancement de la déconvolution avec EDec stage 1 
-deconv = EDec::run_edec_stage_1(meth_bulk_samples = LUAD_CF, informative_loci = rownames(D_FS), num_cell_types = 7)
+deconv = EDec::run_edec_stage_1(meth_bulk_samples = LUAD_CF, informative_loci = rownames(D_FS), num_cell_types = 8)
 saveRDS(deconv,"/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_deconv.rds")
 TCGA_LUAD_deconv <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_deconv.rds")
 
@@ -179,6 +179,24 @@ while (!is.null(dev.list()))  dev.off()
 pdf("density_heatmap_T_EDec2.pdf")
 ComplexHeatmap::densityHeatmap(T_final_EDec$means)
 dev.off()
+
+publi_Jun <- c("TP53","KRAS","KEAP1","STK11","EGFR","ALK","ROS1","PD-1","PD1","PDL1","PD-L1","ERBB2","HER2","DCD1","AFF2","PRC1","SYDE1","TRIM33","ZBTB7B","AGER", "SFTPA2", "CACNA2D2", "LAMP3", "SCGB1A1", "SFTPB", "SFTPC","CAV2","MUC1")
+publi_Jun %in% rownames(T_final_EDec$means)
+gene_present <- publi_Jun %in% rownames(T_final_EDec$means)
+publi_Jun[gene_present]
+biblio_Jun <- c()
+biblio_Jun$mean <- T_final_EDec$means[publi_Jun[gene_present],]
+biblio_Jun$sd <- T_final_EDec$std.errors[publi_Jun[gene_present],]
+
+library(pheatmap)
+while (!is.null(dev.list()))  dev.off()
+pdf("heatmap_jun.pdf")
+pheatmap(biblio_Jun$mean)
+dev.off()
+
+# Score GSEA 
+GeneSetObject <- ExpressionSet(T_final_EDec$means)
+GeneSet <- GeneSet(GeneSetObject, setName="Test")
 ```
 
 ```{r, label = "Partie 3: Creation des matrices A dans immune deconv"}
