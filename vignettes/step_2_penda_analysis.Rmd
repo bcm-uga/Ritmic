@@ -50,7 +50,7 @@ Please, check out the `simulation` vignette for more details.
 ## Data filtering
 ```{r echo=FALSE, label="data_loading"}
 simu_D_output = readRDS("~/Datas/projects/RiTMIC/inst/extdata/matrix_D.RDS")
-matrix_D <- simu_D_output$matrix_D
+matrix_D <- simu_D_output$D_noise
 penda_data_case <- penda::penda_data_case
 
 matrix_D_control <- penda::penda_data_ctrl[,4]
@@ -109,17 +109,6 @@ The function  `penda_test_1ctrl` infers for each gene and for each sample of the
 By default, the `threshold` parameter is set to `r threshold` but we strongly advise users to use the vignette `vignette simulation` to adjust this parameter to the user-specific data.
 
 Results are in the form of two matrices `$down_genes` and `$up_genes`. Each row corresponds to a gene and each column to a case sample. A TRUE entry in these matrices means that the corresponding genes are deregulated (down or up-regulated) in the corresponding samples. 
-
-```{r, echo=FALSE}
-data_bypatient = RiTMIC::generate_data_bypatient(D_list = penda_res$down_genes,
-                                         U_list = penda_res$up_genes)
-
-RiTMIC::plot_figure(data_patients = data_bypatient)
-```
-
-```{r fig.width=9, fig.height=9, echo=FALSE}
-RiTMIC::plot_heatmap_hclust(data = penda_res)
-```
 
 
 # Material and methods

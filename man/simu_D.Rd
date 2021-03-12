@@ -2,42 +2,30 @@
 % Please edit documentation in R/simulation.R
 \name{simu_D}
 \alias{simu_D}
-\title{Build the matrix_D: gene expression per sample}
+\title{Build the D matrix: gene expression per sample}
 \usage{
-simu_D(
-  matrix_A,
-  matrix_T,
-  corr_matrix_T,
-  noise = T,
-  mean = 0,
-  sd = 0.1,
-  val_min = 0,
-  val_max = 1
-)
+simu_D(A, T, T_cancer, noise = F, mean = 0, sd = 0.1, val_min = 0, val_max = 1)
 }
 \arguments{
-\item{matrix_A}{matrix obtained with \code{simu_A}}
+\item{A}{The matrix of the different cell type proportion in each sample, can be generated with: \code{simu_A}. Note: the last row will be used for the tumor.}
 
-\item{matrix_T}{matrix obtained with \code{simu_T_cancer}}
+\item{T}{The matrix with the gene expression profile of each cell type, except tumors}
 
-\item{corr_matrix_T}{matrix obtained with corr_prop_functions}
+\item{T_cancer}{The matrix of gene expression in each tumor, can be generated with: \code{simu_T_cancer}}
 
-\item{noise}{Boolean statement, {default} = T \cr\cr Do you want to use \code{add_noise} to your resulting matrix to increase the variance ?}
+\item{noise}{TRUE for adding a Gaussian noise on the product matrix, FALSE for not (see \code{add_noise})}
 
-\item{mean}{Mean of the noise, {default} = 0}
+\item{mean}{Mean of the noise (see \code{add_noise})}
 
-\item{sd}{Standard deviation of the noise, {default} = 0.1}
+\item{sd}{Standard deviation of the noise (see \code{add_noise})}
 
-\item{val_min}{Minimum value of the noise, {default} = 0}
+\item{val_min}{Minimum value of the matrix after the noise (see \code{add_noise})}
 
-\item{val_max}{Maximum value of the noise, {default} = 1}
+\item{val_max}{Maximum value of the matrix after the noise (see \code{add_noise})}
 }
 \value{
-matrix D of gene expression per sample
+The D matrix of size n*p with the complex gene expression for each sample. If noise = T, return a list of the D matrix before the noise (D) and after the noise (D_noise)
 }
 \description{
-Simulation of an RNAseq matrix, obtained with the matrices combinations of the matrix A and T for each sample
-}
-\seealso{
-\code{\link[RiTMIC]{add_noise}}
+Simulation of a complex RNAseq matrix, obtained with the matrix multiplication of the A and T matrices, with a different tumor profile for each sample
 }

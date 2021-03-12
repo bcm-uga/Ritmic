@@ -107,7 +107,7 @@ corr_prop_s = function(T_cancer, G, A_ME, x = 100){
     # Sampling of the gene names from T_cancer 
     genes = sample(nrow(T_cancer), G, replace = F)
     T_cancer[genes, ] =  T_cancer[genes, ] + x*A_ME
-    return(list(T = T_cancer, g_dereg = genes))
+    return(list(T = T_cancer, g_dereg = rownames(T_cancer)[genes]))
   }
 }
 
@@ -138,7 +138,7 @@ corr_prop_t = function(T_cancer, G, A_ME, y = 2, thres_ME = 0.1){
         T_f[genes, n] =  T_f[genes, n] * y
       }
     }
-    return(list(T = T_f, g_dereg = genes))
+    return(list(T = T_f, g_dereg = rownames(T_cancer)[genes]))
   }
 }
 
@@ -162,7 +162,7 @@ corr_prop_f = function(T_cancer, G, A_ME, z = 2){
   } else {
     genes = sample(nrow(T_cancer), G, replace = F)
     T_cancer[genes, ] =  T_cancer[genes, ]*(1 + z*A_ME)
-    return(list(T = T_cancer, g_dereg = genes))
+    return(list(T = T_cancer, g_dereg = rownames(T_cancer)[genes]))
   }
 }
 

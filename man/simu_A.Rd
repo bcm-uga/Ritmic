@@ -2,26 +2,26 @@
 % Please edit documentation in R/simulation.R
 \name{simu_A}
 \alias{simu_A}
-\title{Simulate cell lines proportion distribution in tumors}
+\title{Simulation of the cell types proportion distribution (A matrix)}
 \usage{
 simu_A(n, alpha = c(1.5, 4.5, 1, 3))
 }
 \arguments{
-\item{n}{patients number}
+\item{n}{Number of samples}
 
-\item{alpha}{cell type proportions of size k in a concatenated vector}
+\item{alpha}{Different proportion of cell types in a vector of size k (number of cell types)}
 }
 \value{
-Proportion of different cell lines in a matrix
+This function return a matrix of size k*p with the cell type proportions.
 }
 \description{
-\code{simu_A} generates the \strong{matrix A} : \cr Proportion of cell lines distribution per tumor \cr \cr  Dimensions: n x alpha
+\code{simu_A} generates the \strong{matrix A} : \cr Proportion of cell types in samples \cr \cr  Dimensions: k*p
 }
 \details{
 Cell lines distributions are obtained with \code{\link[gtools]{rdirichlet}} method
 }
 \examples{
-simu_A(20,c(1.5, 4.5, 3))
+simu_A(n = 20, alpha = c(1.5, 4.5, 3))
 }
 \seealso{
 \code{\link[gtools]{rdirichlet}}

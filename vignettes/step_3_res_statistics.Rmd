@@ -75,13 +75,14 @@ dim(matrix_A)
 
 # Matrix T control 
 simu_D_output <- readRDS("~/Datas/projects/RiTMIC/inst/extdata/matrix_D.RDS")
-pre_treat_res <- RiTMIC::pre_treat(penda_res = test_matrix, patientNumber=5)
+pre_treat_res <- Ritmic::pre_treat(penda_res = test_matrix, thres_p = 5)
 
+T_cancer = readRDS("~/Datas/projects/RiTMIC/inst/extdata/matrix_T.RDS")
 ```
 
 ```{r,label="RiTMIC::calc_dist", message=FALSE}
-distance <- RiTMIC ::calc_dist(pre_treat_output = pre_treat_res, matrix_A = matrix_A)
-calc_corr <- RiTMIC::calc_corr(matrix_D = simu_D_output, matrix_A = matrix_A)
+distance <- Ritmic::calc_dist(binary_penda = pre_treat_res, A = matrix_A)
+correlation <- Ritmic::calc_corr(D_cancer = simu_D_output, A = matrix_A)
 ```
 ## Did PenDA had an impact to the simulated results ? 
 
@@ -90,7 +91,13 @@ So, a greater correlation score than the distance scores simulated with kanto, k
 
 To have a reliable result, please run the pipeline with real dataset. 
 ```{r,label="RiTMIC::plot_res"}
-RiTMIC::plot_res(calc_corr_output = calc_corr, calc_dist_output = distance, graph_title = "ROC curves to test the model improvement induce by PenDA")
+pvalues = c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+
+#To focus on the cell type 3 
+corr_3 = correlation[correlation$type == 3, ]
+dist_3 = distance[distance$type == 3, ]
+
+Ritmic::plot_res(corr_res = correlation, dist_res = distance, genes_dereg = T_cancer$genes_dereg, pvalues, graph_title = "ROC curves to test the model improvement induce by PenDA")
 ```
 
 # Session Information

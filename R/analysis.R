@@ -94,11 +94,11 @@ calc_dist = function(binary_penda, A){
 #' Compute the correlation between the gene expression in tumors and the micro-environment proportion
 #'
 #' @param D_cancer The matrix with the gene expression in each tumor
-#' @paramA The matrix of the different cell type proportion in each sample
+#' @param A The matrix of the different cell type proportion in each sample
 #' 
 #' @seealso \code{compute_1_res} \code{plot_res}
 #'
-#' @return A matrix with correlation between each gene and each cell type
+#' @return A data.frame with for each gene and each cell type the correlation between the gene expression and the cell type proportion 
 #' @export 
 calc_corr <- function(D_cancer, A) {
   
@@ -108,12 +108,16 @@ calc_corr <- function(D_cancer, A) {
                          total = nrow(D_cancer), clear = FALSE, width= 80)
   for(g in rownames(D_cancer)){
     for(t in 1:nrow(A)){
-      c = cor(matrix_T[g, ], matrix_A[t, ])
+      c = cor(D_cancer[g, ], A[t, ])
       res_cor = rbind(res_cor, c(g, t, c))
     }
   }
   options(warn = 0)
-  return(res_cor)
+  df = data.frame(genes = res_cor[, 1],
+                  type =  factor(res_cor[, 2]),
+                  corr = as.numeric(res_cor[, 3]), 
+                  stringsAsFactors = F)
+  return(df)
 }
 
 
@@ -150,50 +154,45 @@ eval_results = function(values, genes, genes_dereg, pval){
 }
 
 
-
 #' Check the PenDA enrichment: Plot ROC curves  
 #' @description Compare non-enriched data by PenDA with a correlation test versus the PenDA efficiency with tests: \cr \itemize{
 #' \item{Kolmogorov-Smirnov} \item{Student} \item{Kantorovich}
 #' } 
 #'
-#' @param calc_corr_output Output from \code{pre_plot_res} function
-#' @param calc_dist_output Output from \code{calc_dist} function
+#' @param corr_res Output from \code{calc_corr} function for the cell type deregulated
+#' @param dist_res Output from \code{calc_dist} function for the cell type deregulated
+#' @param genes_dereg The names of genes deregulated in the simulation
+#' @param pvalues The threshold for the ROC curve
 #' @param graph_title Title of the ROC curve graph 
 #' 
 #' @seealso \code{as_def_res} \code{pre_plot_res} \code{compute_1_res}
 #'
 #'@return ROC curves
-#' @export
-plot_res = function(calc_corr_output, calc_dist_output, graph_title){
-  "FPR" <- "TPR" <- "metrique" <- c()
-  matrix_D <- calc_corr_output$matrix_D$matrix_D
-  T <- calc_corr_output$matrix_D$T
-  genes_c = c(rownames(T$T)[T$g_immune], rownames(T$T)[T$g_fibro])
-  genes = genes_c[(genes_c %in% rownames(matrix_D))]
-  cor_T <- calc_corr_output$cor_T
-  pvalues <- c(0, 0.00005, 0.0001, 0.0005, 0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25,  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
-  g_fibro = unique(genes[genes%in%rownames(T$T)[T$g_fibro]])
-  g_immune = unique(genes[genes%in%rownames(T$T)[T$g_immune]])
-  df <- calc_dist_output$df
+#'@export
+plot_res = function(corr_res, dist_res, genes_dereg, pvalues = c(0, 0.1, 0.5, 0.8), graph_title){
+  
+  genes_dereg = unique(genes_dereg[genes_dereg%in%corr_res$genes])
   res_ks = sapply(pvalues, function(x){
-    compute_1_res(df$ks, df$genes, g_fibro, g_immune, x)
+    Ritmic::eval_results(dist_res$ks, dist_res$genes, genes_dereg, x)
   })
   
   res_st = sapply(pvalues, function(x){
-    compute_1_res(df$student, df$genes, g_fibro, g_immune, x)
+    Ritmic::eval_results(dist_res$student, dist_res$genes, genes_dereg, x)
   })
  
   res_kanto = sapply(pvalues, function(x){
-    compute_1_res(df$kanto, df$genes, g_fibro, g_immune, x)
+    Ritmic::eval_results(dist_res$kanto, dist_res$genes, genes_dereg, x)
   })
   
   res_cor = sapply(pvalues, function(x){
-    compute_1_res(abs(as.numeric(cor_T[, 3])), cor_T[, 1], rownames(T$T)[T$g_fibro], rownames(T$T)[T$g_immune], x)
+    Ritmic::eval_results(abs(corr_res$corr), corr_res$genes, genes_dereg, x)
   })
+  
   df = data.frame(pval = as.factor(rep(pvalues)),
                   FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
                   TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
                   metrique = rep(c("ks", "student", "kanto", "correlation"), each = length(pvalues)))
+  
   plot = ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
     geom_point() + 
     geom_line() + 

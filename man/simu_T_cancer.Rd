@@ -2,23 +2,23 @@
 % Please edit documentation in R/simulation.R
 \name{simu_T_cancer}
 \alias{simu_T_cancer}
-\title{Simulate an enhanced tumor micro-environment}
+\title{Simulation of new tumors RNAseq profiles based on already known tumors expression}
 \usage{
 simu_T_cancer(tumor_RNAseq, n)
 }
 \arguments{
-\item{tumor_RNAseq}{RNAseq dataset to simulate a random T matrix}
+\item{tumor_RNAseq}{Gene expression of tumors samples}
 
-\item{n}{Supposed sample number}
+\item{n}{Final number of tumors}
 }
 \value{
-Matrix T: \cr Gene expressions distributions per cell line
+This function return a matrix of size n*p with a different gene expression profile for each tumor
 }
 \description{
-Generate a \strong{matrix T} with random \strong{gene expression} distributions in \strong{n} samples \cr Matrix dimension : n x gene_name
+Generate a \strong{matrix T} with a \strong{gene expression} distributions for each \strong{n} tumor \cr Matrix dimension : n*p
 }
 \details{
-gene_name is imported from the tumor_RNAseq data \cr Random gene expression distributions is performed by \code{\link{rnorm}} \cr Probability of gene expression in a cell line is computed by \code{\link[mixtools]{normalmixEM}}
+Genes names are imported from the tumor_RNAseq data \cr Bimodal distribution of each gene expression is infered with \code{\link[mixtools]{normalmixEM}} \cr When the bimodal distribution doesn't work (too many 0, extreme value, etc.), the gene expression is sampled from existing values.
 }
 \seealso{
 \code{\link[mixtools]{normalmixEM}}

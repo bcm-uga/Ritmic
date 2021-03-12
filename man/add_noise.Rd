@@ -2,28 +2,24 @@
 % Please edit documentation in R/simulation.R
 \name{add_noise}
 \alias{add_noise}
-\title{Add noise to the analysis or simulations of the tumor micro-environments gene expressions}
+\title{Add a Gaussian noise to a matrix}
 \usage{
 add_noise(matrix_D, mean = 0, sd = 0.1, val_min = 0, val_max = 1)
 }
 \arguments{
-\item{matrix_D}{matrix_D with or without deregulations obtained from the combinations of matrix_T * matrix_A}
+\item{matrix_D}{The matrix where to add a noise}
 
-\item{mean}{Mean of the data, {default} = 0}
+\item{mean}{Mean of noise}
 
-\item{sd}{Standard deviation of the data, {default} = 0.1}
+\item{sd}{Standard deviation of the noise}
 
-\item{val_min}{Minimum value, {default} = 0}
+\item{val_min}{Minimum value of the matrix}
 
-\item{val_max}{Maximum value, {default} = 1}
+\item{val_max}{Maximum value of the matrix}
 }
 \value{
-New matrix D with dimensions : \cr gene_name per tumor_number
+The matrix_D with a gaussian noise of mean = mean, sd = sd, without exceeding the lower threshold val_min and the upper threshold val_max
 }
 \description{
 Applications of \code{add_noise} \cr \cr Simulations : Better reflection of the biological observations \cr
-Biological observation : improve the generalization error to avoid over-learning
-}
-\seealso{
-\code{\link[RiTMIC]{simu_T_cancer}}, \code{\link[RiTMIC]{corr_prop_s}}, \code{\link[RiTMIC]{corr_prop_n}}, \code{\link[RiTMIC]{corr_prop_c}}
 }

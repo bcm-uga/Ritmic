@@ -2,25 +2,25 @@
 % Please edit documentation in R/simulation.R
 \name{corr_prop_s}
 \alias{corr_prop_s}
-\title{Simple deregulations in tumors micro-environment}
+\title{Simple simulation of the correlation between tumor micro-environment proportion and tumor gene expression}
 \usage{
-corr_prop_s(T_cancer, G, A, x = 100)
+corr_prop_s(T_cancer, G, A_ME, x = 100)
 }
 \arguments{
-\item{T_cancer}{The matrix T, for more documentation : \code{simu_T_cancer}}
+\item{T_cancer}{The matrix of gene expression in each tumor, can be generated with: \code{simu_T_cancer}}
 
-\item{G}{Gene number to be sampled, this function requires an \strong{even} Gene number}
+\item{G}{Number of genes correlated with the micro-environment composition}
 
-\item{A}{Matrix A : distribution of cell lines per tumor \code{simu_A}}
+\item{A_ME}{The vector with the proportion of the micro-environment in each tumor. Can be generated with a row of: \code{simu_A}}
 
-\item{x}{Coefficient, by default it's settled to 100}
+\item{x}{Deregulation coefficient}
 }
 \value{
-List with : \cr Deregulated matrix $T and deregulated genes in $g_immune and $g_fibro
+List with : \cr Deregulated matrix $T and deregulated genes in $g_dereg
 }
 \description{
 Generation of deregulations with a simple model in the matrix T generated from \code{simu_T_cancer} with cell lines proportions from the return of \code{simu_A} method \cr\cr
 Step 1: G genes are drawn\cr \cr 
 Step 2: Over-expression induced to these genes : \cr \cr
-newGeneExpression = geneExpression + x * cellTypeProportion
+newGeneExpression = geneExpression + x * microEnvironmentProportion
 }
