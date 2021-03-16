@@ -28,6 +28,18 @@ layout(1, respect=TRUE)
 
 `RiTMIC` Part 4: **Deconvolution by calling EDec functions**
 
+```{r label = "header", echo = FALSE, eval = TRUE}
+library(shiny)
+library(shinythemes)
+library(pheatmap)
+library(plotly)
+library(cowplot)
+library(ggplot2)
+library(fgsea)
+library(matrixStats)
+library(medepir)
+```
+
 ```{r, label="Partie 1: Importation, Vérification et filtration des jeux de données "}
 # Données de références poumon gtex
 gtex <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/study_gtex.rds")
@@ -143,13 +155,12 @@ dim(TCGA_LUSC_trs$exp_grp)
 # Rentrer la matrice de methylation pour EDec_step_1 donc besoin d'implémenter les matrices met 
 table(colnames(TCGA_LUAD_meth$data) == rownames(TCGA_LUAD_trs$exp_grp))
 # Filtration du exp_grp 
-library(dplyr)
 TCGA_LUAD_trs$exp_grp <- TCGA_LUAD_trs$exp_grp %>% select(id_sample, sample_source, sex, age_min,age_max,id_morphology,t,n,tnm_stage,dfs_months,os_months, relapsed,exposure)
 LUAD_CF <- medepir::CF_detection(TCGA_LUAD_meth$data,TCGA_LUAD_trs$exp_grp,threshold = 0.15, ncores=2)
 table(rownames(TCGA_LUAD_trs$exp_grp) == colnames(LUAD_CF))
 # Passage de 21785 à 11663 sondes 
-saveRDS(LUAD_CF,"/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_CF.rds")
-LUAD_CF <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_CF.rds")
+saveRDS(LUAD_CF,"~/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_CF.rds")
+LUAD_CF <- readRDS("~/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_CF.rds")
 dim(LUAD_CF)
 
 while (!is.null(dev.list()))  dev.off()
@@ -162,18 +173,18 @@ dev.off()
 D_FS = medepir::feature_selection(LUAD_CF)
 # Lancement de la déconvolution avec EDec stage 1 
 deconv = EDec::run_edec_stage_1(meth_bulk_samples = LUAD_CF, informative_loci = rownames(D_FS), num_cell_types = 8)
-saveRDS(deconv,"/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_deconv.rds")
-TCGA_LUAD_deconv <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_deconv.rds")
+saveRDS(deconv,"~/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_deconv.rds")
+TCGA_LUAD_deconv <- readRDS("~/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_deconv.rds")
 
 # Extraction des matrices T et A
 T_est = as.matrix(TCGA_LUAD_deconv$methylation)
 A_est = as.matrix(TCGA_LUAD_deconv$proportions)
-#A_est = t(A_est)
-
 
 T_final_EDec <- EDec::run_edec_stage_2(TCGA_LUAD_trs$data, A_est)
+deconv_matrices <- list(Aest = A_est, Test = T_final_EDec$means)
+saveRDS(deconv_matrices,"~/Datas/projects/data/import_data/RiTMIC/TCGA_Luad_estimated_matrix_deconv.rds")
 
-library(pheatmap)
+
 while (!is.null(dev.list()))  dev.off()
 pdf("heatmap_T_EDec2.pdf")
 pheatmap(T_final_EDec$means)
@@ -200,14 +211,148 @@ pheatmap(biblio_Jun$mean)
 dev.off()
 
 ```
+# Enrichissement Yuna
+```{r, label = "Data Loading"}
+path  = "~/Datas/projects/data/import_data/RiTMIC/"
+A_T_matrices <- readRDS(paste0(path, "TCGA_Luad_estimated_matrix_deconv.rds"))
+Aest <- A_T_matrices$Aest
+Test <- A_T_matrices$Test
 
-```{r, label = "Partie 3: Creation des matrices A dans immune deconv"}
+dbmarkers = readRDS(paste0(path, "CellMatchCurated.RDS"))
+dbmarkers <- subset(dbmarkers, dbmarkers$tissueType=="Lung")
+cancertypes = levels(as.factor(dbmarkers$cancerType))
 
 ```
 
-```{r, label= "Partie4: Matrices A par methodes immune deconv"}
+## Loading Yuna's functions 
+```{r, label= "Yuna's functions"}
+#Fonctions for unsupervised enrichment
+enrichplot = function(mydata, markerscelltypes, showCategory){
+  enrich = function(x, markerscelltypes, showCategory, plot_title){
+    genes=sort(x,decreasing=TRUE)
+    #set.seed(1)
+    # fgsea needs to have markercelltypes: $pathway -> gene1, gene2, gene 3....
+    #and numeric genes expressions 
+    fgseaRes = fgseaMultilevel(markerscelltypes, genes, minSize=2, maxSize=200)
+    fgseaResDF = data.frame(fgseaRes)
+    # Apply a score
+    fgseaResDFSIGN = fgseaResDF[which(fgseaResDF[,"pval"]<0.05 & fgseaResDF[,"ES"]>0),c("pathway", "pval", "ES")]
+    # Ranking 
+    fgseaResDFSIGN = fgseaResDFSIGN[order(fgseaResDFSIGN[,"pval"], decreasing = FALSE),]
+    if(nrow(fgseaResDFSIGN)==0){
+      p = print("No significant cell-type enrichment")
+    } else {
+      fgseaResDFSIGN = fgseaResDFSIGN[1:min(showCategory, nrow(x)),]
+      # Extract lines if the first column (Pathway) is not NA
+      fgseaResDFSIGN = fgseaResDFSIGN[!is.na(fgseaResDFSIGN[,1]),]
+      # Transform pval in -log10(pval)
+      fgseaResDFSIGN[,"-log10(pval)"] = -log10(fgseaResDFSIGN[,"pval"])
+      # Reranking
+      fgseaResDFSIGN = fgseaResDFSIGN[order(fgseaResDFSIGN[,"pval"], decreasing = TRUE),]
+      fgseaResDFSIGN$pathway <- factor(fgseaResDFSIGN$pathway, levels=fgseaResDFSIGN$pathway)
+      p <- ggplot(fgseaResDFSIGN, aes(x=pathway, y=-log10(pval), fill =ES))+
+        geom_bar(stat='identity') + scale_fill_continuous(low="white", high="red")+coord_flip()+ggtitle(plot_title)
+    }
+    return(p)
+  }
+  
+  allplots = list()
+  for (col in 1:ncol(mydata)){
+     plot_title = paste("Estimated component", col, sep = " ")
+        print(plot_title)
+    allplots[[col]] = enrich(mydata[,col], markerscelltypes, showCategory, plot_title =  plot_title)
+  }
+  return(allplots)
+  #return(apply(mydata, 2,  enrich, markerscelltypes, showCategory))
+  #subplot(allplots, nrows = length(allplots), margin = 0.07)#, margin = c(0,0,0.07,0.07))
+  #cowplot::plot_grid(plotlist = allplots, nrow = ncol(mydata), labels = colnames(mydata))
+}
 
+# Apply on every matrix column a boolean test to test the maximum values 
+# Then apply a sign inversion to the matrix if the test is true
+orient_funct <- function(S) {
+  orient <-
+    apply(S, 2, function(x) {
+      if (min(x) < -3 & max(x) > 3) {
+        ifelse (sum(x > 3)  < sum(x < -3), -1, 1)
+      } else {
+        ifelse (sum(x > 2)  < sum(x < -2), -1, 1)
+      }
+    })
+  S <- as.matrix(S)  %*% diag(orient)
+  return(S)
+}
+
+#Functions for identifying Unsupervised number of components 
+plot_k = function(D){
+  svd. = svd(t(D))$d[1:min(30, ncol(D))]
+  ggplot(data.frame(val = svd., idx = 1:min(30, ncol(D))), aes(x = idx, y = val)) +s
+    geom_line() + geom_point() + scale_x_continuous(breaks = 1:min(30, ncol(D)))+
+    labs(x = "PC index", y = "Eigenvalues") +
+    theme_minimal(base_size = 16)
+}
+
+#Function that generate the plot
+plot_enrichment= function(dat, dbmarkers, input)  {  
+        
+        if(input$radio012 == "ICA-based"){
+          datemp = orient_funct(dat)
+          colnames(datemp) =  colnames(dat)
+          dat = datemp
+        }
+        if(input$select1 == "ALL"){
+          markerscelltypes = tapply(dbmarkers$geneSymbol,dbmarkers$cellIDcancer, cbind)
+        } else {
+          dbmarkers. = dbmarkers[dbmarkers$cancerType == input$select1,]
+          markerscelltypes = tapply(dbmarkers.$geneSymbol,dbmarkers.$cellID, cbind)
+        }
+        
+return(enrichplot(dat, markerscelltypes, showCategory = 10))
+
+}
+
+show_markers = function(dat, dbmarkers, input)  {  
+  if(input$radio012 == "ICA-based"){
+          datemp = orient_funct(dat)
+          colnames(datemp) =  colnames(dat)
+          dat = datemp
+        }
+  return(apply(dat, 2, function(x){rownames(dat)[order(x, decreasing = TRUE)[1:100]]}))
+}
+
+plot_cell_prop = function (dat, sample_id, celltype_id){
+cell_prop_plot = list()
+
+hm = pheatmap(dat, clustering_method = "ward.D2", silent = TRUE)
+tmp_dat = dat[hm$tree_row$order, hm$tree_col$order]
+        
+cell_prop_plot$p1 = plot_ly(x = colnames(tmp_dat), y = rownames(tmp_dat), z = round(dat, 4), type = "heatmap", height = 1000) %>% layout(margin = c(0,0,50,50), title = "Heatmap - Cell vs Samples")
+        
+hm = pheatmap(dat, clustering_method = "ward.D2", silent = TRUE)
+tmp_dat = dat[hm$tree_row$order, hm$tree_col$order]
+        
+cell_prop_plot$p2 = plot_ly(x = rownames(tmp_dat), y = tmp_dat[,sample_id], type="bar", name = "Cells", height = 1000) %>% layout(title = "Cell types distribution in the first sample selected sample", yaxis = list(hoverformat = ".2f"), margin = c(0,0,50,50))
+
+hm = pheatmap(dat, clustering_method = "ward.D2", silent = TRUE)
+tmp_dat = dat[hm$tree_row$order, hm$tree_col$order]
+
+cell_prop_plot$p3 = plot_ly(x = colnames(tmp_dat), y = as.numeric(tmp_dat[celltype_id,]), type="bar", name = "Samples", height = 1000) %>% layout(title = "Selected celltype number 1 proportion across samples", yaxis = list(hoverformat = ".2f"), margin = c(0,0,50,50))
+return (cell_prop_plot)
+
+}
 ```
 
-```{r, label= "Partie 5: PenDA sur surrogate D matrix + immune_deconv_A_matrices"}
+```{r, label= "Enrichment"}
+dat = as.matrix(Test)
+dim(dat)
+input = list()
+input$radio012 = "NMF-based" #is it an ICA based method?
+input$select1 = "ALL" #is it an all cell type query
+
+dat = as.matrix(Test)
+dbmarkers <- subset(dbmarkers, dbmarkers$tissueType=="Lung")
+allplots = plot_enrichment(dat, dbmarkers, input)
+allplots
+show_markers  (dat, dbmarkers, input)
+
 ```
