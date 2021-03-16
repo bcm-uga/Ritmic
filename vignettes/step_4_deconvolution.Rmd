@@ -151,7 +151,12 @@ table(rownames(TCGA_LUAD_trs$exp_grp) == colnames(LUAD_CF))
 saveRDS(LUAD_CF,"/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_CF.rds")
 LUAD_CF <- readRDS("/home/quinquif/Datas/projects/data/import_data/RiTMIC/TCGA_LUAD_CF.rds")
 dim(LUAD_CF)
+
+while (!is.null(dev.list()))  dev.off()
+pdf("LUAD_plot_k.pdf")
 medepir::plot_k(LUAD_CF)
+dev.off()
+
 # PC = 6, donc d'après la loi de Cattel, K = 7+1 = 8
 # Selection des paramètres/sondes
 D_FS = medepir::feature_selection(LUAD_CF)
@@ -194,9 +199,6 @@ pdf("heatmap_jun.pdf")
 pheatmap(biblio_Jun$mean)
 dev.off()
 
-# Score GSEA 
-GeneSetObject <- ExpressionSet(T_final_EDec$means)
-GeneSet <- GeneSet(GeneSetObject, setName="Test")
 ```
 
 ```{r, label = "Partie 3: Creation des matrices A dans immune deconv"}
