@@ -2,21 +2,21 @@
 % Please edit documentation in R/analysis.R
 \name{calc_corr}
 \alias{calc_corr}
-\title{Compute the correlation between the gene expression in tumors and the micro-environment proportion}
+\title{Comparison between gene expression and cell type proportion.}
 \usage{
 calc_corr(D_cancer, A)
 }
 \arguments{
-\item{D_cancer}{The matrix with the gene expression in each tumor}
+\item{D_cancer}{The matrix with the gene expression in each tumor.}
 
-\item{A}{The matrix of the different cell type proportion in each sample}
+\item{A}{The matrix of cell type proportions for each sample.}
 }
 \value{
-A data.frame with for each gene and each cell type the correlation between the gene expression and the cell type proportion
+A data frame with for each gene and each cell type the correlation between the gene expression and the cell type proportion
 }
 \description{
-Compute the correlation between the gene expression in tumors and the micro-environment proportion
+`calc_corr` compute the correlation between the gene expression in tumors and the micro-environment proportion.
 }
 \seealso{
-\code{compute_1_res} \code{plot_res}
+\code{\link{compute_1_res}} \code{plot_res}
 }

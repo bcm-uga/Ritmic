@@ -2,24 +2,24 @@
 % Please edit documentation in R/analysis.R
 \name{calc_dist}
 \alias{calc_dist}
-\title{Compute metrics between the two groups: samples with deregulated genes versus not deregulated genes}
+\title{Comparison between gene deregulation and cell type proportion.}
 \usage{
 calc_dist(binary_penda, A)
 }
 \arguments{
-\item{binary_penda}{The binary matrix of deregulation, can be obtain with the \code{pre_treat} function}
+\item{binary_penda}{The binary matrix of deregulation 0/1 for each gene and each sample, can be obtain with the \code{pre_treat} function. Dimension n (genes) * p (samples).}
 
-\item{A}{The matrix of the different cell type proportion in each sample \cr \cr  Dimensions: k (cell types) * p (samples)}
+\item{A}{The matrix of cell type proportions for each sample. Dimension p (samples) * k (cell types).}
 }
 \value{
-A data.frame with for each gene (genes) and each celle type (type), the result of the 3 metrics
+A data frame with for each gene and each cell type the result of the 3 metrics.
 }
 \description{
-For each cell type and each gene, 3 statistical tests are applied to evaluate the distances bewteen the cell type proportion of the two groups of deregulation: 
+`calc_dist` groups samples according to their deregulation status for a given gene. It then computes for each cell type different metrics to evaluate the distance between the two groups of cell proportions. An important distance suggests a link between the gene expression and the cell type proportion.
 \tabular{lll}{
-Statistical test   \tab Tested parameter               \tab Result type\cr 
-Kantorovich        \tab Kantorovich distance           \tab distance\cr
-Student t-test     \tab Mean comparison                \tab -log10(p-value)\cr
-Kolmogorov-Smirnov \tab Repartition comparison         \tab -log(p-value)\cr
+*Metric*                 \tab *Tested parameter*       \tab *Computed parameter*\cr 
+Kantorovich distance     \tab Transportation           \tab distance\cr
+Student's t-test         \tab Mean comparison          \tab -log10(p-value)\cr
+Kolmogorov-Smirnov test  \tab Distribution comparison  \tab -log10(p-value)\cr
 }
 }

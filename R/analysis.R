@@ -1,9 +1,9 @@
-#' Pre-treatment for the link between gene deregulation and microenvironment composition
-#' @description Matrix are sorted to conserved only the genes with a different deregulation statut in more than thres_p samples  
-#' @param penda_res The result of the Penda method with the deregulation of each gene for each sample  \code{\link[penda]{penda_test}}
-#' @param thres_p Minimum number of samples for the deregulated and not deregulated groups. 
+#' Pre-treatment of the Penda results
+#' @description `pre_treat` takes as input the Penda result lists and combines them to make only one matrix of size genes*samples, with 1 for deregulated genes and 0 for conserved genes. Then, the matrix is sorted to conserved only the genes with a different deregulation status in more than thres_p samples. 
+#' @param penda_res List of two matrices, $up_genes and $down_genes with 1 or 0 for each gene and each sample obtained by the Penda method. See: \code{\link[penda]{penda_test}}
+#' @param thres_p Minimum number of samples in each deregulation group to conserved the gene. 
 #'
-#' @return A binary matrix with the genes that can be used for the statistical analysis and their deregulation status for each sample. 
+#' @return A binary matrix of deregulation 0/1 with the genes that can be used for the statistical analysis and their status for each sample. 
 #' 
 #' @export
 pre_treat = function(penda_res, thres_p){
@@ -12,13 +12,13 @@ pre_treat = function(penda_res, thres_p){
   } else {
     penda_res <- abs(penda_res$up_genes - penda_res$down_genes)
     
-    #We removed the genes with the same deregulation status in all the samples
-    g_egaux = which(apply(penda_res, 1, function(g) {
+    #Genes with the same deregulation status in all the samples are removed
+    g_same = which(apply(penda_res, 1, function(g) {
       length(table(g)) == 1
     }))
-    penda_res = penda_res[-g_egaux, ]
+    penda_res = penda_res[-g_same, ]
     
-    #We removed the genes with less than thres_p samples in each deregulation group
+    #Genes with less than thres_p samples in each deregulation group are removed
     g_sup = which(apply(penda_res, 1, function(g) {
       table(g)[1] > thres_p & table(g)[2] > thres_p
     }))
@@ -28,32 +28,31 @@ pre_treat = function(penda_res, thres_p){
   }
 }
 
-#' Compute metrics between the two groups: samples with deregulated genes versus not deregulated genes
-#' @description  For each cell type and each gene, 3 statistical tests are applied to evaluate the distances bewteen the cell type proportion of the two groups of deregulation: 
+#' Comparison between gene deregulation and cell type proportion.
+#' @description `calc_dist` groups samples according to their deregulation status for a given gene. It then computes for each cell type different metrics to evaluate the distance between the two groups of cell proportions. An important distance suggests a link between the gene expression and the cell type proportion.
 #' \tabular{lll}{
-#' Statistical test   \tab Tested parameter               \tab Result type\cr 
-#' Kantorovich        \tab Kantorovich distance           \tab distance\cr
-#' Student t-test     \tab Mean comparison                \tab -log10(p-value)\cr
-#' Kolmogorov-Smirnov \tab Repartition comparison         \tab -log(p-value)\cr
+#' *Metric*                 \tab *Tested parameter*       \tab *Computed parameter*\cr 
+#' Kantorovich distance     \tab Transportation           \tab distance\cr
+#' Student's t-test         \tab Mean comparison          \tab -log10(p-value)\cr
+#' Kolmogorov-Smirnov test  \tab Distribution comparison  \tab -log10(p-value)\cr
 #' }
 #'
-#' @param binary_penda The binary matrix of deregulation, can be obtain with the \code{pre_treat} function
-#' @param A The matrix of the different cell type proportion in each sample \cr \cr  Dimensions: k (cell types) * p (samples) 
+#' @param binary_penda The binary matrix of deregulation 0/1 for each gene and each sample, can be obtain with the \code{pre_treat} function. Dimension n (genes) * p (samples).
+#' @param A The matrix of cell type proportions for each sample. Dimension p (samples) * k (cell types).
 #' 
 #' @importFrom stats ks.test sd t.test
 #' @importFrom ptlmapper kantorovich
 #' @import progress
 #' 
-#' @return A data.frame with for each gene (genes) and each celle type (type), the result of the 3 metrics
+#' @return A data frame with for each gene and each cell type the result of the 3 metrics.
 #' @export
 #'
 calc_dist = function(binary_penda, A){
   options(warn = -1)
-  res_dereg = c()
-  genes = rownames(binary_penda)
   # Progress bar
-  pb <- progress_bar$new(format = "  Running RiTMIC::calc_dist [:bar] :current/:total (:percent)",total = nrow(binary_penda), clear = FALSE, width= 80)
+  pb <- progress::progress_bar$new(format = "  Running RiTMIC::calc_dist [:bar] :current/:total (:percent)",total = nrow(binary_penda), clear = FALSE, width= 80)
   
+  res_dereg = c()
   #For each gene
   for(g in rownames(binary_penda)){
     pb$tick()
@@ -65,22 +64,19 @@ calc_dist = function(binary_penda, A){
     if(length(p_dereg) != 0 & length(p_zero) != 0){
       #For each cell type
       for(t in 1:nrow(A)){
-      
         x = A[t, p_dereg]
         y = A[t, p_zero]
       
         kanto_dist = ptlmapper::kantorovich(x, y)
         student = -log10(t.test(x, y)$p.value)
         ks = ks.test(x, y)
-        cvx = sd(x) / mean(x)
-        cvy = sd(y) / mean(y)
         
-        res_dereg = rbind(res_dereg, c(g, length(p_dereg), length(p_zero), t, kanto_dist, student, ks$statistic, -log10(ks$p.value), cvx, cvy))
+        res_dereg = rbind(res_dereg, c(g, length(p_dereg), length(p_zero), t, kanto_dist, student, ks$statistic, -log10(ks$p.value)))
       }
     }
   }
   
-  colnames(res_dereg) = c("Gene", "nb_dereg", "nb_zero", "cell_type", "kanto", "student", "ks d", "ks pvalue", "cvx", "cvy")
+  colnames(res_dereg) = c("Gene", "nb_dereg", "nb_zero", "cell_type", "kanto", "student", "ks d", "ks pvalue")
   
   df =  data.frame(genes = res_dereg[, 1],
                    type =  factor(res_dereg[, 4]),
@@ -91,22 +87,24 @@ calc_dist = function(binary_penda, A){
   return(df)
 }
 
-#' Compute the correlation between the gene expression in tumors and the micro-environment proportion
+#' Comparison between gene expression and cell type proportion.
+#' @description `calc_corr` compute the correlation between the gene expression in tumors and the micro-environment proportion.
 #'
-#' @param D_cancer The matrix with the gene expression in each tumor
-#' @param A The matrix of the different cell type proportion in each sample
+#' @param D_cancer The matrix with the gene expression in each tumor.
+#' @param A The matrix of cell type proportions for each sample.
 #' 
-#' @seealso \code{compute_1_res} \code{plot_res}
+#' @seealso \code{\link{compute_1_res}} \code{plot_res}
 #'
-#' @return A data.frame with for each gene and each cell type the correlation between the gene expression and the cell type proportion 
+#' @return A data frame with for each gene and each cell type the correlation between the gene expression and the cell type proportion 
 #' @export 
 calc_corr <- function(D_cancer, A) {
   
   options(warn = -1)
   res_cor = c()
-  pb <- progress_bar$new(format = "  Running RiTMIC::pre_plot_res [:bar] :current/:total (:percent) in :elapsed",
+  pb <- progress::progress_bar$new(format = "  Running RiTMIC::calc_corr [:bar] :current/:total (:percent) in :elapsed",
                          total = nrow(D_cancer), clear = FALSE, width= 80)
   for(g in rownames(D_cancer)){
+    pb$tick()
     for(t in 1:nrow(A)){
       c = cor(D_cancer[g, ], A[t, ])
       res_cor = rbind(res_cor, c(g, t, c))
@@ -163,20 +161,20 @@ eval_results = function(values, genes, genes_dereg, pval){
 #' @param dist_res Output from \code{calc_dist} function for the cell type deregulated
 #' @param genes_dereg The names of genes deregulated in the simulation
 #' @param pvalues The threshold for the ROC curve
-#' @param graph_title Title of the ROC curve graph 
+#' @param graph_title the title of the ROC curve graph 
 #' 
 #' @seealso \code{as_def_res} \code{pre_plot_res} \code{compute_1_res}
 #'
 #'@return ROC curves
 #'@export
-plot_res = function(corr_res, dist_res, genes_dereg, pvalues = c(0, 0.1, 0.5, 0.8), graph_title){
+plot_res = function(corr_res, dist_res, genes_dereg, pvalues = c(0, 0.01, 0.05, 0.1, 1), graph_title = ""){
   
   genes_dereg = unique(genes_dereg[genes_dereg%in%corr_res$genes])
-  res_ks = sapply(pvalues, function(x){
+  res_ks = sapply(-log10(pvalues), function(x){
     Ritmic::eval_results(dist_res$ks, dist_res$genes, genes_dereg, x)
   })
   
-  res_st = sapply(pvalues, function(x){
+  res_st = sapply(-log10(pvalues), function(x){
     Ritmic::eval_results(dist_res$student, dist_res$genes, genes_dereg, x)
   })
  

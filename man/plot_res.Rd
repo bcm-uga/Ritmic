@@ -8,8 +8,8 @@ plot_res(
   corr_res,
   dist_res,
   genes_dereg,
-  pvalues = c(0, 0.1, 0.5, 0.8),
-  graph_title
+  pvalues = c(0, 0.01, 0.05, 0.1, 1),
+  graph_title = ""
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ plot_res(
 
 \item{pvalues}{The threshold for the ROC curve}
 
-\item{graph_title}{Title of the ROC curve graph}
+\item{graph_title}{the title of the ROC curve graph}
 }
 \value{
 ROC curves
