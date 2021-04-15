@@ -228,8 +228,8 @@ plot_res = function(corr_res, dist_res, genes_dereg, pvalues = c(0, 0.01, 0.05, 
                   FPR = c(res_ks[5, ], res_st[5, ], res_kanto[5, ], res_cor[5, ]),
                   TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
                   metrique = rep(c("ks", "student", "kanto", "correlation"), each = length(pvalues)))
-  
-  plot = ggplot2::ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
+  library(ggplot2)
+  plot = ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
     geom_point() + 
     geom_line() + 
     theme_minimal()+

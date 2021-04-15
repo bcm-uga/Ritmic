@@ -1,0 +1,92 @@
+---
+title: "RiTMIC: RegulatIon of Tumor MIcroenvironment Composition"
+subtitle: "Step 4: Analysis of gene deregulation with `penda`"
+author: "Magali Richard, Clementine Decamps, Fabien Quinquis"
+contact: 
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim", dpi=75)
+layout(1, respect=TRUE)
+```
+
+# Introduction 
+
+`RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package to study the link between the gene expression in a tumor and the microenvironment composition. 
+
+**To do** : describe the pipeline's steps : 1. simulation of complex D matrix / 2. deconvolution with medepir / 3. identification and extraction of the cancer type / 4. Penda / 5. res analysis.
+
+`RiTMIC` **"Step 4: Analysis of gene deregulation  with `penda` **
+
+`penda` (**PE**rso**N**alized **D**ifferential **A**nalysis ) is an open-access R package that detects gene deregulation in individual samples compared to a set of reference, control samples. 
+
+# Dataset
+
+**To do** : describe data 
+
+```{r, label="load_data"}
+D_cancer = readRDS("tmp_ritmic/D_cancer.rds")
+```
+
+# Penda Method
+
+`penda` performs a 3-steps analysis: 
+  1. Data filtering
+  2. Relative gene ordering
+  3. Differential expression testing
+
+**To do** : describe that we used as controls and what user has to used 
+Described make dataset
+
+## Data filtering
+```{r echo=FALSE, label="data filtering"}
+penda_data_case <- D_cancer
+penda_data_ctrl <- penda::penda_data_ctrl[1:1000, 1:10]
+
+Penda_dataset = penda::make_dataset(penda_data_ctrl, penda_data_case, detectlowvalue = F)
+data_ctrl = Penda_dataset$data_ctrl
+data_case = Penda_dataset$data_case
+```
+
+
+## Relative gene ordering
+
+**To do** : explain what we make and what user has to make (simu penda)
+
+```{r, label= "penda::compute_lower_and_higher_lists"}
+s_max = 30
+L_H_list = penda::compute_lower_and_higher_lists(data_ctrl, threshold = 0.99, s_max = s_max)
+L = L_H_list$L
+H = L_H_list$H
+```
+
+## Differential expression testing
+
+**To do** : explain what we make and what user has to make (simu penda)
+
+```{r, label="penda::penda_test", results="hide"}
+threshold = 0.4
+iterations =  20
+
+penda_res = penda::penda_test(samples = data_case, 
+                              controls = data_ctrl,
+                              iterations =  iterations, 
+                              L_H_list =  L_H_list, 
+                              threshold = threshold)
+
+if(!file.exists("tmp_ritmic/penda_res.rds")){
+  saveRDS(penda_res, file = "tmp_ritmic/penda_res.rds")
+}
+
+```

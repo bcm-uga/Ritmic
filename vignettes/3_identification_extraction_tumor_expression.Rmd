@@ -1,0 +1,65 @@
+---
+title: "RiTMIC: RegulatIon of Tumor MIcroenvironment Composition"
+subtitle: "Part 3 : Identification and extraction of tumor cell type"
+author: "Magali Richard, Clementine Decamps, Fabien Quinquis"
+contact: 
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{simulation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+```{r echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim", dpi=75)
+layout(1, respect=TRUE)
+```
+
+# Introduction
+
+# Introduction
+
+`RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package to study the link between the gene expression in a tumor and the microenvironment composition. 
+
+**To do** : describe the pipeline's steps : 1. simulation of complex D matrix / 2. deconvolution with medepir / 3. identification and extraction of the cancer type / 4. Penda / 5. res analysis.
+
+`RiTMIC` Part 3: **identification and extraction of the cancer type**
+
+# Data
+
+**To do** : describe data obtained in deconvolution
+
+```{r, label="load_data"}
+D_rna = readRDS("tmp_ritmic/D_rna.rds")
+A_calc = readRDS("tmp_ritmic/res_edec.rds")$A
+T_calc = readRDS("tmp_ritmic/res_edec2.rds")
+```
+
+# Identification of cancer cell type
+
+**To do** : describe the solutions for this part (cell marker etc), here we compared with the simulation for an easiest solution. We know that the real tumor is the 4 of A ref, so wi pick the cell type of A_calc with the biggest correlation. 
+
+```{r, label="cancer identification"}
+A_ref = readRDS("tmp_ritmic/A_matrix.rds")
+rownames(A_ref) = c("", "", "","cancer")
+cor(t(A_ref), t(A_calc))
+pos_tum = which.max(cor(t(A_ref), t(A_calc))[4,])
+```
+
+# Extraction of cancer cell type
+
+**To do** : describe this step (we removed non cancer cell types of D_rna to obtain D cancer)
+
+```{r, label="cancer extraction"}
+D_cancer = (D_rna - T_calc[, -pos_tum] %*% A_calc[-pos_tum, ]) / rep(A_calc[pos_tum,])
+
+if(!file.exists("tmp_ritmic/D_cancer.rds")){
+  saveRDS(D_cancer, file = "tmp_ritmic/D_cancer.rds")
+}
+```
