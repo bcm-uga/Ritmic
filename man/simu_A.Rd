@@ -2,26 +2,26 @@
 % Please edit documentation in R/simulation.R
 \name{simu_A}
 \alias{simu_A}
-\title{Simulation of the cell types proportion distribution (A matrix)}
+\title{Simulation of the A matrix}
 \usage{
 simu_A(n, alpha = c(1.5, 4.5, 1, 3))
 }
 \arguments{
-\item{n}{Number of samples}
+\item{n}{The number of samples.}
 
-\item{alpha}{Different proportion of cell types in a vector of size k (number of cell types)}
+\item{alpha}{The vector of size kwith the different cell types proportion.}
 }
 \value{
 This function return a matrix of size k*p with the cell type proportions.
 }
 \description{
-\code{simu_A} generates the \strong{matrix A} : \cr Proportion of cell types in samples \cr \cr  Dimensions: k*p
+\code{simu_A} generates the \strong{A matrix}: \cr 
+Different cell types proportions in each sample. \cr 
+Dimensions: k*p
 }
 \details{
-Cell lines distributions are obtained with \code{\link[gtools]{rdirichlet}} method
-}
-\examples{
-simu_A(n = 20, alpha = c(1.5, 4.5, 3))
+The cell type distribution in a sample is simulated by a Dirichlet 
+distribution. See: \code{\link[gtools]{rdirichlet}}
 }
 \seealso{
 \code{\link[gtools]{rdirichlet}}

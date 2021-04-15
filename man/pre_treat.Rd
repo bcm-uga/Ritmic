@@ -7,13 +7,21 @@
 pre_treat(penda_res, thres_p)
 }
 \arguments{
-\item{penda_res}{List of two matrices, $up_genes and $down_genes with 1 or 0 for each gene and each sample obtained by the Penda method. See: \code{\link[penda]{penda_test}}}
+\item{penda_res}{List of two matrices, $up_genes and $down_genes with 
+1 or 0 for each gene and each sample obtained by the Penda method. 
+See: \code{\link[penda]{penda_test}}}
 
-\item{thres_p}{Minimum number of samples in each deregulation group to conserved the gene.}
+\item{thres_p}{Minimum number of samples in each deregulation group to 
+conserved the gene.}
 }
 \value{
-A binary matrix of deregulation 0/1 with the genes that can be used for the statistical analysis and their status for each sample.
+A binary matrix of deregulation 0/1 with the genes that can be used 
+ for the statistical analysis and their status for each sample.
 }
 \description{
-`pre_treat` takes as input the Penda result lists and combines them to make only one matrix of size genes*samples, with 1 for deregulated genes and 0 for conserved genes. Then, the matrix is sorted to conserved only the genes with a different deregulation status in more than thres_p samples.
+\code{pre_treat} takes as input the Penda result lists and 
+combines them to make only one matrix of size genes*samples, with 1 for 
+deregulated genes and 0 for conserved genes. Then, the matrix is sorted to 
+conserved only the genes with a different deregulation status in more than 
+thres_p samples.
 }

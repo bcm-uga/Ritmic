@@ -7,18 +7,25 @@
 simu_T_cancer(tumor_RNAseq, n)
 }
 \arguments{
-\item{tumor_RNAseq}{Gene expression of tumors samples}
+\item{tumor_RNAseq}{The matrix of gene expression for the already known tumors samples.}
 
-\item{n}{Final number of tumors}
+\item{n}{Final number of tumors.}
 }
 \value{
-This function return a matrix of size n*p with a different gene expression profile for each tumor
+This function return a matrix of size n*p with a different gene 
+expression profile for each tumor.
 }
 \description{
-Generate a \strong{matrix T} with a \strong{gene expression} distributions for each \strong{n} tumor \cr Matrix dimension : n*p
+\code{simu_T_cancer} generates a \strong{gene expression} matrix, with a different
+expression for each of the \strong{n} tumors. \cr 
+Matrix dimension : n*p
 }
 \details{
-Genes names are imported from the tumor_RNAseq data \cr Bimodal distribution of each gene expression is infered with \code{\link[mixtools]{normalmixEM}} \cr When the bimodal distribution doesn't work (too many 0, extreme value, etc.), the gene expression is sampled from existing values.
+Genes names are imported from the tumor_RNAseq data \cr
+ Bimodal distribution of each gene expression is infered with the
+ \code{\link[mixtools]{normalmixEM}} function \cr 
+ When the bimodal distribution doesn't work (too many 0, extreme value, etc.), 
+ the gene expression is sampled from existing values.
 }
 \seealso{
 \code{\link[mixtools]{normalmixEM}}

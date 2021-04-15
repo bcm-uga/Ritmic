@@ -2,25 +2,31 @@
 % Please edit documentation in R/simulation.R
 \name{corr_prop_f}
 \alias{corr_prop_f}
-\title{Simulation of the correlation between tumor micro-environment proportion and tumor gene expression based on a Factor}
+\title{Simulation of the correlation between gene expression and tumor 
+micro-environment proportion based on a factor.}
 \usage{
-corr_prop_f(T_cancer, G, A_ME, z = 2)
+corr_prop_f(T_cancer, A_ME, G = 100, dereg_coeff = 2)
 }
 \arguments{
-\item{T_cancer}{The matrix of gene expression in each tumor, can be generated with: \code{simu_T_cancer}}
+\item{T_cancer}{The matrix of gene expression in each tumor. Can be 
+generated with: \code{simu_T_cancer}.}
 
-\item{G}{Number of genes correlated with the micro-environment composition}
+\item{A_ME}{The vector with the proportion of the micro-environment in each tumor.
+Can be generated with a row of: \code{simu_A}.}
 
-\item{A_ME}{The vector with the proportion of the micro-environment in each tumor. Can be generated with a row of: \code{simu_A}}
+\item{G}{The number of genes correlated with the micro-environment composition.}
 
-\item{z}{Deregulation coefficient}
+\item{dereg_coeff}{The deregulation coefficient.}
 }
 \value{
-A list with : \cr Deregulated matrix $T and deregulated genes in $g_dereg
+A list of $T the deregulated T matrix and $g_dereg the deregulated genes.
 }
 \description{
-Generation of deregulations with a model based on factor in the matrix T generated from \code{simu_T_cancer} with cell lines proportions from the matrix A \code{simu_A} \cr \cr
-Step 1: G genes are drawn\cr \cr 
-Step 2: The over-expressions of G genes is induced by: \cr \cr
-newGeneExpression = geneExpression x [1 + (z x cellTypeProportion)]
+\code{corr_prop_f} simulates a link between the gene expression of \code{G} 
+genes and the micro-environment (ME) proportion, by multiplying the gene expression
+by a factor of the ME proportion.
+}
+\details{
+\code{G} genes are drawn, then for each tumor in \code{T_cancer}: \cr
+New gene expression = gene expression * (1 + \code{dereg_coeff} * ME proportion)
 }

@@ -2,24 +2,25 @@
 % Please edit documentation in R/simulation.R
 \name{add_noise}
 \alias{add_noise}
-\title{Add a Gaussian noise to a matrix}
+\title{Add a Gaussian noise to a matrix.}
 \usage{
-add_noise(matrix_D, mean = 0, sd = 0.1, val_min = 0, val_max = 1)
+add_noise(D, mean = 0, sd = 0.1, val_min = 0, val_max = 1)
 }
 \arguments{
-\item{matrix_D}{The matrix where to add a noise}
+\item{D}{The matrix where to add a noise.}
 
-\item{mean}{Mean of noise}
+\item{mean}{The mean of the noise.}
 
-\item{sd}{Standard deviation of the noise}
+\item{sd}{The standard deviation of the noise.}
 
-\item{val_min}{Minimum value of the matrix}
+\item{val_min}{The minimum value for the final matrix.}
 
-\item{val_max}{Maximum value of the matrix}
+\item{val_max}{The maximum value of the final matrix.}
 }
 \value{
-The matrix_D with a gaussian noise of mean = mean, sd = sd, without exceeding the lower threshold val_min and the upper threshold val_max
+A matrix corresponding to the D matrix with a gaussian noise.
 }
 \description{
-Applications of \code{add_noise} \cr \cr Simulations : Better reflection of the biological observations \cr
+\code{add_noise} Apply a gaussian noise with a lower cap and an upper cap for 
+the values.
 }

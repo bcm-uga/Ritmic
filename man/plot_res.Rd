@@ -2,7 +2,7 @@
 % Please edit documentation in R/analysis.R
 \name{plot_res}
 \alias{plot_res}
-\title{Check the PenDA enrichment: Plot ROC curves}
+\title{Plot the ROC curve of the detection of deregulated genes linked to micro-environment.}
 \usage{
 plot_res(
   corr_res,
@@ -13,24 +13,30 @@ plot_res(
 )
 }
 \arguments{
-\item{corr_res}{Output from \code{calc_corr} function for the cell type deregulated}
+\item{corr_res}{The data frame output from \code{\link[Ritmic]{calc_corr}},
+with the correlation for each gene of the cell type deregulated.}
 
-\item{dist_res}{Output from \code{calc_dist} function for the cell type deregulated}
+\item{dist_res}{The data frame output from \code{\link[Ritmic]{calc_dist}}, 
+with the metrics for each gene of the cell type deregulated.}
 
-\item{genes_dereg}{The names of genes deregulated in the simulation}
+\item{genes_dereg}{The vector with the names of genes deregulated in the simulation.}
 
-\item{pvalues}{The threshold for the ROC curve}
+\item{pvalues}{The vector of thresholds to trace the ROC curve.}
 
-\item{graph_title}{the title of the ROC curve graph}
+\item{graph_title}{An optional title for the ROC curve plot.}
 }
 \value{
-ROC curves
+A ggplot object with the ROC curves. See \code{\link[ggplot2]{ggplot}}
 }
 \description{
-Compare non-enriched data by PenDA with a correlation test versus the PenDA efficiency with tests: \cr \itemize{
-\item{Kolmogorov-Smirnov} \item{Student} \item{Kantorovich}
+\code{plot_res} makes a ROC plot with the detection of genes deregulated in 
+simulations. It makes one curve for the direct correlation between genes 
+expression and micro-environment proportion, and three curves for the comparison
+between PenDA results and micro-environment, with three metrics: \cr 
+\itemize{
+  \item{The pvalue of the Kolmogorov-Smirnov test} \item{The p-value of the Student's t-test} \item{The distance of Kantorovich}
 }
 }
 \seealso{
-\code{as_def_res} \code{pre_plot_res} \code{compute_1_res}
+\code{\link[Ritmic]{compute_1_res}}
 }

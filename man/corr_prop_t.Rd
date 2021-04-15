@@ -2,28 +2,34 @@
 % Please edit documentation in R/simulation.R
 \name{corr_prop_t}
 \alias{corr_prop_t}
-\title{Simulation of the correlation between tumor micro-environment proportion and tumor gene expression based on a Threshold}
+\title{Simulation of the correlation between gene expression and tumor 
+micro-environment proportion based on a threshold.}
 \usage{
-corr_prop_t(T_cancer, G, A_ME, y = 2, thres_ME = 0.1)
+corr_prop_t(T_cancer, A_ME, G = 100, dereg_coeff = 2, thres_ME = 0.1)
 }
 \arguments{
-\item{T_cancer}{The matrix of gene expression in each tumor, can be generated with: \code{simu_T_cancer}}
+\item{T_cancer}{The matrix of gene expression in each tumor. Can be 
+generated with: \code{simu_T_cancer}.}
 
-\item{G}{Number of genes correlated with the micro-environment composition}
+\item{A_ME}{The vector with the proportion of the micro-environment in each tumor.
+Can be generated with a row of: \code{simu_A}.}
 
-\item{A_ME}{The vector with the proportion of the micro-environment in each tumor. Can be generated with a row of: \code{simu_A}}
+\item{G}{The number of genes correlated with the micro-environment composition.}
 
-\item{y}{Deregulation coefficient}
+\item{dereg_coeff}{The deregulation coefficient.}
 
-\item{thres_ME}{Threshold to induce the overexpression}
+\item{thres_ME}{The threshold to induce the overexpression.}
 }
 \value{
-List with : Deregulated matrix T and deregulated genes in g_dereg
+A list of $T the deregulated T matrix and $g_dereg the deregulated genes.
 }
 \description{
-#' Generation of deregulations with a model based on threshold in the matrix T generated from \code{simu_T_cancer} with cell lines proportions from the return of \code{simu_A} method \cr\cr
-Step 1: G genes are drawn\cr \cr 
-Step 2: Checking if the proportion of the ME is greater than \strong{tres_ME} \cr \cr
-Step 3: If yes, \cr \cr
-newGeneExpression = geneExpression * y
+\code{corr_prop_t} simulates a link between the gene expression of \code{G} 
+genes and the micro-environment (ME) proportion, only if this proportion is greater 
+than \code{thres_ME}.
+}
+\details{
+\code{G} genes are drawn, then for each tumor in \code{T_cancer}: \cr
+If the proportion of the ME in this tumor is greater than \code{thres_ME}: \cr
+New gene expression = gene expression * \code{dereg_coeff}.
 }

@@ -1,13 +1,23 @@
 #' Pre-treatment of the Penda results
-#' @description `pre_treat` takes as input the Penda result lists and combines them to make only one matrix of size genes*samples, with 1 for deregulated genes and 0 for conserved genes. Then, the matrix is sorted to conserved only the genes with a different deregulation status in more than thres_p samples. 
-#' @param penda_res List of two matrices, $up_genes and $down_genes with 1 or 0 for each gene and each sample obtained by the Penda method. See: \code{\link[penda]{penda_test}}
-#' @param thres_p Minimum number of samples in each deregulation group to conserved the gene. 
+#' 
+#' \code{pre_treat} takes as input the Penda result lists and 
+#' combines them to make only one matrix of size genes*samples, with 1 for 
+#' deregulated genes and 0 for conserved genes. Then, the matrix is sorted to 
+#' conserved only the genes with a different deregulation status in more than 
+#' thres_p samples. 
+#' 
+#' @param penda_res List of two matrices, $up_genes and $down_genes with 
+#'   1 or 0 for each gene and each sample obtained by the Penda method. 
+#'   See: \code{\link[penda]{penda_test}}
+#' @param thres_p Minimum number of samples in each deregulation group to 
+#'  conserved the gene. 
 #'
-#' @return A binary matrix of deregulation 0/1 with the genes that can be used for the statistical analysis and their status for each sample. 
+#' @return A binary matrix of deregulation 0/1 with the genes that can be used 
+#'  for the statistical analysis and their status for each sample. 
 #' 
 #' @export
 pre_treat = function(penda_res, thres_p){
-  if (thres_p >= ncol(penda_res$up_genes)){
+  if(thres_p >= ncol(penda_res$up_genes)){
     stop("You can't reach a minimal number of samples higher than the total number of samples")
   } else {
     penda_res <- abs(penda_res$up_genes - penda_res$down_genes)
@@ -24,21 +34,29 @@ pre_treat = function(penda_res, thres_p){
     }))
     penda_res = penda_res[g_sup, ]
     
-    return (penda_res)
+    return(penda_res)
   }
 }
 
 #' Comparison between gene deregulation and cell type proportion.
-#' @description `calc_dist` groups samples according to their deregulation status for a given gene. It then computes for each cell type different metrics to evaluate the distance between the two groups of cell proportions. An important distance suggests a link between the gene expression and the cell type proportion.
+#' 
+#' \code{calc_dist} groups samples according to their deregulation status 
+#' for a given gene. It then computes for each cell type different metrics to 
+#' evaluate the distance between the two groups of cell proportions. An important 
+#' distance suggests a link between the gene expression and the cell type proportion. \cr 
+#' Metrics: 
 #' \tabular{lll}{
-#' *Metric*                 \tab *Tested parameter*       \tab *Computed parameter*\cr 
-#' Kantorovich distance     \tab Transportation           \tab distance\cr
+#' \strong{Metric}          \tab \strong{Tested parameter} \tab \strong{Computed parameter}\cr 
+#' Kantorovich distance     \tab Transportation           \tab Distance\cr
 #' Student's t-test         \tab Mean comparison          \tab -log10(p-value)\cr
 #' Kolmogorov-Smirnov test  \tab Distribution comparison  \tab -log10(p-value)\cr
 #' }
 #'
-#' @param binary_penda The binary matrix of deregulation 0/1 for each gene and each sample, can be obtain with the \code{pre_treat} function. Dimension n (genes) * p (samples).
-#' @param A The matrix of cell type proportions for each sample. Dimension p (samples) * k (cell types).
+#' @param binary_penda The binary matrix of deregulation 0/1 for each gene and 
+#'   each sample, can be obtain with the \code{pre_treat} function. 
+#'   Dimension n (genes) * p (samples).
+#' @param A The matrix of cell type proportions for each sample. 
+#'   Dimension p (samples) * k (cell types).
 #' 
 #' @importFrom stats ks.test sd t.test
 #' @importFrom ptlmapper kantorovich
@@ -50,7 +68,9 @@ pre_treat = function(penda_res, thres_p){
 calc_dist = function(binary_penda, A){
   options(warn = -1)
   # Progress bar
-  pb <- progress::progress_bar$new(format = "  Running RiTMIC::calc_dist [:bar] :current/:total (:percent)",total = nrow(binary_penda), clear = FALSE, width= 80)
+  pb <- progress::progress_bar$new(
+    format = "Running RiTMIC::calc_dist [:bar] :current/:total (:percent)",
+    total = nrow(binary_penda), clear = FALSE, width = 80)
   
   res_dereg = c()
   #For each gene
@@ -87,22 +107,26 @@ calc_dist = function(binary_penda, A){
   return(df)
 }
 
-#' Comparison between gene expression and cell type proportion.
-#' @description `calc_corr` compute the correlation between the gene expression in tumors and the micro-environment proportion.
+#' Correlation between gene expression and cell type proportion.
+#' 
+#' \code{calc_corr} compute the correlation between the gene expression in 
+#' tumors and the micro-environment proportion.
 #'
 #' @param D_cancer The matrix with the gene expression in each tumor.
 #' @param A The matrix of cell type proportions for each sample.
 #' 
-#' @seealso \code{\link{compute_1_res}} \code{plot_res}
+#' @seealso \code{\link{compute_1_res}} ; \code{\link{plot_res}} 
 #'
-#' @return A data frame with for each gene and each cell type the correlation between the gene expression and the cell type proportion 
+#' @return A data frame with for each gene and each cell type the
+#'   correlation between the gene expression and the cell type proportion.
 #' @export 
-calc_corr <- function(D_cancer, A) {
+calc_corr = function(D_cancer, A) {
   
   options(warn = -1)
   res_cor = c()
-  pb <- progress::progress_bar$new(format = "  Running RiTMIC::calc_corr [:bar] :current/:total (:percent) in :elapsed",
-                         total = nrow(D_cancer), clear = FALSE, width= 80)
+  pb <- progress::progress_bar$new(
+    format = "Running RiTMIC::calc_corr [:bar] :current/:total (:percent) in :elapsed",
+    total = nrow(D_cancer), clear = FALSE, width = 80)
   for(g in rownames(D_cancer)){
     pb$tick()
     for(t in 1:nrow(A)){
@@ -119,22 +143,29 @@ calc_corr <- function(D_cancer, A) {
 }
 
 
-#' For one p-value, test if the we find genes deregulated in the simulations  
+#' For one p-value, test relevance of the results.
 #' 
-#' @description Compute the confusion matrix(TP,FP,TN,FN) necessary to plot ROC curves 
+#' \code{eval_results} compares the computed results and the genes deregulated 
+#' in the simulation to obtain the confusion matrix (TP, FP, TN, FN) necessary to 
+#' plot ROC curves.
 #'  
-#' @param values the result of the test for each gene (ex: distance value, p-value, etc.)
-#' @param genes names of the genes analysed
-#' @param genes_dereg names of the genes deregulated in the simulations
-#' @param pval the threshold of interest, can be a -log10(pval) or a distance
+#' @param values The vector of values associated at each gene, can be p-values 
+#'  of a statistical test, correlations, distances, etc. 
+#'  See also: \code{\link[Ritmic]{calc_dist}}
+#' @param genes The vector with the names of the genes. 
+#' @param genes_dereg The vector with the names of the genes deregulated in the
+#'  simulations.
+#' @param pval The threshold of interest, adapted for the metric used in values. 
 #'
-#' @return A vector with the number of TP, FP, TN, FN, the FPR and the TPR
+#' @return A vector with the number of True Positive, False Positive, True 
+#'   Negative and False Negative results, the False Positive Rate and the True 
+#'   Positive Rate.
 #' @export  
 eval_results = function(values, genes, genes_dereg, pval){
-  # Recuperation of the deregulated gene list
   names(values) = genes
   values = values[!is.na(values)]
-  #True deregulation simulated in corr_prop functions
+  
+  #Values of the genes deregulated in simulations
   genes_dereg = values[genes_dereg]
   genes_dereg = genes_dereg[!is.na(genes_dereg)]
   
@@ -152,24 +183,31 @@ eval_results = function(values, genes, genes_dereg, pval){
 }
 
 
-#' Check the PenDA enrichment: Plot ROC curves  
-#' @description Compare non-enriched data by PenDA with a correlation test versus the PenDA efficiency with tests: \cr \itemize{
-#' \item{Kolmogorov-Smirnov} \item{Student} \item{Kantorovich}
+#' Plot the ROC curve of the detection of deregulated genes linked to micro-environment.
+#' 
+#' \code{plot_res} makes a ROC plot with the detection of genes deregulated in 
+#' simulations. It makes one curve for the direct correlation between genes 
+#' expression and micro-environment proportion, and three curves for the comparison
+#' between PenDA results and micro-environment, with three metrics: \cr 
+#' \itemize{
+#'   \item{The pvalue of the Kolmogorov-Smirnov test} \item{The p-value of the Student's t-test} \item{The distance of Kantorovich}
 #' } 
 #'
-#' @param corr_res Output from \code{calc_corr} function for the cell type deregulated
-#' @param dist_res Output from \code{calc_dist} function for the cell type deregulated
-#' @param genes_dereg The names of genes deregulated in the simulation
-#' @param pvalues The threshold for the ROC curve
-#' @param graph_title the title of the ROC curve graph 
+#' @param corr_res The data frame output from \code{\link[Ritmic]{calc_corr}},
+#'   with the correlation for each gene of the cell type deregulated.
+#' @param dist_res The data frame output from \code{\link[Ritmic]{calc_dist}}, 
+#'   with the metrics for each gene of the cell type deregulated.
+#' @param genes_dereg The vector with the names of genes deregulated in the simulation.
+#' @param pvalues The vector of thresholds to trace the ROC curve.
+#' @param graph_title An optional title for the ROC curve plot.
 #' 
-#' @seealso \code{as_def_res} \code{pre_plot_res} \code{compute_1_res}
+#' @seealso \code{\link[Ritmic]{compute_1_res}}
 #'
-#'@return ROC curves
-#'@export
+#' @return A ggplot object with the ROC curves. See \code{\link[ggplot2]{ggplot}}
+#' @export
 plot_res = function(corr_res, dist_res, genes_dereg, pvalues = c(0, 0.01, 0.05, 0.1, 1), graph_title = ""){
   
-  genes_dereg = unique(genes_dereg[genes_dereg%in%corr_res$genes])
+  genes_dereg = unique(genes_dereg[genes_dereg %in% corr_res$genes])
   res_ks = sapply(-log10(pvalues), function(x){
     Ritmic::eval_results(dist_res$ks, dist_res$genes, genes_dereg, x)
   })
@@ -191,7 +229,7 @@ plot_res = function(corr_res, dist_res, genes_dereg, pvalues = c(0, 0.01, 0.05, 
                   TPR = c(res_ks[6, ], res_st[6, ], res_kanto[6, ], res_cor[6, ]),
                   metrique = rep(c("ks", "student", "kanto", "correlation"), each = length(pvalues)))
   
-  plot = ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
+  plot = ggplot2::ggplot(df, aes(x = FPR, y = TPR, color = metrique, group = metrique)) +
     geom_point() + 
     geom_line() + 
     theme_minimal()+

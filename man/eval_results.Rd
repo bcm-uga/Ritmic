@@ -2,22 +2,29 @@
 % Please edit documentation in R/analysis.R
 \name{eval_results}
 \alias{eval_results}
-\title{For one p-value, test if the we find genes deregulated in the simulations}
+\title{For one p-value, test relevance of the results.}
 \usage{
 eval_results(values, genes, genes_dereg, pval)
 }
 \arguments{
-\item{values}{the result of the test for each gene (ex: distance value, p-value, etc.)}
+\item{values}{The vector of values associated at each gene, can be p-values 
+of a statistical test, correlations, distances, etc. 
+See also: \code{\link[Ritmic]{calc_dist}}}
 
-\item{genes}{names of the genes analysed}
+\item{genes}{The vector with the names of the genes.}
 
-\item{genes_dereg}{names of the genes deregulated in the simulations}
+\item{genes_dereg}{The vector with the names of the genes deregulated in the
+simulations.}
 
-\item{pval}{the threshold of interest, can be a -log10(pval) or a distance}
+\item{pval}{The threshold of interest, adapted for the metric used in values.}
 }
 \value{
-A vector with the number of TP, FP, TN, FN, the FPR and the TPR
+A vector with the number of True Positive, False Positive, True 
+  Negative and False Negative results, the False Positive Rate and the True 
+  Positive Rate.
 }
 \description{
-Compute the confusion matrix(TP,FP,TN,FN) necessary to plot ROC curves
+\code{eval_results} compares the computed results and the genes deregulated 
+in the simulation to obtain the confusion matrix (TP, FP, TN, FN) necessary to 
+plot ROC curves.
 }
