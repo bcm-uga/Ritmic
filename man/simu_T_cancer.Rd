@@ -2,14 +2,14 @@
 % Please edit documentation in R/simulation.R
 \name{simu_T_cancer}
 \alias{simu_T_cancer}
-\title{Simulation of new tumors RNAseq profiles based on already known tumors expression}
+\title{Simulation of new tumors RNAseq profiles based on already known tumors expression (T cancer).}
 \usage{
 simu_T_cancer(tumor_RNAseq, n)
 }
 \arguments{
 \item{tumor_RNAseq}{The matrix of gene expression for the already known tumors samples.}
 
-\item{n}{Final number of tumors.}
+\item{n}{Total number of tumors.}
 }
 \value{
 This function return a matrix of size n*p with a different gene 
@@ -18,7 +18,7 @@ expression profile for each tumor.
 \description{
 \code{simu_T_cancer} generates a \strong{gene expression} matrix, with a different
 expression for each of the \strong{n} tumors. \cr 
-Matrix dimension : n*p
+Matrix dimensions : n*p
 }
 \details{
 Genes names are imported from the tumor_RNAseq data \cr

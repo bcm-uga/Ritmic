@@ -2,21 +2,21 @@
 % Please edit documentation in R/simulation.R
 \name{simu_A}
 \alias{simu_A}
-\title{Simulation of the A matrix}
+\title{Simulation of the cell type proportion matrix (A matrix).}
 \usage{
 simu_A(n, alpha = c(1.5, 4.5, 1, 3))
 }
 \arguments{
-\item{n}{The number of samples.}
+\item{n}{The number of samples (k).}
 
-\item{alpha}{The vector of size kwith the different cell types proportion.}
+\item{alpha}{A vector of size k, with the different cell types proportion.}
 }
 \value{
-This function return a matrix of size k*p with the cell type proportions.
+This function return a matrix of size k*p with the cell type proportions in each sample.
 }
 \description{
-\code{simu_A} generates the \strong{A matrix}: \cr 
-Different cell types proportions in each sample. \cr 
+\code{simu_A} generates the \strong{A matrix} corresponding to \cr 
+the cell types proportions in each sample.  \cr 
 Dimensions: k*p
 }
 \details{

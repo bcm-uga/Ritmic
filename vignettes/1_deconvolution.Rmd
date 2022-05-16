@@ -1,0 +1,74 @@
+---
+title: "RiTMIC: RegulatIon of Tumor MIcroenvironment Composition"
+subtitle: "Part 1: Deconvolution of the bulk samples"
+author: "Clementine Decamps, Magali Richard"
+contact: 
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{deconvolution}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+```{r echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim", dpi=75)
+layout(1, respect=TRUE)
+```
+
+`RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package to study the link between the gene expression in a tumor and the microenvironment composition.  
+
+![](images/pipeline_ritmic.png)
+
+The pipeline is in 4 steps:  
+
+1. **Deconvolution** of the bulk samples to obtain the cell type composition.
+2. **Extraction** of the cancer expression.
+3. **Differential** analysis of the gene expression in the cancer component.
+4. **Analyze** of the link between the gene expression in the cancer and the tumor composition.
+
+---
+
+This vignette allows to apply the **step 1**, the deconvolution step to obtain the cell-type composition.
+
+# Load data
+
+D_met and D_rna are the bulk samples, respectively for the methylome and the transcriptome of the samples. Here, we used the samples simulated in the vignette 0_simulation.Rmd.
+
+```{r, label="load_data"}
+D_met = readRDS("tmp_ritmic/D_met.rds")
+D_rna = readRDS("tmp_ritmic/D_rna.rds")
+```
+
+# Compute the proportion matrix (A) 
+
+To obtain the matrix of cell types proportions, we used the methylome data. The first step is to pre-treat the data, with the removing of probes correlated with confounding factors when we have clinical data, and the feature selection to reduce the sample size. The deconvolution is made with EDec, through the package `medepir`.
+
+```{r, label="Deconv meth"}
+D_FS = medepir::feature_selection(D = D_met, number = 2000)
+results_edec = medepir::Edec(D_FS, nbcell = 4, infloci = rownames(D_FS))
+
+if(!file.exists("tmp_ritmic/res_edec.rds")){
+  saveRDS(results_edec, file = "tmp_ritmic/res_edec.rds")
+}
+```
+
+# Compute the cell type profiles (T) 
+
+To obtain the cell type profiles in RNAseq, we used the A matrix compute on the methylome and the bulk sample of RNAseq. It's the stage 2 function of the `EDec` method which allows this.
+
+```{r, label="Deconv rnaseq"}
+prop_cell_type = t(results_edec$A)
+res_edec2 = EDec::run_edec_stage_2(D_rna, prop_cell_type)
+T_res = res_edec2$means
+colnames(T_res) = 1:4
+
+if(!file.exists("tmp_ritmic/res_edec2.rds")){
+  saveRDS(T_res, file = "tmp_ritmic/res_edec2.rds")
+}
+```

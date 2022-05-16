@@ -11,7 +11,7 @@ pre_treat(penda_res, thres_p)
 1 or 0 for each gene and each sample obtained by the Penda method. 
 See: \code{\link[penda]{penda_test}}}
 
-\item{thres_p}{Minimum number of samples in each deregulation group to 
+\item{thres_p}{Minimal number of samples in each deregulation group to 
 conserved the gene.}
 }
 \value{

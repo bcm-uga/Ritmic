@@ -9,7 +9,7 @@
 #' @param penda_res List of two matrices, $up_genes and $down_genes with 
 #'   1 or 0 for each gene and each sample obtained by the Penda method. 
 #'   See: \code{\link[penda]{penda_test}}
-#' @param thres_p Minimum number of samples in each deregulation group to 
+#' @param thres_p Minimal number of samples in each deregulation group to 
 #'  conserved the gene. 
 #'
 #' @return A binary matrix of deregulation 0/1 with the genes that can be used 
@@ -62,47 +62,42 @@ pre_treat = function(penda_res, thres_p){
 #' @importFrom ptlmapper kantorovich
 #' @import progress
 #' 
-#' @return A data frame with for each gene and each cell type the result of the 3 metrics.
+#' @return A data frame with for each gene and each cell type the results of the 3 metrics.
 #' @export
 #'
 calc_dist = function(binary_penda, A){
   options(warn = -1)
-  # Progress bar
-  pb <- progress::progress_bar$new(
-    format = "Running RiTMIC::calc_dist [:bar] :current/:total (:percent)",
-    total = nrow(binary_penda), clear = FALSE, width = 80)
+  pb <- progress::progress_bar$new(format = "Running RiTMIC::calc_dist [:bar] :current/:total (:percent)", total = nrow(binary_penda), clear = FALSE, width = 80)
   
   res_dereg = c()
-  #For each gene
-  for(g in rownames(binary_penda)){
+  for (g in rownames(binary_penda)) {
     pb$tick()
     gene = binary_penda[g, ]
     p_dereg = which(gene != 0)
     p_zero = which(gene == 0)
-    
-    #If different deregulation status exists
-    if(length(p_dereg) != 0 & length(p_zero) != 0){
-      #For each cell type
-      for(t in 1:nrow(A)){
+    if (length(p_dereg) != 0 & length(p_zero) != 0) {
+      for (t in 1:nrow(A)) {
         x = A[t, p_dereg]
         y = A[t, p_zero]
-      
         kanto_dist = ptlmapper::kantorovich(x, y)
         student = -log10(t.test(x, y)$p.value)
+        statstud = t.test(x, y)$statistic
         ks = ks.test(x, y)
-        
-        res_dereg = rbind(res_dereg, c(g, length(p_dereg), length(p_zero), t, kanto_dist, student, ks$statistic, -log10(ks$p.value)))
+        res_dereg = rbind(res_dereg, c(g, length(p_dereg), 
+                                       length(p_zero), t, kanto_dist, student, ks$statistic, 
+                                       -log10(ks$p.value), statstud))
       }
     }
   }
-  
-  colnames(res_dereg) = c("Gene", "nb_dereg", "nb_zero", "cell_type", "kanto", "student", "ks d", "ks pvalue")
-  
-  df =  data.frame(genes = res_dereg[, 1],
-                   type =  factor(res_dereg[, 4]),
-                   kanto = as.numeric(res_dereg[, 5]),
-                   student = as.numeric(res_dereg[, 6]),
-                   ks = as.numeric(res_dereg[, 8]),  stringsAsFactors = F)
+  colnames(res_dereg) = c("Gene", "nb_dereg", "nb_zero", "cell_type", 
+                          "kanto", "pval student", "ks d", "ks pvalue", "stat student")
+  df = data.frame(genes = res_dereg[, 1], 
+                  type = factor(res_dereg[, 4]), 
+                  kanto = as.numeric(res_dereg[, 5]), 
+                  st_pval = as.numeric(res_dereg[, 6]), 
+                  ks_d = as.numeric(res_dereg[, 7]), 
+                  ks_pval = as.numeric(res_dereg[, 8]), 
+                  st_st = as.numeric(res_dereg[, 9]), stringsAsFactors = F)
   options(warn = 0)
   return(df)
 }

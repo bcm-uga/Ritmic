@@ -1,0 +1,72 @@
+---
+title: "RiTMIC: RegulatIon of Tumor MIcroenvironment Composition"
+subtitle: "Part 2: Identification and extraction of the cancer expression"
+author: "Clementine Decamps, Magali Richard"
+contact: 
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{cancer_extraction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+```{r echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim", dpi=75)
+layout(1, respect=TRUE)
+```
+
+`RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package to study the link between the gene expression in a tumor and the microenvironment composition.  
+
+![](images/pipeline_ritmic.png)
+
+The pipeline is in 4 steps:  
+
+1. **Deconvolution** of the bulk samples to obtain the cell type composition.
+2. **Extraction** of the cancer expression.
+3. **Differential** analysis of the gene expression in the cancer component.
+4. **Analyze** of the link between the gene expression in the cancer and the tumor composition.
+
+---
+
+This vignette allows to apply the **step 2**, the step of extraction of the variability due to cancer.
+
+# Load data
+
+For this step, we use D_rna, the transcriptome of each bulk samples. We also use the A matrix with the proportion of each cell type in each sample, and the T matrix with the cell type profiles. A and T matrices was obtain with the vignette 1_deconvolution.Rmd.
+
+```{r, label="load_data"}
+D_rna = readRDS("tmp_ritmic/D_rna.rds")
+A_calc = readRDS("tmp_ritmic/res_edec.rds")$A
+T_calc = readRDS("tmp_ritmic/res_edec2.rds")
+```
+
+# Identification of cancer cell type
+
+The first part of this step is to identify the cancer cell type. For that, we can used different methods like cell markers, comparison with identified cell lines, etc. Here, to automate the process and as we are in the simulation framework, we compared the obtained A matrix with the reference A matrix.  
+
+We know that the real tumor is the 4 of A ref, so we pick the cell type of A_calc with the biggest correlation. 
+
+```{r, label="cancer identification"}
+A_ref = readRDS("tmp_ritmic/A_matrix.rds")
+cor(t(A_ref), t(A_calc))
+pos_tum = which.max(cor(t(A_ref), t(A_calc))[4,])
+```
+
+# Extraction of cancer cell type
+
+Once the cancer type is identified, we can removed of the bulk samples D the signal of the micro-environment (ME). The equation is:  
+$D_{cancer} = (D_{RNAseq} - T_{ME} * A_{ME}) / A_{cancer}$
+
+```{r, label="cancer extraction"}
+D_cancer = (D_rna - T_calc[, -pos_tum] %*% A_calc[-pos_tum, ]) / rep(A_calc[pos_tum,])
+
+if(!file.exists("tmp_ritmic/D_cancer.rds")){
+  saveRDS(D_cancer, file = "tmp_ritmic/D_cancer.rds")
+}
+```

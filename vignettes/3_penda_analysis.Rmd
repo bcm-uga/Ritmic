@@ -1,7 +1,7 @@
 ---
 title: "RiTMIC: RegulatIon of Tumor MIcroenvironment Composition"
-subtitle: "Step 4: Analysis of gene deregulation with `penda`"
-author: "Magali Richard, Clementine Decamps, Fabien Quinquis"
+subtitle: "Part 3: Differential analysis of gene expression with `penda`"
+author: "Clementine Decamps, Magali Richard"
 contact: 
 date: "`r Sys.Date()`"
 output: 
@@ -21,35 +21,44 @@ knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, 
 layout(1, respect=TRUE)
 ```
 
-# Introduction 
+`RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package to study the link between the gene expression in a tumor and the microenvironment composition.  
 
-`RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package to study the link between the gene expression in a tumor and the microenvironment composition. 
+![](images/pipeline_ritmic.png)
 
-**To do** : describe the pipeline's steps : 1. simulation of complex D matrix / 2. deconvolution with medepir / 3. identification and extraction of the cancer type / 4. Penda / 5. res analysis.
+The pipeline is in 4 steps:  
 
-`RiTMIC` **"Step 4: Analysis of gene deregulation  with `penda` **
+1. **Deconvolution** of the bulk samples to obtain the cell type composition.
+2. **Extraction** of the cancer expression.
+3. **Differential** analysis of the gene expression in the cancer component.
+4. **Analyze** of the link between the gene expression in the cancer and the tumor composition.
 
-`penda` (**PE**rso**N**alized **D**ifferential **A**nalysis ) is an open-access R package that detects gene deregulation in individual samples compared to a set of reference, control samples. 
+---
+
+This vignette allows to apply the **step 3**, the step of differential gene expression analysis.   
+
+For this step, we used `penda` (**PE**rso**N**alized **D**ifferential **A**nalysis ), an open-access R package that detects gene deregulation in individual samples compared to a set of reference, control samples. 
 
 # Dataset
 
-**To do** : describe data 
+$D_{cancer}$ is the matrix with the gene expression of cancer cells in each sample, obtained in the vignette 2_identification_extraction_tumor_expression.Rmd.
 
 ```{r, label="load_data"}
 D_cancer = readRDS("tmp_ritmic/D_cancer.rds")
 ```
 
-# Penda Method
+# Penda method
 
 `penda` performs a 3-steps analysis: 
-  1. Data filtering
-  2. Relative gene ordering
-  3. Differential expression testing
+1. Data filtering
+2. Relative gene ordering
+3. Differential expression testing  
 
-**To do** : describe that we used as controls and what user has to used 
-Described make dataset
+
+To use Penda, we need a control sample. Here, we use the example dataset penda::penda_data_ctrl, but for a real analysis you can used, for example, normal cell lines.
 
 ## Data filtering
+
+This step arranges data in penda format.
 ```{r echo=FALSE, label="data filtering"}
 penda_data_case <- D_cancer
 penda_data_ctrl <- penda::penda_data_ctrl[1:1000, 1:10]
@@ -62,7 +71,7 @@ data_case = Penda_dataset$data_case
 
 ## Relative gene ordering
 
-**To do** : explain what we make and what user has to make (simu penda)
+This step make the reference rank of genes in controls data.
 
 ```{r, label= "penda::compute_lower_and_higher_lists"}
 s_max = 30
@@ -73,7 +82,7 @@ H = L_H_list$H
 
 ## Differential expression testing
 
-**To do** : explain what we make and what user has to make (simu penda)
+Finally, this step is the test of deregulation. You can fit the penda parameters by making simulations, see penda package for more information.
 
 ```{r, label="penda::penda_test", results="hide"}
 threshold = 0.4

@@ -15,7 +15,7 @@ Dimension n (genes) * p (samples).}
 Dimension p (samples) * k (cell types).}
 }
 \value{
-A data frame with for each gene and each cell type the result of the 3 metrics.
+A data frame with for each gene and each cell type the results of the 3 metrics.
 }
 \description{
 \code{calc_dist} groups samples according to their deregulation status 

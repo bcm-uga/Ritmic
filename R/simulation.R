@@ -1,18 +1,18 @@
-#' Simulation of the A matrix
+#' Simulation of the cell type proportion matrix (A matrix).
 #' 
-#' \code{simu_A} generates the \strong{A matrix}: \cr 
-#' Different cell types proportions in each sample. \cr 
+#' \code{simu_A} generates the \strong{A matrix} corresponding to \cr 
+#' the cell types proportions in each sample.  \cr 
 #' Dimensions: k*p
 #' 
 #' @details The cell type distribution in a sample is simulated by a Dirichlet 
 #' distribution. See: \code{\link[gtools]{rdirichlet}}
 #' 
-#' @param n The number of samples.
-#' @param alpha The vector of size kwith the different cell types proportion.
+#' @param n The number of samples (k).
+#' @param alpha A vector of size k, with the different cell types proportion.
 #' 
 #' @seealso \code{\link[gtools]{rdirichlet}}
 #' 
-#' @return This function return a matrix of size k*p with the cell type proportions.
+#' @return This function return a matrix of size k*p with the cell type proportions in each sample.
 #' @export 
 #'
 simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
@@ -20,11 +20,11 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
     return(A_matrix)
 }
 
-#' Simulation of new tumors RNAseq profiles based on already known tumors expression
+#' Simulation of new tumors RNAseq profiles based on already known tumors expression (T cancer).
 #' 
 #' \code{simu_T_cancer} generates a \strong{gene expression} matrix, with a different
 #' expression for each of the \strong{n} tumors. \cr 
-#' Matrix dimension : n*p
+#' Matrix dimensions : n*p
 #' 
 #' @details Genes names are imported from the tumor_RNAseq data \cr
 #'  Bimodal distribution of each gene expression is infered with the
@@ -33,7 +33,7 @@ simu_A = function(n, alpha = c(1.5, 4.5, 1, 3)){
 #'  the gene expression is sampled from existing values.
 #'  
 #' @param tumor_RNAseq The matrix of gene expression for the already known tumors samples.
-#' @param n Final number of tumors.
+#' @param n Total number of tumors.
 #' 
 #' @seealso \code{\link[mixtools]{normalmixEM}}
 #'
