@@ -38,7 +38,7 @@ This vignette allows to apply the **step 1**, the deconvolution step to obtain t
 
 # Load data
 
-D_met and D_rna are the bulk samples, respectively for the methylome and the transcriptome of the samples. Here, we used the samples simulated in the vignette 0_simulation.Rmd.
+D_met and D_rna are the bulk samples, respectively for the methylome and the transcriptome of the samples. Here, we used the samples simulated with the package Ritmic_simu.
 
 ```{r, label="load_data"}
 D_met = readRDS("tmp_ritmic/D_met.rds")
