@@ -38,24 +38,20 @@ This vignette allows to apply the **step 2**, the step of extraction of the vari
 
 # Load data
 
-For this step, we use D_rna, the transcriptome of each bulk samples. We also use the A matrix with the proportion of each cell type in each sample, and the T matrix with the cell type profiles. A and T matrices was obtain with the vignette 1_deconvolution.Rmd.
+For this step, we use D_rna, the transcriptome of each bulk samples. We also use the A matrix with the proportion of each cell type in each sample, and the T matrix with the cell type profiles. A and T matrices was obtained with the vignette 1_deconvolution.Rmd.
 
 ```{r, label="load_data"}
-D_rna = readRDS("tmp_ritmic/D_rna.rds")
-A_calc = readRDS("tmp_ritmic/res_edec.rds")$A
-T_calc = readRDS("tmp_ritmic/res_edec2.rds")
+D_rna = readRDS("data_example/D_rna.rds")
+A_calc = readRDS("data_example/res_edec.rds")$A
+T_calc = readRDS("data_example/res_edec2.rds")
 ```
 
 # Identification of cancer cell type
 
-The first part of this step is to identify the cancer cell type. For that, we can used different methods like cell markers, comparison with identified cell lines, etc. Here, to automate the process and as we are in the simulation framework, we compared the obtained A matrix with the reference A matrix.  
-
-We know that the real tumor is the 4 of A ref, so we pick the cell type of A_calc with the biggest correlation. 
+The first part of this step is to identify the cancer cell type. For that, we can use different methods like cell markers, comparison with identified cell lines, etc. Here, as we don't use real cell types, we can assume for example than the cancer cell type is the type 4.
 
 ```{r, label="cancer identification"}
-A_ref = readRDS("tmp_ritmic/A_matrix.rds")
-cor(t(A_ref), t(A_calc))
-pos_tum = which.max(cor(t(A_ref), t(A_calc))[4,])
+pos_tum = 4
 ```
 
 # Extraction of cancer cell type
@@ -65,8 +61,16 @@ $D_{cancer} = (D_{RNAseq} - T_{ME} * A_{ME}) / A_{cancer}$
 
 ```{r, label="cancer extraction"}
 D_cancer = (D_rna - T_calc[, -pos_tum] %*% A_calc[-pos_tum, ]) / rep(A_calc[pos_tum,])
+```
 
-if(!file.exists("tmp_ritmic/D_cancer.rds")){
-  saveRDS(D_cancer, file = "tmp_ritmic/D_cancer.rds")
+# Pretreatment of D cancer
+
+To optimize the next step, we can preatreat D cancer to remove negative expression and samples with too few cancer cells.
+
+```{r, label="Dcancer preatreatment"}
+D_cancer_preatreat = Ritmic::pre_treat_Dcancer(D_cancer, A_cancer = A_calc[pos_tum,], prop_cancer_threshold = 0.1)
+
+if(!file.exists("data_example/D_cancer_pretreat.rds")){
+  saveRDS(D_cancer_preatreat, file = "data_example/D_cancer_pretreat.rds")
 }
 ```

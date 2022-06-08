@@ -43,7 +43,7 @@ For this step, we used `penda` (**PE**rso**N**alized **D**ifferential **A**nalys
 $D_{cancer}$ is the matrix with the gene expression of cancer cells in each sample, obtained in the vignette 2_identification_extraction_tumor_expression.Rmd.
 
 ```{r, label="load_data"}
-D_cancer = readRDS("tmp_ritmic/D_cancer.rds")
+D_cancer = readRDS("data_example/D_cancer_pretreat.rds")
 ```
 
 # Penda method
@@ -53,21 +53,19 @@ D_cancer = readRDS("tmp_ritmic/D_cancer.rds")
 2. Relative gene ordering
 3. Differential expression testing  
 
-
-To use Penda, we need a control sample. Here, we use the example dataset penda::penda_data_ctrl, but for a real analysis you can used, for example, normal cell lines.
+To use Penda, we need a control sample. Here, we use the example dataset penda::penda_data_ctrl, but for a real analysis you can use, for example, normal cell lines.
 
 ## Data filtering
 
 This step arranges data in penda format.
 ```{r echo=FALSE, label="data filtering"}
-penda_data_case <- D_cancer
-penda_data_ctrl <- penda::penda_data_ctrl[1:1000, 1:10]
+penda_data_case = D_cancer
+penda_data_ctrl = penda::penda_data_ctrl[1:1000, 1:10]
 
 Penda_dataset = penda::make_dataset(penda_data_ctrl, penda_data_case, detectlowvalue = F)
 data_ctrl = Penda_dataset$data_ctrl
 data_case = Penda_dataset$data_case
 ```
-
 
 ## Relative gene ordering
 
@@ -94,8 +92,13 @@ penda_res = penda::penda_test(samples = data_case,
                               L_H_list =  L_H_list, 
                               threshold = threshold)
 
-if(!file.exists("tmp_ritmic/penda_res.rds")){
-  saveRDS(penda_res, file = "tmp_ritmic/penda_res.rds")
+if(!file.exists("data_example/penda_res.rds")){
+  saveRDS(penda_res, file = "data_example/penda_res.rds")
 }
 
+prop.table(table(penda_res$down_genes))
+prop.table(table(penda_res$up_genes))
+
 ```
+
+

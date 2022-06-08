@@ -19,6 +19,8 @@ vignette: >
 ```{r echo=FALSE, eval=TRUE}
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim", dpi=75)
 layout(1, respect=TRUE)
+require(medepir)
+library(ggplot2)
 ```
 
 `RiTMIC` (**R**egulat**I**on of **T**umor **MI**croenvironment **C**omposition) is an open-access R package to study the link between the gene expression in a tumor and the microenvironment composition.  
@@ -34,27 +36,37 @@ The pipeline is in 4 steps:
 
 ---
 
-This vignette allows to apply the **step 1**, the deconvolution step to obtain the cell-type composition.
+This vignette allows to apply the **step 1**, the deconvolution step to obtain the cell-type composition. This step is made through the package `medepir`.
 
 # Load data
 
-D_met and D_rna are the bulk samples, respectively for the methylome and the transcriptome of the samples. Here, we used the samples simulated with the package Ritmic_simu.
+D_met and D_rna are the bulk samples, respectively for the methylome and the transcriptome of the samples. Here, we used 30 samples simulated with the package Ritmic_simu, with 10,000 probes for the methylome and 1,000 genes for the transcriptome.
 
 ```{r, label="load_data"}
-D_met = readRDS("tmp_ritmic/D_met.rds")
-D_rna = readRDS("tmp_ritmic/D_rna.rds")
+D_met = readRDS("data_example/D_met.rds")
+D_rna = readRDS("data_example/D_rna.rds")
+
+dim(D_met)
+dim(D_rna)
 ```
 
 # Compute the proportion matrix (A) 
 
-To obtain the matrix of cell types proportions, we used the methylome data. The first step is to pre-treat the data, with the removing of probes correlated with confounding factors when we have clinical data, and the feature selection to reduce the sample size. The deconvolution is made with EDec, through the package `medepir`.
+To obtain the matrix of cell types proportions, we used the methylome data. 
+
+First, we pre-treat the data. When you have clinical data, you can use `medepir::CF_detection` to remove the probes correlated with confounding factors. Then, we use `medepir::feature_selection` to reduce the sample size.
+
+With `medepir::plot_k` you can plot a PCA to choose the number of components to deconvolute. Here, we find k = 4.
+
+Then, we compute the cell type proportion matrix with `medepir::Edec`.
 
 ```{r, label="Deconv meth"}
 D_FS = medepir::feature_selection(D = D_met, number = 2000)
+medepir::plot_k(D_FS)
 results_edec = medepir::Edec(D_FS, nbcell = 4, infloci = rownames(D_FS))
 
-if(!file.exists("tmp_ritmic/res_edec.rds")){
-  saveRDS(results_edec, file = "tmp_ritmic/res_edec.rds")
+if(!file.exists("data_example/res_edec.rds")){
+  saveRDS(results_edec, file = "data_example/res_edec.rds")
 }
 ```
 
@@ -68,7 +80,33 @@ res_edec2 = EDec::run_edec_stage_2(D_rna, prop_cell_type)
 T_res = res_edec2$means
 colnames(T_res) = 1:4
 
-if(!file.exists("tmp_ritmic/res_edec2.rds")){
-  saveRDS(T_res, file = "tmp_ritmic/res_edec2.rds")
+if(!file.exists("data_example/res_edec2.rds")){
+  saveRDS(T_res, file = "data_example/res_edec2.rds")
 }
 ```
+
+# Visualization 
+
+## A matrix
+
+To visualize the A matrix, we can use a stacked barplot to see the variation of cell type proportions across the samples.
+
+```{r, label="Visu A"}
+df = data.frame(data = c(results_edec$A),
+                    type = as.factor(rep(1:4)),
+                    p = rep(1:ncol(results_edec$A), each = 4))
+    
+
+ggplot(df, aes(x = p, y = data, fill = type, color = type)) +
+      geom_bar(stat="identity") +
+      theme_minimal() + labs(title = "A matrix")
+```
+
+## T matrix
+
+To visualize the T matrix, we can for example use a heatmap, to see the correlation between the deconvolued cell types.
+
+```{r, label="Visu T"}
+ComplexHeatmap::Heatmap(cor(T_res))
+```
+
