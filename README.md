@@ -8,6 +8,7 @@ The pipeline **Ritmic**  is in 4 steps:
 3. **Differential** analysis of the gene expression in the cancer component.
 4. **Analyze** of the link between the gene expression in the cancer and the tumor composition.
 
+This package allows to use the method. The package Ritmic_simu implements simulations to test it.
 
 # Installation
 
